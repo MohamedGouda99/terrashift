@@ -1,0 +1,13 @@
+# Pinned Rust toolchain.
+# Pattern: stakpak_arch.md section 31 (toolchain pin in Stakpak).
+#
+# Note: terrashift_v5/terrashift_prompts.md P-01 originally suggested 1.75
+# "for ecosystem compatibility". We deviate and pin 1.94.1 — the same version
+# Stakpak uses — because (a) the workspace dependencies (rmcp, lancedb, sqlx 0.8,
+# ratatui 0.29) are recent and likely raise their MSRV above 1.75, and (b)
+# pinning to a known-good version reduces friction during Stage 1 setup.
+# See pre-flight.md for the full rationale (decision #3).
+
+[toolchain]
+channel = "1.94.1"
+components = ["rustfmt", "clippy"]

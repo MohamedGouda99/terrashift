@@ -1,0 +1,35 @@
+# Rust
+/target/
+**/target/
+**/*.rs.bk
+Cargo.lock.bak
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Local config — not committed (per Article XIII rule 10)
+~/.terrashift/
+.env
+.env.local
+*.local.toml
+
+# Audit log working files (per Article IX — user data, never auto-deleted)
+.audit/
+.checkpoints/
+.backup/
+
+# Test artifacts
+/coverage/
+*.profraw
+
+# Spec Kit feature workdirs
+specs/*/output/
+
+# Sandbox executor working directories (per P-09)
+/tmp/terrashift-exec-*/

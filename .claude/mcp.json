@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "filesystem-readonly-refs": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "C:\\Users\\goda\\refs\\stakpak",
+        "C:\\Users\\goda\\refs\\claude-code",
+        "C:\\Users\\goda\\refs"
+      ],
+      "_comment": "Read-only mounts of reference codebases. Per terrashift_opus_setup.md section 6 + pre-flight.md decision 2."
+    },
+    "stakpak-reference": {
+      "command": "stakpak",
+      "args": ["mcp", "start", "--tool-mode", "local"],
+      "_comment": "Stakpak's own binary in MCP mode — used as reference oracle. Requires `stakpak` on PATH (build from C:\\Users\\goda\\Desktop\\agent\\)."
+    },
+    "_terrashift-knowledge_TODO": {
+      "command": "cargo",
+      "args": ["run", "--package", "terrashift-knowledge-mcp"],
+      "_comment": "PLACEHOLDER. Built in P-07 (Knowledge service). Activate after Stage 1 week 4 by removing the leading underscore from this server's key."
+    }
+  }
+}

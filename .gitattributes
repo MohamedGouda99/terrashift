@@ -1,0 +1,21 @@
+# Normalize line endings on commit.
+# Critical on Windows because Git Bash + cargo can produce mixed CRLF/LF
+# which causes spurious diffs and breaks Article VII (clean PRs).
+* text=auto eol=lf
+
+# Binary files — never normalize
+*.docx binary
+*.png binary
+*.jpg binary
+*.tar.gz binary
+*.zip binary
+
+# Rust
+Cargo.lock binary text eol=lf
+*.rs text eol=lf
+
+# Shell scripts must use LF
+*.sh text eol=lf
+
+# Markdown
+*.md text eol=lf

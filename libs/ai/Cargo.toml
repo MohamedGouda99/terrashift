@@ -1,0 +1,28 @@
+[package]
+name = "terrashift-ai"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+stakai = { workspace = true }
+tokio = { workspace = true }
+futures = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+reqwest = { workspace = true }
+reqwest-eventsource = { workspace = true }
+async-trait = "0.1"
+
+# Internal
+terrashift-shared = { workspace = true }
+terrashift-agent-core = { workspace = true }

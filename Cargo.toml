@@ -1,0 +1,117 @@
+# Terrashift workspace manifest
+# Pattern: stakpak_arch.md section 5 (workspace map of 14 crates)
+# Article II — reference codebase discipline; Article VII — repository hygiene
+
+[workspace]
+resolver = "2"
+members = [
+    "cli",
+    "tui",
+    "libs/shared",
+    "libs/agent-core",
+    "libs/ai",
+    "libs/knowledge",
+    "libs/engine",
+    "libs/creds",
+    "libs/audit",
+    "libs/eval",
+    "libs/shell-tool-approvals",
+    "libs/mcp/client",
+    "libs/mcp/server",
+    "libs/mcp/proxy",
+    "libs/mcp/config",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.94.1"
+authors = ["Terrashift Team"]
+license = "Apache-2.0"
+repository = "https://github.com/terrashift/cli"
+description = "Cross-cloud Terraform migration CLI"
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+tokio-util = "0.7"
+futures = "0.3"
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+
+# Error handling (per Article IV — failures must be loud)
+thiserror = "1"
+anyhow = "1"
+
+# Observability (per Article X)
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-opentelemetry = { version = "0.27", optional = true }
+
+# HTTP client (rustls only — no OpenSSL — for static linking)
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+reqwest-eventsource = "0.6"
+
+# TUI
+ratatui = "0.29"
+crossterm = "0.29"
+
+# CLI
+clap = { version = "4", features = ["derive"] }
+
+# LLM SDK — Stakpak's published crate (per Article II)
+# Pattern: stakpak_arch.md section 10
+stakai = "0.3"
+
+# MCP — Rust SDK
+# Pattern: stakpak_arch.md section 13
+rmcp = { version = "0.11", features = ["client", "server"] }
+
+# HCL parsing
+hcl-rs = "0.18"
+
+# Vector store (embedded, file-based; for RAG — Stage 3+)
+lancedb = "0.10"
+
+# Database
+sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "sqlite", "macros", "chrono", "uuid"] }
+
+# JSON Schema generation
+schemars = "0.8"
+
+# Security primitives (per Article V)
+zeroize = { version = "1", features = ["zeroize_derive"] }
+
+# Identifiers and time
+uuid = { version = "1", features = ["serde", "v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+# Cryptography (audit log signing per Article V)
+ed25519-dalek = "2"
+sha2 = "0.10"
+
+# Internal workspace crates
+terrashift-shared = { path = "libs/shared" }
+terrashift-agent-core = { path = "libs/agent-core" }
+terrashift-ai = { path = "libs/ai" }
+terrashift-knowledge = { path = "libs/knowledge" }
+terrashift-engine = { path = "libs/engine" }
+terrashift-creds = { path = "libs/creds" }
+terrashift-audit = { path = "libs/audit" }
+terrashift-eval = { path = "libs/eval" }
+terrashift-shell-tool-approvals = { path = "libs/shell-tool-approvals" }
+terrashift-mcp-client = { path = "libs/mcp/client" }
+terrashift-mcp-server = { path = "libs/mcp/server" }
+terrashift-mcp-proxy = { path = "libs/mcp/proxy" }
+terrashift-mcp-config = { path = "libs/mcp/config" }
+terrashift-tui = { path = "tui" }
+
+# Workspace-wide lints — Article XIII rule 3 enforcement
+# Pattern: stakpak_arch.md section 31
+[workspace.lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+string_slice = "deny"

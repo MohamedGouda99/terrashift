@@ -1,0 +1,30 @@
+[package]
+name = "terrashift-engine"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+hcl-rs = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+schemars = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+async-trait = "0.1"
+
+# Internal
+terrashift-shared = { workspace = true }
+terrashift-agent-core = { workspace = true }
+terrashift-ai = { workspace = true }
+terrashift-knowledge = { workspace = true }
+terrashift-creds = { workspace = true }
+terrashift-audit = { workspace = true }
