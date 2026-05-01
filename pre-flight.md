@@ -30,11 +30,23 @@ sits in or under `terrashift/`.
 
 **Layout** (all under `C:\Users\goda\Desktop\terrashift\refs\`):
 
-| Path | Type | Target |
+| Path | Type | Source |
 |---|---|---|
-| `refs/stakpak/` | Directory junction | `C:\Users\goda\Desktop\agent\` |
+| `refs/stakpak/` | **Fresh git clone** of `https://github.com/stakpak/agent.git` | upstream main |
 | `refs/claude-code/` | Directory junction | `C:\Users\goda\Desktop\agent\ClaudeCode-CLI-Src\` |
 | `refs/stakpak_arch.md` | File copy (~169 KB) | `C:\Users\goda\Desktop\agent\stakpak_arch.md` |
+
+**Why clone for stakpak (not junction)?** The user's local working copy of
+the Stakpak repo at `C:\Users\goda\Desktop\agent\` contains unrelated
+additions (terrashift_v5/, ClaudeCode-CLI-Src/, .claude/, .specify/,
+stakpak_arch.md, etc.). A junction surfaces all of those, polluting any
+"read patterns from Stakpak" prompt. A fresh clone gives a clean,
+upstream-only mirror — exactly the contents of the public repo, nothing
+more. Trade-off: ~50-200 MB on disk + a network operation on first setup.
+
+**Why junction for claude-code (not clone)?** The local ClaudeCode-CLI-Src/
+folder is already isolated to Claude Code source only. No pollution to
+filter out. Junction is faster + zero-duplicate.
 
 **Naming convention used everywhere:** `refs/...` (workspace-relative).
 Files that originally said `refs/...` from v5 have been updated to use
