@@ -23,17 +23,60 @@ confusion — Stakpak has its own `Cargo.toml` at its root.
 
 ## Decision 2 — Reference codebase paths
 
-| v5 path | Local path | Notes |
+**Decision:** refs/ lives **inside the workspace** at `terrashift/refs/`,
+not at `refs/` (home directory) as v5 originally suggests. This keeps the
+project self-contained: anything Opus needs to read at the workspace level
+sits in or under `terrashift/`.
+
+**Layout** (all under `C:\Users\goda\Desktop\terrashift\refs\`):
+
+| Path | Type | Target |
 |---|---|---|
-| `~/refs/stakpak/` | `C:\Users\goda\Desktop\agent\` | Stakpak source = the primary working dir of Claude Code |
-| `~/refs/stakpak_arch.md` | `C:\Users\goda\Desktop\agent\stakpak_arch.md` | Sits in Stakpak repo root |
-| `~/refs/claude-code/` | `C:\Users\goda\Desktop\agent\ClaudeCode-CLI-Src\` | Placed by user 2026-05-02 |
+| `refs/stakpak/` | Directory junction | `C:\Users\goda\Desktop\agent\` |
+| `refs/claude-code/` | Directory junction | `C:\Users\goda\Desktop\agent\ClaudeCode-CLI-Src\` |
+| `refs/stakpak_arch.md` | File copy (~169 KB) | `C:\Users\goda\Desktop\agent\stakpak_arch.md` |
 
-When running v5 prompts that cite `~/refs/...`, substitute with the paths above.
-The `.claude/mcp.json` (in this workspace) wires `filesystem-readonly-refs` to
-mount these paths.
+**Naming convention used everywhere:** `refs/...` (workspace-relative).
+Files that originally said `refs/...` from v5 have been updated to use
+`refs/...` instead. When new docs or prompts get written, **always use
+`refs/...`** — never the home-directory form.
 
-### Subdirectories to skip in `claude-code/`
+**Junctions vs symlinks:** directory junctions don't require admin on Windows
+and are transparent to file readers. A junction looks like a real directory
+to `ls`, `Read`, MCP filesystem servers, and any Rust file IO. The underlying
+source folders remain single-source-of-truth — updates to `agent/` reflect in
+`refs/stakpak/` instantly.
+
+**Not committed:** `/refs/` is in `.gitignore`. Each developer runs
+`scripts/setup-refs.ps1` (see below) on first checkout. This avoids:
+- Storing 169 KB binary copy in git history
+- Junctions don't survive git serialization anyway
+- Each contributor may have their own paths to source repos
+
+### Setup script
+
+A new contributor runs:
+
+```powershell
+cd C:\Users\goda\Desktop\terrashift
+.\scripts\setup-refs.ps1
+```
+
+This creates the junctions and copies `stakpak_arch.md`. Source paths are
+configurable inside the script if Stakpak / Claude Code source live elsewhere.
+
+### MCP server wiring
+
+`.claude/mcp.json` `filesystem-readonly-refs` server points to the workspace-
+local refs/ via absolute paths:
+
+```
+C:\Users\goda\Desktop\terrashift\refs\stakpak
+C:\Users\goda\Desktop\terrashift\refs\claude-code
+C:\Users\goda\Desktop\terrashift\refs
+```
+
+### Subdirectories to skip in `refs/claude-code/`
 
 Per terrashift_plan.md §16.2 ("what we don't adopt from Claude Code"):
 

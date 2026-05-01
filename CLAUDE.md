@@ -18,12 +18,14 @@ stack.** No LangChain, no LangGraph, no LiteLLM.
 
 ## Reference codebases
 
-- `~/refs/stakpak_arch.md` (~2,840 lines) — **PRIMARY** architectural reference
-- `~/refs/stakpak/` — Stakpak source code (Apache 2.0); ground truth
-- `~/refs/claude-code/` — Claude Code TypeScript (secondary, agent-loop concepts)
+- `refs/stakpak_arch.md` (~2,840 lines) — **PRIMARY** architectural reference
+- `refs/stakpak/` — Stakpak source code (Apache 2.0); ground truth
+- `refs/claude-code/` — Claude Code TypeScript (secondary, agent-loop concepts)
 
-On this machine the paths resolve as documented in `pre-flight.md`. Substitute
-when running prompts that cite `~/refs/...`.
+All paths are **workspace-relative** — `refs/` lives at the workspace root.
+On a fresh checkout, run `scripts/setup-refs.ps1` to recreate the junctions
+and copy `stakpak_arch.md`. See `pre-flight.md` decision 2 for the rationale
+and the source-path defaults.
 
 ## Citation discipline
 

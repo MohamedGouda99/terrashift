@@ -5,11 +5,11 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "C:\\Users\\goda\\refs\\stakpak",
-        "C:\\Users\\goda\\refs\\claude-code",
-        "C:\\Users\\goda\\refs"
+        "C:\\Users\\goda\\Desktop\\terrashift\\refs\\stakpak",
+        "C:\\Users\\goda\\Desktop\\terrashift\\refs\\claude-code",
+        "C:\\Users\\goda\\Desktop\\terrashift\\refs"
       ],
-      "_comment": "Read-only mounts of reference codebases. Per terrashift_opus_setup.md section 6 + pre-flight.md decision 2."
+      "_comment": "Read-only mounts of reference codebases. Lives inside the workspace at ./refs/ (junctions for source dirs, file copy for stakpak_arch.md). Per pre-flight.md decision 2."
     },
     "stakpak-reference": {
       "command": "stakpak",

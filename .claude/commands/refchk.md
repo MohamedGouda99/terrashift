@@ -2,7 +2,7 @@
 description: Cross-check a proposed implementation against the reference codebases. Read-only.
 ---
 
-For the file or function the user references: find the equivalent pattern in `~/refs/stakpak/` (and `~/refs/claude-code/` if relevant).
+For the file or function the user references: find the equivalent pattern in `refs/stakpak/` (and `refs/claude-code/` if relevant).
 
 Use the `reference-explorer` sub-agent for the actual lookup.
 

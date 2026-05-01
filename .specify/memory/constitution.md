@@ -28,7 +28,7 @@ registry boundary, not at call time.
 Stakpak is the primary architectural reference, with `stakpak_arch.md`
 (~2,840 lines) as the canonical document. Claude Code is the secondary
 reference for agent-loop concepts. All three are checked out locally on every
-team member's machine at `~/refs/`.
+team member's machine at `refs/`.
 
 PR descriptions cite which `stakpak_arch.md` sections informed each
 implementation choice. Code comments include a `// Pattern: stakpak_arch.md

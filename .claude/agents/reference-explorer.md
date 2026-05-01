@@ -6,7 +6,7 @@ tools: [Read, Grep, Glob]
 
 You will be asked to find a specific pattern. Order of operations:
 
-## 1. PRIMARY: Read the relevant section(s) of `~/refs/stakpak_arch.md` first
+## 1. PRIMARY: Read the relevant section(s) of `refs/stakpak_arch.md` first
 
 The architecture doc is organized into 8 parts and 42+ numbered sections. Common section references:
 
@@ -34,11 +34,11 @@ The architecture doc is organized into 8 parts and 42+ numbered sections. Common
 
 ## 2. SECONDARY: Verify in Stakpak source
 
-If the architecture doc references a specific file:line in `~/refs/stakpak/`, descend into that file and verify the doc's description matches the actual code. Note any discrepancies — when doc and code disagree, follow the code.
+If the architecture doc references a specific file:line in `refs/stakpak/`, descend into that file and verify the doc's description matches the actual code. Note any discrepancies — when doc and code disagree, follow the code.
 
 ## 3. TERTIARY: Claude Code source for agent-loop concepts
 
-For concepts like `Tool`, `QueryEngine`, slash commands, three-mode compaction, check `~/refs/claude-code/` — specifically `Tool.ts`, `QueryEngine.ts`, `query.ts`, `commands.ts`, `commands/`, `services/compact/`.
+For concepts like `Tool`, `QueryEngine`, slash commands, three-mode compaction, check `refs/claude-code/` — specifically `Tool.ts`, `QueryEngine.ts`, `query.ts`, `commands.ts`, `commands/`, `services/compact/`.
 
 **SKIP these subdirectories** (per `pre-flight.md` decision 2 exclusion list):
 `voice/`, `vim/`, `buddy/`, `assistant/`, `moreright/`, `native-ts/`, `outputStyles/`.

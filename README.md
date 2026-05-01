@@ -21,9 +21,9 @@ using LLMs only where they earn their place, deterministic code everywhere else.
 
 Patterns are mirrored from two open-source codebases checked out locally:
 
-- **Stakpak** (primary architectural reference, Apache 2.0) — see `~/refs/stakpak/`
-- **Claude Code source** (secondary, agent-loop concepts) — see `~/refs/claude-code/`
+- **Stakpak** (primary architectural reference, Apache 2.0) — see `refs/stakpak/`
+- **Claude Code source** (secondary, agent-loop concepts) — see `refs/claude-code/`
 
-The canonical architectural reference is `~/refs/stakpak_arch.md` (~2,840 lines).
+The canonical architectural reference is `refs/stakpak_arch.md` (~2,840 lines).
 
 See [`ATTRIBUTIONS.md`](ATTRIBUTIONS.md) for license attribution.

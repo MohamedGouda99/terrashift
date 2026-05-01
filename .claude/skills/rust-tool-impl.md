@@ -6,7 +6,7 @@ description: Loaded whenever you're implementing a new Rust Tool for Terrashift.
 When implementing a Rust Tool for Terrashift:
 
 1. **Read the trait** — `libs/agent-core/src/tool.rs` to understand the trait surface (filled by P-02).
-2. **Read an analogous Stakpak tool** — `~/refs/stakpak/libs/agent-core/` for a similar tool. Use `reference-explorer` sub-agent if needed.
+2. **Read an analogous Stakpak tool** — `refs/stakpak/libs/agent-core/` for a similar tool. Use `reference-explorer` sub-agent if needed.
 3. **Define typed I/O** — input/output structs with `serde + schemars` so JSON Schema is auto-generated. Mismatch between schema and type is a compile error (per terrashift_plan.md §16.5).
 4. **Implement the trait `async`** — use `async-trait`. Return `Result<ToolExecutionResult, ToolError>`.
 5. **Tests cover four cases:**

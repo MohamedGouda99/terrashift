@@ -19,6 +19,11 @@ Thumbs.db
 .env.local
 *.local.toml
 
+# Reference codebases — junctions and large file copies, set up per developer
+# via scripts/setup-refs.ps1. Not committed because junctions don't survive git
+# and stakpak_arch.md is large; see pre-flight.md decision 2.
+/refs/
+
 # Audit log working files (per Article IX — user data, never auto-deleted)
 .audit/
 .checkpoints/

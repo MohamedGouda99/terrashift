@@ -16,7 +16,7 @@ Sub-clause I.4: agents have bounded blast radius via the subagent permission mod
 
 ## Article II — Reference codebase discipline
 
-Stakpak is the primary architectural reference, with `stakpak_arch.md` (~2,840 lines) as the canonical document. Claude Code is the secondary reference for agent-loop concepts. All three are checked out locally on every team member's machine at `~/refs/`.
+Stakpak is the primary architectural reference, with `stakpak_arch.md` (~2,840 lines) as the canonical document. Claude Code is the secondary reference for agent-loop concepts. All three are checked out locally on every team member's machine at `refs/`.
 
 PR descriptions cite which `stakpak_arch.md` sections informed each implementation choice. Code comments include a `// Pattern: stakpak_arch.md section N` line at the top of any file that adopted a Stakpak pattern.
 

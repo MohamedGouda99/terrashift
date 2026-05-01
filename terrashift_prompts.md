@@ -10,7 +10,7 @@ A working set of prompts for directing Opus 4.7 during Terrashift development. K
 
 **Order:** P-00 first (always), then P-01 (workspace setup), then by need.
 
-**Reference document conventions.** Most prompts cite `stakpak_arch.md` by section number — e.g., `stakpak_arch.md section 8` is "stakpak-agent-core: THE CANONICAL AGENT LOOP". The architecture document at `~/refs/stakpak_arch.md` is the canonical reference. Stakpak source code at `~/refs/stakpak/` is the ground truth that backs it. Most of the time, the architecture document is enough.
+**Reference document conventions.** Most prompts cite `stakpak_arch.md` by section number — e.g., `stakpak_arch.md section 8` is "stakpak-agent-core: THE CANONICAL AGENT LOOP". The architecture document at `refs/stakpak_arch.md` is the canonical reference. Stakpak source code at `refs/stakpak/` is the ground truth that backs it. Most of the time, the architecture document is enough.
 
 ---
 
@@ -19,16 +19,16 @@ A working set of prompts for directing Opus 4.7 during Terrashift development. K
 **When to use:** First thing on day one. Once per teammate. Builds your mental model and produces the canonical mapping document.
 
 **Preconditions:**
-- `stakpak/agent` cloned at `~/refs/stakpak/`
-- `claude-cli-src` cloned at `~/refs/claude-code/`
-- Architecture reference at `~/refs/stakpak_arch.md`
+- `stakpak/agent` cloned at `refs/stakpak/`
+- `claude-cli-src` cloned at `refs/claude-code/`
+- Architecture reference at `refs/stakpak_arch.md`
 - `terrashift_plan.md` in your editor
 
 **Prompt:**
 
 ```
 >>>
-I am onboarding to the Terrashift project. The canonical architectural reference is `~/refs/stakpak_arch.md` (~2,840 lines, with file:line citations into Stakpak source). Walk me through the key sections and produce a Terrashift-specific mapping document.
+I am onboarding to the Terrashift project. The canonical architectural reference is `refs/stakpak_arch.md` (~2,840 lines, with file:line citations into Stakpak source). Walk me through the key sections and produce a Terrashift-specific mapping document.
 
 PART 1 — Read these sections of stakpak_arch.md in order:
 
@@ -44,10 +44,10 @@ PART 1 — Read these sections of stakpak_arch.md in order:
 PART 2 — Spot-read Stakpak source for the patterns you want to verify. The arch doc tells you which file:line to look at. For at least 3-5 patterns, descend into the source and confirm the doc's description matches.
 
 PART 3 — Read Claude Code source for secondary agent-loop concepts:
-1. `~/refs/claude-code/Tool.ts` — conceptual Tool definition
-2. `~/refs/claude-code/QueryEngine.ts` and `query.ts` — conversation state machine
-3. `~/refs/claude-code/commands/` — slash-command registry pattern
-4. `~/refs/claude-code/services/compact/` — three-mode compaction
+1. `refs/claude-code/Tool.ts` — conceptual Tool definition
+2. `refs/claude-code/QueryEngine.ts` and `query.ts` — conversation state machine
+3. `refs/claude-code/commands/` — slash-command registry pattern
+4. `refs/claude-code/services/compact/` — three-mode compaction
 
 PART 4 — Produce TERRASHIFT_MAPPING.md in the workspace root:
 
@@ -189,9 +189,9 @@ PRIMARY REFERENCE: Read stakpak_arch.md section 8 carefully. The "Key traits" su
 
 CROSS-CUTTING: Read stakpak_arch.md section 20 (tool call lifecycle). Lifecycle: Build ApprovalStateMachine → next_ready → emit ToolExecutionStarted → executor → emit ToolExecutionCompleted.
 
-DESCEND INTO SOURCE: Open `~/refs/stakpak/libs/agent-core/src/tools.rs` to confirm trait shape. Open `types.rs` for `ProposedToolCall`, `AgentRunContext`. Open `~/refs/stakpak/cli/src/commands/agent/run/tooling.rs` for a concrete impl.
+DESCEND INTO SOURCE: Open `refs/stakpak/libs/agent-core/src/tools.rs` to confirm trait shape. Open `types.rs` for `ProposedToolCall`, `AgentRunContext`. Open `refs/stakpak/cli/src/commands/agent/run/tooling.rs` for a concrete impl.
 
-CLAUDE CODE SECONDARY: Read `~/refs/claude-code/Tool.ts` for conceptual clarity on what "a Tool is".
+CLAUDE CODE SECONDARY: Read `refs/claude-code/Tool.ts` for conceptual clarity on what "a Tool is".
 
 IMPLEMENT in libs/agent-core/src/:
 1. `tool.rs` — Tool trait
@@ -282,10 +282,10 @@ Implement enforcement in resolver: when merging, policy fields from profile over
 CREDENTIAL HANDLING: Per Article V — the broker (libs/creds, P-10) handles BOTH cloud creds AND LLM provider keys. `api_key_env = "ANTHROPIC_API_KEY"` is resolved at LLM-call time, value zeroized after request. The LLM client never holds the raw key as an instance field; it asks the broker on each call.
 
 DESCEND INTO SOURCE:
-- `~/refs/stakpak/libs/ai/src/registry/mod.rs` — auto-registration pattern
-- `~/refs/stakpak/libs/ai/src/client/builder.rs` — InferenceConfig construction
-- `~/refs/stakpak/libs/server/src/routes.rs:545-583` — RunOverrides merge logic (the canonical reference)
-- `~/refs/stakpak/cli/src/config/profile.rs` — profile/provider config types
+- `refs/stakpak/libs/ai/src/registry/mod.rs` — auto-registration pattern
+- `refs/stakpak/libs/ai/src/client/builder.rs` — InferenceConfig construction
+- `refs/stakpak/libs/server/src/routes.rs:545-583` — RunOverrides merge logic (the canonical reference)
+- `refs/stakpak/cli/src/config/profile.rs` — profile/provider config types
 
 TESTS:
 - Mock the provider with stakai's test helpers
@@ -445,7 +445,7 @@ IMPLEMENT:
 4. Cache TTL: schemas pinned by version don't expire (Article VI); "latest" lookups expire after 24h.
 5. `ProviderSchema` typed Rust struct: resources → attributes → type/required/description.
 
-DESCEND INTO SOURCE: For SessionStorage pattern, read `~/refs/stakpak/libs/api/src/storage.rs`. Our trait is structurally the same but covers schemas instead of agent sessions.
+DESCEND INTO SOURCE: For SessionStorage pattern, read `refs/stakpak/libs/api/src/storage.rs`. Our trait is structurally the same but covers schemas instead of agent sessions.
 
 TESTS:
 - First fetch hits registry, populates cache
@@ -484,7 +484,7 @@ IMPLEMENT in libs/engine/src/generator/mod.rs:
 
 NO LLM in happy path. Templates are deterministic. Only fall back to LLM if a template is missing AND the resource is in scope (rare in Stage 1; if it happens, log loudly per Article IV).
 
-DESCEND INTO SOURCE: For reversible-file pattern, read `~/refs/stakpak/libs/agent-core/src/` and search for `.backup` references. Implementation uses move semantics: existing file moved to backup, new written; rollback is move-backup-back-to-original.
+DESCEND INTO SOURCE: For reversible-file pattern, read `refs/stakpak/libs/agent-core/src/` and search for `.backup` references. Implementation uses move semantics: existing file moved to backup, new written; rollback is move-backup-back-to-original.
 
 TESTS:
 - Round-trip: emit → re-parse should be valid HCL
@@ -528,9 +528,9 @@ IMPLEMENT in libs/engine/src/executor/mod.rs:
 8. Stream tool output via tracing spans
 9. Audit-log every action per Article V
 
-DESCEND INTO SOURCE: Read `~/refs/stakpak/libs/shell-tool-approvals/src/` for tree-sitter-bash command parser. Pattern: parse command into syntax tree, walk it, apply scope::cmd::arg rule map. Adopt directly for terraform commands.
+DESCEND INTO SOURCE: Read `refs/stakpak/libs/shell-tool-approvals/src/` for tree-sitter-bash command parser. Pattern: parse command into syntax tree, walk it, apply scope::cmd::arg rule map. Adopt directly for terraform commands.
 
-For Warden, read `~/refs/stakpak/cli/src/commands/warden.rs` and architecture in section 29.
+For Warden, read `refs/stakpak/cli/src/commands/warden.rs` and architecture in section 29.
 
 CREDENTIALS: Use credential broker from libs/creds (P-10). For Stage 1, allow STS-token-based AWS credentials only.
 
@@ -578,7 +578,7 @@ IMPLEMENT:
 7. Every fetch audit-logged with timestamp + invoking operation
 8. Credentials zeroized in memory after use using `zeroize` crate
 
-DESCEND INTO SOURCE: For Stakpak's secret manager, read `~/refs/stakpak/libs/shared/src/secrets/` and `secret_manager.rs`. Redaction patterns and entropy thresholds directly applicable.
+DESCEND INTO SOURCE: For Stakpak's secret manager, read `refs/stakpak/libs/shared/src/secrets/` and `secret_manager.rs`. Redaction patterns and entropy thresholds directly applicable.
 
 PRIVACY MODE: Per section 27, --privacy-mode adds IP addresses, AWS account IDs, PII patterns. We adopt and add cross-cloud-specific patterns (GCP project IDs, Azure subscription GUIDs).
 
@@ -695,7 +695,7 @@ INTEGRATION POINTS (where append() is called from):
 
 CROSS-CUTTING: Reference stakpak_arch.md section 22 (checkpoint and resume). Audit log entries written at same lifecycle points as checkpoints — but different purposes. Both run through hooks. Audit chain is INDEPENDENT of checkpoint chain — losing a checkpoint must not break audit verification.
 
-DESCEND INTO SOURCE: For checkpoint patterns audit log emulates, see `~/refs/stakpak/libs/server/src/checkpoint_store.rs`. The hash-chained structure of CheckpointEnvelope is the closest analog.
+DESCEND INTO SOURCE: For checkpoint patterns audit log emulates, see `refs/stakpak/libs/server/src/checkpoint_store.rs`. The hash-chained structure of CheckpointEnvelope is the closest analog.
 
 TESTS:
 - Append + verify round-trip per payload variant
@@ -783,7 +783,7 @@ IMPLEMENT in .github/workflows/release.yml:
 
 For static linking: rustls-tls everywhere (chosen in P-01). No OpenSSL.
 
-DESCEND INTO SOURCE: Copy `~/refs/stakpak/.github/workflows/build-and-release.yml` and adapt.
+DESCEND INTO SOURCE: Copy `refs/stakpak/.github/workflows/build-and-release.yml` and adapt.
 
 TESTS:
 - Local: `cargo build --release` produces binary that runs on fresh container
@@ -811,7 +811,7 @@ Implement slash commands in TUI: /help, /plan, /cost, /migrate, /rollback, /audi
 
 PRIMARY REFERENCE: stakpak_arch.md section 16 covers stakpak-tui's structure — AppState, services/handlers/, dual-channel mpsc contract (InputEvent / OutputEvent). Slash command pattern is part of this.
 
-CLAUDE CODE SECONDARY: Per-command-file pattern is cleaner in Claude Code's commands/ directory. Read `~/refs/claude-code/commands/` and adopt: each command is a small file with metadata header and handler.
+CLAUDE CODE SECONDARY: Per-command-file pattern is cleaner in Claude Code's commands/ directory. Read `refs/claude-code/commands/` and adopt: each command is a small file with metadata header and handler.
 
 IMPLEMENT in tui/src/commands/:
 
@@ -911,7 +911,7 @@ Do not write production code. Review only.
 
 ```
 >>>
-Add `<provider-name>` as a custom LLM provider in libs/ai/src/providers/<provider-name>/. The canonical reference for this work is the `feat/add-minimax-provider` branch in ~/refs/stakpak/ (see stakpak_arch.md section 38) — read its diff before starting.
+Add `<provider-name>` as a custom LLM provider in libs/ai/src/providers/<provider-name>/. The canonical reference for this work is the `feat/add-minimax-provider` branch in refs/stakpak/ (see stakpak_arch.md section 38) — read its diff before starting.
 
 PRIMARY REFERENCE: stakpak_arch.md section 41 Phase 3 lists exactly the files to add and touch:
 
