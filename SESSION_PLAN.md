@@ -81,7 +81,7 @@ the next session. That's the load-bearing discipline.
 | 5 | Sandboxed Executor + Credential broker | 1 | Blocked: needs cloud test creds | — | All |
 | 6a | Release pipeline (P-13) | 1 | ✅ Done | `920b7a4` | All |
 | 6b | TUI slash commands (P-14) | 1 | ✅ Done | this commit | All |
-| 7 | Eval expansion (3 → 5 → 10 golden migrations) | 1 | 🟡 Partial: 5/10 shipped (`a01797c`) | — | All |
+| 7 | Eval expansion (3 → 5 → 10 golden migrations) | 1 | ✅ Done: 10/10 (`a01797c` 5/10, this commit 10/10) | — | All |
 | 8 | Stage 1 exit gate (P-16) + remediation | 1 | Planned | — | All |
 | 9 | Agent loop kernel (run_agent, approval, retry) | 2 | Planned | — | MVP+ |
 | 10 | Recovery agent | 2 | Planned | — | MVP+ |

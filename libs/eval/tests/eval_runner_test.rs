@@ -24,26 +24,40 @@ fn suite_root() -> PathBuf {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// Test 1 — discover_suite finds all 5 golden migrations (criterion #1).
-// S3b: 3 AWS-as-target. S7-prefetch (this commit): +2 Azure-as-target.
-// Closes S3b stage-gate remediation ticket R1 (Azure direction coverage).
+// Test 1 — discover_suite finds all 10 golden migrations (criterion #1).
+// S3b: 3 AWS-as-target. S7 prefetch: +2 Azure-as-target. S7 close (this
+// commit): +5 more covering remaining Stage 1 templates. Hits the S7
+// target of 10 from SESSION_PLAN row 7.
 // ─────────────────────────────────────────────────────────────────────────
 #[test]
 fn discover_suite_finds_all_goldens() {
     let goldens = discover_suite(&suite_root()).unwrap();
     assert_eq!(
         goldens.len(),
-        5,
-        "Stage 1 ships 5 hand-curated goldens (3 AWS, 2 Azure); suite_root = {:?}",
+        10,
+        "Stage 1 ships 10 hand-curated goldens (5 AWS-target, 5 Azure-target); suite_root = {:?}",
         suite_root()
     );
 
     let names: Vec<&str> = goldens.iter().map(|g| g.manifest.name.as_str()).collect();
-    assert!(names.contains(&"001_aws_vpc_minimal"));
-    assert!(names.contains(&"002_aws_subnet_with_reference"));
-    assert!(names.contains(&"003_aws_s3_bucket"));
-    assert!(names.contains(&"004_azurerm_vnet_minimal"));
-    assert!(names.contains(&"005_azurerm_storage_account"));
+    for expected in [
+        "001_aws_vpc_minimal",
+        "002_aws_subnet_with_reference",
+        "003_aws_s3_bucket",
+        "004_azurerm_vnet_minimal",
+        "005_azurerm_storage_account",
+        "006_aws_security_group",
+        "007_aws_instance",
+        "008_azurerm_subnet",
+        "009_azurerm_nsg",
+        "010_azurerm_linux_vm",
+    ] {
+        assert!(
+            names.contains(&expected),
+            "missing golden {expected}; got {:?}",
+            names
+        );
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -65,10 +79,10 @@ fn manifest_toml_parses_correctly() {
 //  populates it.)
 // ─────────────────────────────────────────────────────────────────────────
 #[test]
-fn all_five_goldens_pass() {
+fn all_ten_goldens_pass() {
     let runner = EvalRunner::new();
     let report = runner.run_suite(&suite_root()).unwrap();
-    assert_eq!(report.total, 5);
+    assert_eq!(report.total, 10);
     assert!(
         report.all_passed(),
         "{} of {} goldens failed:\n{}",
@@ -86,9 +100,12 @@ fn all_five_goldens_pass() {
             .collect::<Vec<_>>()
             .join("\n\n")
     );
-    assert_eq!(report.passed, 5);
+    assert_eq!(report.passed, 10);
     assert_eq!(report.failed, 0);
-    assert_eq!(report.total_token_cost_micros, 0, "S3b: token cost = 0");
+    assert_eq!(
+        report.total_token_cost_micros, 0,
+        "S7 close: still 0 token cost — Mapper bypassed by P-12 design (goldens pre-curate mapping_plan.json)"
+    );
 }
 
 // ─────────────────────────────────────────────────────────────────────────

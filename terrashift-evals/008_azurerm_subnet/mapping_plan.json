@@ -1,0 +1,19 @@
+{
+  "run_id": "00000000-0000-0000-0000-000000000008",
+  "source_provider": "aws",
+  "target_provider": "azurerm",
+  "resources": [
+    {
+      "source_addr": "aws_subnet.private",
+      "target_addr": "azurerm_subnet.private",
+      "target_type": "azurerm_subnet",
+      "target_name": "private",
+      "attributes": {
+        "name": { "string": "private-subnet" },
+        "resource_group_name": { "reference": "azurerm_resource_group.main.name" },
+        "virtual_network_name": { "reference": "azurerm_virtual_network.main.name" }
+      },
+      "dependencies": ["azurerm_virtual_network.main"]
+    }
+  ]
+}

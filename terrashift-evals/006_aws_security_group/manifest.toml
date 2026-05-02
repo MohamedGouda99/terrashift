@@ -1,0 +1,6 @@
+name = "006_aws_security_group"
+description = "AWS security group referencing a VPC; exercises Reference attribute on a non-VPC AWS resource type"
+source_provider = "google"
+target_provider = "aws"
+token_cost_ceiling_micros = 0
+articles = [3, 6, 9]

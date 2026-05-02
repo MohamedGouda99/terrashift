@@ -1,0 +1,21 @@
+{
+  "run_id": "00000000-0000-0000-0000-00000000000a",
+  "source_provider": "aws",
+  "target_provider": "azurerm",
+  "resources": [
+    {
+      "source_addr": "aws_instance.web",
+      "target_addr": "azurerm_linux_virtual_machine.web",
+      "target_type": "azurerm_linux_virtual_machine",
+      "target_name": "web",
+      "attributes": {
+        "name": { "string": "web-vm" },
+        "resource_group_name": { "reference": "azurerm_resource_group.main.name" },
+        "location": { "string": "East US" },
+        "size": { "string": "Standard_D2s_v3" },
+        "admin_username": { "string": "azureuser" }
+      },
+      "dependencies": []
+    }
+  ]
+}

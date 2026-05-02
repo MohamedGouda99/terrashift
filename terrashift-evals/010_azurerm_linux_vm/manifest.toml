@@ -1,0 +1,6 @@
+name = "010_azurerm_linux_vm"
+description = "Azure Linux VM with size + admin_username + network_interface_ids; exercises 4-required attrs + optional list passthrough"
+source_provider = "aws"
+target_provider = "azurerm"
+token_cost_ceiling_micros = 0
+articles = [3, 6, 9]

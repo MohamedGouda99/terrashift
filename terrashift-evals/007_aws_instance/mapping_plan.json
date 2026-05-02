@@ -1,0 +1,19 @@
+{
+  "run_id": "00000000-0000-0000-0000-000000000007",
+  "source_provider": "google",
+  "target_provider": "aws",
+  "resources": [
+    {
+      "source_addr": "google_compute_instance.web",
+      "target_addr": "aws_instance.web",
+      "target_type": "aws_instance",
+      "target_name": "web",
+      "attributes": {
+        "instance_type": { "string": "t3.medium" },
+        "ami": { "string": "ami-0c55b159cbfafe1f0" },
+        "subnet_id": { "reference": "aws_subnet.main.id" }
+      },
+      "dependencies": ["aws_subnet.main"]
+    }
+  ]
+}

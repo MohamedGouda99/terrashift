@@ -1,0 +1,19 @@
+{
+  "run_id": "00000000-0000-0000-0000-000000000009",
+  "source_provider": "aws",
+  "target_provider": "azurerm",
+  "resources": [
+    {
+      "source_addr": "aws_security_group.web",
+      "target_addr": "azurerm_network_security_group.web",
+      "target_type": "azurerm_network_security_group",
+      "target_name": "web",
+      "attributes": {
+        "name": { "string": "allow-web-nsg" },
+        "location": { "string": "East US" },
+        "resource_group_name": { "reference": "azurerm_resource_group.main.name" }
+      },
+      "dependencies": []
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "run_id": "00000000-0000-0000-0000-000000000006",
+  "source_provider": "google",
+  "target_provider": "aws",
+  "resources": [
+    {
+      "source_addr": "google_compute_firewall.web",
+      "target_addr": "aws_security_group.web",
+      "target_type": "aws_security_group",
+      "target_name": "web",
+      "attributes": {
+        "name": { "string": "allow-web" },
+        "vpc_id": { "reference": "aws_vpc.main.id" },
+        "description": { "string": "Allow inbound web traffic on 80 and 443" }
+      },
+      "dependencies": ["aws_vpc.main"]
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+name = "009_azurerm_nsg"
+description = "Azure Network Security Group; exercises 3-required-string emission on Azure-side networking primitive"
+source_provider = "aws"
+target_provider = "azurerm"
+token_cost_ceiling_micros = 0
+articles = [3, 6, 9]

@@ -1,0 +1,6 @@
+name = "007_aws_instance"
+description = "AWS EC2 instance with ami + instance_type + subnet_id Reference; exercises multi-Reference resource emission"
+source_provider = "google"
+target_provider = "aws"
+token_cost_ceiling_micros = 0
+articles = [3, 6, 9]
