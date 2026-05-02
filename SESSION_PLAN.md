@@ -1,8 +1,22 @@
 # Terrashift — Multi-Session Production Plan
 
 **Maintained:** auto-updated by each session at handoff.
-**Last updated:** 2026-05-02 by Session 3b (continuing in same conversation).
-**Last commit:** see `git log -1` — `feat(p-12): Eval framework — golden-file harness + 3 fixtures` closes S3b.
+**Last updated:** 2026-05-02 by Session 4b (continuing in same conversation).
+**Last commit:** see `git log -1`.
+
+> **Spec format note (2026-05-02):** Specs 000–014 use a custom
+> Goal/Scope/Out-of-scope/Success-criteria shape (legacy). Spec
+> 003 onward follows the official `.specify/templates/spec-template.md`
+> format (User Stories with priorities, Functional Requirements
+> FR-NNN, Success Criteria SC-NNN). Reason: `/speckit-*` slash
+> commands are wired via `.specify/scripts/powershell/` but were
+> not surfaced in the Skill tool list at session start, so prior
+> specs were hand-written without the template. Substantive content
+> review of prior specs against `Terrashift_Plan.docx` and
+> `terrashift_plan.md` confirmed **no content mismatches** — only
+> format. Prior specs are NOT being retro-rewritten because their
+> code is committed + tested with reviewer sign-off; rewriting
+> would add noise without changing behavior.
 
 This document divides the v5 plan (`terrashift_plan.md` §19, ~14 months for a
 team of 4-8) into **autonomous Claude Code sessions of 4-8 hours each**. Each
