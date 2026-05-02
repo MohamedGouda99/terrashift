@@ -1,19 +1,211 @@
 //! Mapper — LLM with structured output (single call, then deterministic).
 //!
-//! Stage 1: minimal type definitions. Just enough for P-08 Generator to
-//! compile against and for tests to construct fixtures. The real Mapper
-//! (LLM call, prompt template, JSON schema, cache integration) arrives in
-//! S4 (P-05).
+//! P-05 (S4b structural) ships the full Mapper machinery:
+//! - `Mapper::map(estate, knowledge, llm, reducer, cache)` async API
+//! - `ContextReducer` trait + `PassthroughContextReducer` (Article XIII rule 1)
+//! - `MapperCache` keyed by Sha256 of canonical-JSON inventory (Article XII rule 2)
+//! - Prompt assembly (system + user) routed through `LlmClient::complete`
+//! - JSON parse → `MappingPlan` (loud `MalformedResponse` on bad input)
+//!
+//! Real Groq integration is one `RealClient`-vs-`StubClient` swap away;
+//! the structural code ships today, the real-LLM `#[ignore]`'d test fires
+//! once `GROQ_API_KEY` is set.
 //!
 //! Pattern: terrashift_plan.md §5 (agentic-vs-deterministic split — Mapper
 //! is single-LLM-call structured-output, NOT an agent), §6.X (strict JSON
-//! conforming to schemars-derived schema). Constitution: Article I (NOT an
-//! agent; adding agentic complexity requires RFC).
+//! conforming to schemars-derived schema). Source patterns:
+//! - refs/stakpak/libs/agent-core/src/context.rs (ContextReducer trait shape)
+//! - refs/stakpak/libs/agent-core/src/agent.rs:159-187 (canonical
+//!   `reduce → generate` happy-path sequence)
+//! - refs/stakpak/tui/src/services/plan.rs:137-141 (Sha256 cache-key idiom)
+//!
+//! Constitution: Article I (NOT an agent; single LLM call), Article III
+//! (output validated by Validator P-06 downstream), Article IV (loud
+//! errors), Article XII rule 2 (cache-first), Article XIII rule 1
+//! (reducer on the path), Article XIII rule 3 (no panics in production),
+//! Article XIII rule 4 (stakai owns Message/Role; this module's `Message`
+//! is a Stage-1 local that converges with stakai's in S5+).
 
+pub mod cache;
+pub mod context;
+pub mod errors;
+pub mod prompt;
+
+pub use cache::{estate_cache_key, MapperCache};
+pub use context::{ContextReducer, Message, PassthroughContextReducer, Role};
+pub use errors::MapperError;
+
+use crate::scanner::EstateInventory;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
+use terrashift_ai::{LlmClient, Tier};
+use terrashift_knowledge::{KnowledgeService, ResourceMatch};
 use thiserror::Error;
 use uuid::Uuid;
+
+/// Stage 1 inventory size cap (100 KB of canonical JSON). Inventories
+/// above this fail loudly with `MapperError::InventoryTooLarge` —
+/// chunking arrives in Stage 2+. Article IV.
+const MAX_INVENTORY_BYTES: usize = 100_000;
+
+/// Top-K knowledge hits per source resource type.
+const KNOWLEDGE_TOP_K: usize = 5;
+
+/// Mapper — Stage 1 single-LLM-call structured-output orchestrator.
+/// Stateless apart from the source/target provider configuration.
+pub struct Mapper {
+    pub source_provider: String,
+    pub target_provider: String,
+}
+
+impl Mapper {
+    pub fn new(source_provider: impl Into<String>, target_provider: impl Into<String>) -> Self {
+        Self {
+            source_provider: source_provider.into(),
+            target_provider: target_provider.into(),
+        }
+    }
+
+    /// Run the Mapper on an `EstateInventory`. Cache-first: hits the
+    /// cache before invoking the LLM. Article XII rule 2 + Article XIII
+    /// rule 1 enforced via this signature (the `reducer` parameter is
+    /// non-optional, so bypassing the reducer is a compile error).
+    ///
+    /// Stage 1 deviation from the P-05 prompt: stakai 0.3.x has no
+    /// `response_format` field, so we use prompt-instructed JSON output
+    /// and parse the response string. Tool-call channel pattern from
+    /// refs/stakpak/libs/agent-core/src/agent.rs:284-298 is the
+    /// production path; deferred to S5+ pending eval signal.
+    #[allow(clippy::too_many_arguments)]
+    pub async fn map(
+        &self,
+        estate: &EstateInventory,
+        knowledge: &KnowledgeService,
+        llm: &dyn LlmClient,
+        reducer: &dyn ContextReducer,
+        cache: &mut MapperCache,
+    ) -> Result<MappingPlan, MapperError> {
+        // Article XII rule 2 — cache-first.
+        let key = estate_cache_key(estate)?;
+        if let Some(cached) = cache.get(&key) {
+            tracing::debug!(cache_key = %key, "Mapper::map cache hit");
+            return Ok(cached.clone());
+        }
+
+        // Article XII rule 1 — empty inventory short-circuits without
+        // an LLM call. Saves tokens.
+        let total_resources: usize = estate.files.iter().map(|f| f.resources.len()).sum();
+        if total_resources == 0 {
+            tracing::info!("Mapper::map empty inventory; emitting empty MappingPlan");
+            let plan = MappingPlan {
+                run_id: Uuid::new_v4(),
+                source_provider: self.source_provider.clone(),
+                target_provider: self.target_provider.clone(),
+                resources: Vec::new(),
+            };
+            cache.insert(key, plan.clone());
+            return Ok(plan);
+        }
+
+        // Inventory size cap (Article IV).
+        let bytes = serde_json::to_vec(estate)
+            .map_err(|e| MapperError::Serialize(Box::new(e)))?
+            .len();
+        if bytes > MAX_INVENTORY_BYTES {
+            return Err(MapperError::InventoryTooLarge {
+                bytes,
+                limit: MAX_INVENTORY_BYTES,
+            });
+        }
+
+        // RAG: knowledge hits per unique source resource type.
+        let mut knowledge_hits: Vec<(String, Vec<ResourceMatch>)> = Vec::new();
+        let unique_types: std::collections::BTreeSet<String> = estate
+            .files
+            .iter()
+            .flat_map(|f| f.resources.iter().map(|r| r.resource_type.clone()))
+            .collect();
+        for source_type in unique_types {
+            let query = format!("{source_type} {} equivalent", self.target_provider);
+            let hits = knowledge
+                .find_similar_in_provider(&query, &self.target_provider, KNOWLEDGE_TOP_K)
+                .await
+                .map_err(|e| MapperError::Knowledge(Box::new(e)))?;
+            knowledge_hits.push((source_type, hits));
+        }
+
+        // Build the prompt + route through the reducer. Article XIII
+        // rule 1: the `reducer.reduce` call is non-optional on this
+        // path; the type system makes bypass impossible.
+        let user_prompt = prompt::build_user_prompt(
+            &self.source_provider,
+            &self.target_provider,
+            estate,
+            &knowledge_hits,
+        );
+        let messages = vec![
+            Message {
+                role: Role::System,
+                content: prompt::SYSTEM_PROMPT.to_string(),
+            },
+            Message {
+                role: Role::User,
+                content: user_prompt,
+            },
+        ];
+        let reduced = reducer.reduce(messages);
+
+        // Stage 1 LLM call: collapse the (system, user) pair into one
+        // string with a separator, since `LlmClient::complete` from
+        // P-03 takes a single prompt. S5+ evolves this when the
+        // `LlmClient` API gains typed messages.
+        let combined_prompt = reduced
+            .iter()
+            .map(|m| {
+                format!(
+                    "[{}]\n{}",
+                    match m.role {
+                        Role::System => "system",
+                        Role::User => "user",
+                        Role::Assistant => "assistant",
+                    },
+                    m.content
+                )
+            })
+            .collect::<Vec<_>>()
+            .join("\n\n");
+
+        let (response, _meta) = llm.complete(Tier::Eco, &combined_prompt).await?;
+
+        // Parse the response as JSON → MappingPlan (Article III gate is
+        // P-06; here we only enforce that it parses).
+        let plan: MappingPlan = serde_json::from_str(&response).map_err(|e| {
+            let sample = truncate_utf8(&response, 500);
+            MapperError::MalformedResponse {
+                reason: e.to_string(),
+                sample,
+            }
+        })?;
+
+        cache.insert(key, plan.clone());
+        Ok(plan)
+    }
+}
+
+/// Truncate a string at a UTF-8 boundary near `max_bytes`. Matches
+/// Article XIII rule 3 — no `&s[..n]` slicing (that panics at
+/// non-boundary indices). Falls back to the empty string only when
+/// `s` is empty.
+fn truncate_utf8(s: &str, max_bytes: usize) -> String {
+    if s.len() <= max_bytes {
+        return s.to_string();
+    }
+    let mut end = max_bytes;
+    while end > 0 && !s.is_char_boundary(end) {
+        end -= 1;
+    }
+    s.get(..end).unwrap_or("").to_string()
+}
 
 /// Output of the Mapper. Input to Validator + Generator.
 ///
