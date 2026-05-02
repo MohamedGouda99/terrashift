@@ -24,6 +24,11 @@ Thumbs.db
 # and stakpak_arch.md is large; see pre-flight.md decision 2.
 /refs/
 
+# Test fixtures — external repos cloned for testing. Not committed because some
+# are GPL-2 (incompatible with Terrashift's Apache-2 distribution) and they bloat
+# the repo. Set up via scripts/setup-fixtures.ps1; see pre-flight.md decision 10.
+/fixtures/
+
 # Audit log working files (per Article IX — user data, never auto-deleted)
 .audit/
 .checkpoints/
