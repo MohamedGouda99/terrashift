@@ -21,6 +21,7 @@ thiserror = { workspace = true }
 anyhow = { workspace = true }
 tracing = { workspace = true }
 async-trait = "0.1"
+uuid = { workspace = true }
 
 # Internal
 terrashift-shared = { workspace = true }

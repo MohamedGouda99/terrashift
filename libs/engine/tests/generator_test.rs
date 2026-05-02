@@ -1,0 +1,401 @@
+//! Generator integration tests — round-trip, backup-first, rollback,
+//! template-miss, determinism, references, audit metadata.
+//!
+//! Pattern: tests live under `libs/engine/tests/` per Cargo conventions.
+//! Per spec.md success criteria — every numbered criterion has a test below.
+
+use std::collections::BTreeMap;
+use tempfile::TempDir;
+use uuid::Uuid;
+
+use terrashift_engine::generator::Generator;
+use terrashift_engine::mapper::{AttributeValue, MappedResource, MappingPlan};
+use terrashift_engine::scanner::Scanner;
+
+// ─────────────────────────────────────────────────────────────────────────
+// Fixture helpers
+// ─────────────────────────────────────────────────────────────────────────
+
+fn make_attr_string(s: &str) -> AttributeValue {
+    AttributeValue::String(s.to_string())
+}
+
+fn make_attr_ref(s: &str) -> AttributeValue {
+    AttributeValue::Reference(s.to_string())
+}
+
+fn aws_vpc_resource(name: &str, cidr: &str) -> MappedResource {
+    let mut attrs = BTreeMap::new();
+    attrs.insert("cidr_block".to_string(), make_attr_string(cidr));
+    attrs.insert("instance_tenancy".to_string(), make_attr_string("default"));
+    MappedResource {
+        source_addr: format!("aws_vpc.{}", name),
+        target_addr: format!("aws_vpc.{}", name),
+        target_type: "aws_vpc".to_string(),
+        target_name: name.to_string(),
+        attributes: attrs,
+        dependencies: vec![],
+    }
+}
+
+fn aws_subnet_resource(name: &str, cidr: &str, vpc_ref: &str) -> MappedResource {
+    let mut attrs = BTreeMap::new();
+    attrs.insert("cidr_block".to_string(), make_attr_string(cidr));
+    attrs.insert("vpc_id".to_string(), make_attr_ref(vpc_ref));
+    MappedResource {
+        source_addr: format!("aws_subnet.{}", name),
+        target_addr: format!("aws_subnet.{}", name),
+        target_type: "aws_subnet".to_string(),
+        target_name: name.to_string(),
+        attributes: attrs,
+        dependencies: vec![],
+    }
+}
+
+fn plan_with(resources: Vec<MappedResource>) -> MappingPlan {
+    MappingPlan {
+        run_id: Uuid::new_v4(),
+        source_provider: "google".to_string(),
+        target_provider: "aws".to_string(),
+        resources,
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Test 1 — template registry sanity (Stage 1 has 10 templates)
+// ─────────────────────────────────────────────────────────────────────────
+#[test]
+fn template_count_is_10() {
+    let g = Generator::new();
+    assert_eq!(g.template_count(), 10, "Stage 1 ships exactly 10 templates");
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Test 2 — Round-trip: emit single VPC, re-parse with Scanner, verify
+// (spec.md success criterion #1)
+// ─────────────────────────────────────────────────────────────────────────
+#[test]
+fn emit_aws_vpc_round_trips_through_scanner() {
+    let cwd = TempDir::new().unwrap();
+    let output_dir = TempDir::new().unwrap();
+
+    let plan = plan_with(vec![aws_vpc_resource("main", "10.0.0.0/16")]);
+    let g = Generator::new();
+    let artifacts = g.generate(cwd.path(), output_dir.path(), &plan).unwrap();
+
+    assert_eq!(artifacts.files.len(), 1);
+    assert!(artifacts.files[0].ends_with("aws_vpc.tf"));
+
+    // Now re-parse via the Scanner from P-04.
+    let inventory = Scanner::scan(output_dir.path()).unwrap();
+    assert_eq!(inventory.files.len(), 1, "exactly one .tf file");
+    let file = &inventory.files[0];
+
+    // Should contain exactly one resource block.
+    assert_eq!(
+        file.resources.len(),
+        1,
+        "round-trip preserves exactly one resource"
+    );
+    let r = &file.resources[0];
+    assert_eq!(r.resource_type, "aws_vpc");
+    assert_eq!(r.name, "main");
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Test 3 — Multi-resource MappingPlan writes multiple files grouped by type
+// ─────────────────────────────────────────────────────────────────────────
+#[test]
+fn multi_resource_plan_writes_one_file_per_type() {
+    let cwd = TempDir::new().unwrap();
+    let output_dir = TempDir::new().unwrap();
+
+    let plan = plan_with(vec![
+        aws_vpc_resource("main", "10.0.0.0/16"),
+        aws_vpc_resource("backup", "10.1.0.0/16"),
+        aws_subnet_resource("a", "10.0.1.0/24", "aws_vpc.main.id"),
+    ]);
+    let g = Generator::new();
+    let artifacts = g.generate(cwd.path(), output_dir.path(), &plan).unwrap();
+
+    // Expect 2 files: aws_vpc.tf (with both VPCs) and aws_subnet.tf.
+    assert_eq!(artifacts.files.len(), 2, "two target_types → two files");
+
+    let inventory = Scanner::scan(output_dir.path()).unwrap();
+    assert_eq!(inventory.files.len(), 2);
+    let total_resources: usize = inventory.files.iter().map(|f| f.resources.len()).sum();
+    assert_eq!(total_resources, 3, "all 3 resources land in the output");
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Test 4 — Template miss is a loud Err (Article IV; spec criterion #4)
+// ─────────────────────────────────────────────────────────────────────────
+#[test]
+fn template_miss_is_loud_error() {
+    let cwd = TempDir::new().unwrap();
+    let output_dir = TempDir::new().unwrap();
+
+    let mut attrs = BTreeMap::new();
+    attrs.insert("foo".to_string(), make_attr_string("bar"));
+    let unknown = MappedResource {
+        source_addr: "unknown_type.x".to_string(),
+        target_addr: "unknown_type.x".to_string(),
+        target_type: "unknown_type".to_string(),
+        target_name: "x".to_string(),
+        attributes: attrs,
+        dependencies: vec![],
+    };
+
+    let plan = plan_with(vec![unknown]);
+    let g = Generator::new();
+    let result = g.generate(cwd.path(), output_dir.path(), &plan);
+
+    assert!(result.is_err(), "unknown target_type must error");
+    let err = result.unwrap_err();
+    let msg = format!("{}", err);
+    assert!(
+        msg.contains("unknown_type"),
+        "error names the missing type: {msg}"
+    );
+    assert!(
+        msg.contains("template miss"),
+        "error says 'template miss': {msg}"
+    );
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Test 5 — Backup-first preservation (spec criterion #2)
+// Pre-existing file at output dir is moved to .terrashift/runs/.../backups/
+// before overwrite; the original content is byte-identical to the backup.
+// ─────────────────────────────────────────────────────────────────────────
+#[test]
+fn backup_first_preserves_original_content() {
+    let cwd = TempDir::new().unwrap();
+    let output_dir = TempDir::new().unwrap();
+
+    // Pre-existing file with hand-authored content.
+    let target_path = output_dir.path().join("aws_vpc.tf");
+    let original_content = b"# Original hand-authored file\nresource \"aws_vpc\" \"old\" {\n  cidr_block = \"172.16.0.0/16\"\n}\n";
+    std::fs::write(&target_path, original_content).unwrap();
+
+    let plan = plan_with(vec![aws_vpc_resource("main", "10.0.0.0/16")]);
+    let g = Generator::new();
+    let artifacts = g.generate(cwd.path(), output_dir.path(), &plan).unwrap();
+
+    // Exactly one backup created (the pre-existing aws_vpc.tf).
+    assert_eq!(artifacts.backups_created, 1);
+    assert_eq!(artifacts.backups.len(), 1);
+
+    // Backup lives under .terrashift/runs/{run_id}/backups/{op_uuid}/
+    let backup_path = &artifacts.backups[0];
+    let backup_str = backup_path.to_string_lossy();
+    assert!(
+        backup_str.contains(".terrashift")
+            && backup_str.contains("runs")
+            && backup_str.contains("backups"),
+        "backup path follows .terrashift/runs/.../backups/ scheme: {backup_str}"
+    );
+    assert!(
+        backup_str.contains(&plan.run_id.to_string()),
+        "backup path includes run_id"
+    );
+
+    // Backup file is byte-identical to original.
+    let backup_content = std::fs::read(backup_path).unwrap();
+    assert_eq!(
+        backup_content, original_content,
+        "backup preserves original byte-for-byte (Article V)"
+    );
+
+    // The new aws_vpc.tf has the new content.
+    let new_content = std::fs::read_to_string(&target_path).unwrap();
+    assert!(new_content.contains("aws_vpc"));
+    assert!(new_content.contains("main"));
+    assert!(new_content.contains("10.0.0.0/16"));
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Test 6 — Greenfield write: no backup created when target file is absent
+// (audit metadata correctness — spec criterion #5)
+// ─────────────────────────────────────────────────────────────────────────
+#[test]
+fn greenfield_write_creates_no_backup() {
+    let cwd = TempDir::new().unwrap();
+    let output_dir = TempDir::new().unwrap();
+
+    let plan = plan_with(vec![aws_vpc_resource("main", "10.0.0.0/16")]);
+    let g = Generator::new();
+    let artifacts = g.generate(cwd.path(), output_dir.path(), &plan).unwrap();
+
+    assert_eq!(artifacts.backups_created, 0, "no overwrite, no backup");
+    assert_eq!(artifacts.backups.len(), 0);
+    assert_eq!(artifacts.emitted.len(), 1);
+    assert!(
+        artifacts.emitted[0].backup_path.is_none(),
+        "EmittedFile.backup_path is None for greenfield"
+    );
+    assert!(!artifacts.emitted[0].overwrote, "overwrote = false");
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Test 7 — Rollback restores backed-up file (spec criterion #3, Article IX)
+// ─────────────────────────────────────────────────────────────────────────
+#[test]
+fn rollback_restores_backed_up_file() {
+    let cwd = TempDir::new().unwrap();
+    let output_dir = TempDir::new().unwrap();
+
+    let target_path = output_dir.path().join("aws_vpc.tf");
+    let original = b"# I am the original\n";
+    std::fs::write(&target_path, original).unwrap();
+
+    let plan = plan_with(vec![aws_vpc_resource("main", "10.0.0.0/16")]);
+    let g = Generator::new();
+    let artifacts = g.generate(cwd.path(), output_dir.path(), &plan).unwrap();
+    assert_eq!(artifacts.backups_created, 1);
+
+    // Now roll back.
+    g.rollback(&artifacts).unwrap();
+
+    let restored = std::fs::read(&target_path).unwrap();
+    assert_eq!(
+        restored, original,
+        "rollback restores byte-identical original (Article IX — backups archival)"
+    );
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Test 8 — Determinism: same plan twice → byte-identical output
+// (Article VI; spec criterion #6)
+// ─────────────────────────────────────────────────────────────────────────
+#[test]
+fn determinism_byte_identical_across_runs() {
+    let plan = plan_with(vec![
+        aws_subnet_resource("c", "10.0.3.0/24", "aws_vpc.main.id"),
+        aws_vpc_resource("main", "10.0.0.0/16"),
+        aws_subnet_resource("a", "10.0.1.0/24", "aws_vpc.main.id"),
+    ]);
+
+    let cwd1 = TempDir::new().unwrap();
+    let out1 = TempDir::new().unwrap();
+    let g = Generator::new();
+    g.generate(cwd1.path(), out1.path(), &plan).unwrap();
+
+    let cwd2 = TempDir::new().unwrap();
+    let out2 = TempDir::new().unwrap();
+    g.generate(cwd2.path(), out2.path(), &plan).unwrap();
+
+    // Compare aws_vpc.tf and aws_subnet.tf across the two runs.
+    for filename in &["aws_vpc.tf", "aws_subnet.tf"] {
+        let content1 = std::fs::read(out1.path().join(filename)).unwrap();
+        let content2 = std::fs::read(out2.path().join(filename)).unwrap();
+        assert_eq!(
+            content1, content2,
+            "{filename} byte-identical across runs (Article VI)"
+        );
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Test 9 — References emit unquoted (raw HCL traversal, not string literal)
+// ─────────────────────────────────────────────────────────────────────────
+#[test]
+fn references_emit_as_raw_hcl_traversals() {
+    let cwd = TempDir::new().unwrap();
+    let output_dir = TempDir::new().unwrap();
+
+    let plan = plan_with(vec![aws_subnet_resource(
+        "a",
+        "10.0.1.0/24",
+        "aws_vpc.main.id",
+    )]);
+    let g = Generator::new();
+    g.generate(cwd.path(), output_dir.path(), &plan).unwrap();
+
+    let content = std::fs::read_to_string(output_dir.path().join("aws_subnet.tf")).unwrap();
+
+    // Reference must emit unquoted: vpc_id = aws_vpc.main.id  (not "aws_vpc.main.id")
+    assert!(
+        content.contains("vpc_id = aws_vpc.main.id"),
+        "reference emits as raw traversal, not quoted string. Got:\n{content}"
+    );
+    assert!(
+        !content.contains("vpc_id = \"aws_vpc.main.id\""),
+        "reference must NOT be quoted. Got:\n{content}"
+    );
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Test 10 — InvalidOutputDir error when target isn't a directory.
+// Uses a TempDir-relative non-existent subpath so it's portable (M3).
+// ─────────────────────────────────────────────────────────────────────────
+#[test]
+fn invalid_output_dir_is_loud_error() {
+    let cwd = TempDir::new().unwrap();
+    let nonexistent = cwd.path().join("does_not_exist_subpath");
+    let plan = plan_with(vec![aws_vpc_resource("main", "10.0.0.0/16")]);
+    let g = Generator::new();
+    let err = g.generate(cwd.path(), &nonexistent, &plan).unwrap_err();
+    let msg = format!("{}", err);
+    assert!(
+        msg.contains("not a directory") || msg.contains("does_not_exist_subpath"),
+        "invalid output dir is loud: {msg}"
+    );
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Test 11 — Empty reference is a loud error (M2 fix; Article IV)
+// ─────────────────────────────────────────────────────────────────────────
+#[test]
+fn empty_reference_is_loud_error() {
+    let cwd = TempDir::new().unwrap();
+    let output_dir = TempDir::new().unwrap();
+
+    // Build a resource with an empty Reference attribute.
+    let mut attrs = BTreeMap::new();
+    attrs.insert("cidr_block".to_string(), make_attr_string("10.0.1.0/24"));
+    attrs.insert("vpc_id".to_string(), make_attr_ref("")); // EMPTY reference
+    let bad = MappedResource {
+        source_addr: "aws_subnet.bad".to_string(),
+        target_addr: "aws_subnet.bad".to_string(),
+        target_type: "aws_subnet".to_string(),
+        target_name: "bad".to_string(),
+        attributes: attrs,
+        dependencies: vec![],
+    };
+
+    let plan = plan_with(vec![bad]);
+    let g = Generator::new();
+    let err = g
+        .generate(cwd.path(), output_dir.path(), &plan)
+        .unwrap_err();
+    let msg = format!("{}", err);
+    assert!(
+        msg.contains("empty reference") || msg.contains("EmptyReference"),
+        "empty reference is loud (Article IV): {msg}"
+    );
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Test 12 — `Generator::rollback` on a fresh greenfield artifact removes
+// the freshly-created file (no backup exists). Verifies M1 fix's "delete
+// greenfield" branch works in isolation.
+// ─────────────────────────────────────────────────────────────────────────
+#[test]
+fn rollback_greenfield_deletes_created_file() {
+    let cwd = TempDir::new().unwrap();
+    let output_dir = TempDir::new().unwrap();
+
+    let plan = plan_with(vec![aws_vpc_resource("main", "10.0.0.0/16")]);
+    let g = Generator::new();
+    let artifacts = g.generate(cwd.path(), output_dir.path(), &plan).unwrap();
+    let target = output_dir.path().join("aws_vpc.tf");
+    assert!(target.exists(), "file written");
+    assert_eq!(artifacts.backups_created, 0, "greenfield: no backup");
+
+    g.rollback(&artifacts).unwrap();
+    assert!(
+        !target.exists(),
+        "rollback removes greenfield file (Article V — reversibility holds even when no backup exists)"
+    );
+}
