@@ -73,6 +73,9 @@ rmcp = { version = "0.11", features = ["client", "server"] }
 # HCL parsing
 hcl-rs = "0.18"
 
+# Filesystem walking (Scanner P-04)
+walkdir = "2"
+
 # Vector store (embedded, file-based; for RAG — Stage 3+)
 lancedb = "0.10"
 

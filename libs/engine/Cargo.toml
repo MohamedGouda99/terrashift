@@ -12,6 +12,7 @@ workspace = true
 
 [dependencies]
 hcl-rs = { workspace = true }
+walkdir = { workspace = true }
 tokio = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
@@ -28,3 +29,6 @@ terrashift-ai = { workspace = true }
 terrashift-knowledge = { workspace = true }
 terrashift-creds = { workspace = true }
 terrashift-audit = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3"
