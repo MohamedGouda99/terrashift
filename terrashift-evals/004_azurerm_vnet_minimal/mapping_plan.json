@@ -1,0 +1,19 @@
+{
+  "run_id": "00000000-0000-0000-0000-000000000004",
+  "source_provider": "aws",
+  "target_provider": "azurerm",
+  "resources": [
+    {
+      "source_addr": "aws_vpc.main",
+      "target_addr": "azurerm_virtual_network.main",
+      "target_type": "azurerm_virtual_network",
+      "target_name": "main",
+      "attributes": {
+        "name": { "string": "main" },
+        "resource_group_name": { "reference": "azurerm_resource_group.main.name" },
+        "location": { "string": "East US" }
+      },
+      "dependencies": []
+    }
+  ]
+}

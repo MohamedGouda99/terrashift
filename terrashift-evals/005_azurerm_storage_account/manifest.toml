@@ -1,0 +1,6 @@
+name = "005_azurerm_storage_account"
+description = "AWS S3 bucket → Azure Storage Account; exercises a non-VPC resource family on the AWS→Azure direction"
+source_provider = "aws"
+target_provider = "azurerm"
+token_cost_ceiling_micros = 0
+articles = [3, 6, 9]

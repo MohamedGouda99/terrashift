@@ -24,15 +24,17 @@ fn suite_root() -> PathBuf {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// Test 1 — discover_suite finds exactly 3 golden migrations (criterion #1).
+// Test 1 — discover_suite finds all 5 golden migrations (criterion #1).
+// S3b: 3 AWS-as-target. S7-prefetch (this commit): +2 Azure-as-target.
+// Closes S3b stage-gate remediation ticket R1 (Azure direction coverage).
 // ─────────────────────────────────────────────────────────────────────────
 #[test]
-fn discover_suite_finds_three_goldens() {
+fn discover_suite_finds_all_goldens() {
     let goldens = discover_suite(&suite_root()).unwrap();
     assert_eq!(
         goldens.len(),
-        3,
-        "Stage 1 ships 3 hand-curated goldens; suite_root = {:?}",
+        5,
+        "Stage 1 ships 5 hand-curated goldens (3 AWS, 2 Azure); suite_root = {:?}",
         suite_root()
     );
 
@@ -40,6 +42,8 @@ fn discover_suite_finds_three_goldens() {
     assert!(names.contains(&"001_aws_vpc_minimal"));
     assert!(names.contains(&"002_aws_subnet_with_reference"));
     assert!(names.contains(&"003_aws_s3_bucket"));
+    assert!(names.contains(&"004_azurerm_vnet_minimal"));
+    assert!(names.contains(&"005_azurerm_storage_account"));
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -61,10 +65,10 @@ fn manifest_toml_parses_correctly() {
 //  populates it.)
 // ─────────────────────────────────────────────────────────────────────────
 #[test]
-fn all_three_goldens_pass() {
+fn all_five_goldens_pass() {
     let runner = EvalRunner::new();
     let report = runner.run_suite(&suite_root()).unwrap();
-    assert_eq!(report.total, 3);
+    assert_eq!(report.total, 5);
     assert!(
         report.all_passed(),
         "{} of {} goldens failed:\n{}",
@@ -82,7 +86,7 @@ fn all_three_goldens_pass() {
             .collect::<Vec<_>>()
             .join("\n\n")
     );
-    assert_eq!(report.passed, 3);
+    assert_eq!(report.passed, 5);
     assert_eq!(report.failed, 0);
     assert_eq!(report.total_token_cost_micros, 0, "S3b: token cost = 0");
 }

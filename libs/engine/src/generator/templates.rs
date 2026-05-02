@@ -160,23 +160,32 @@ fn map_to_object_expression(
 }
 
 /// Build a resource block of `target_type "name"` with the given attribute
-/// keys taken from `r.attributes`. `required` keys must be strings; missing
-/// or wrong type returns Err. Optional keys are appended only when present.
+/// keys taken from `r.attributes`. `required_keys` must be *present* (any
+/// `AttributeValue` type — Mapper output legitimately includes
+/// `Reference("azurerm_resource_group.main.name")` for required slots like
+/// `resource_group_name`). Missing returns `Err`. Optional keys are
+/// appended only when present.
 fn build_resource_block(
     r: &MappedResource,
-    required_strings: &[&str],
-    optional_passthrough: &[&str],
+    required_keys: &[&str],
+    optional_keys: &[&str],
 ) -> Result<Block, GeneratorError> {
     let mut builder = Block::builder("resource")
         .add_label(r.target_type.clone())
         .add_label(r.target_name.clone());
 
-    for k in required_strings {
-        let v = r.require_string(k)?;
-        builder = builder.add_attribute((*k, v));
+    for k in required_keys {
+        let value =
+            r.attributes
+                .get(*k)
+                .ok_or_else(|| crate::mapper::MapperLookupError::Missing {
+                    addr: r.target_addr.clone(),
+                    attr: (*k).to_string(),
+                })?;
+        builder = builder.add_attribute((*k, to_expression(value)?));
     }
 
-    for k in optional_passthrough {
+    for k in optional_keys {
         if let Some(value) = r.attributes.get(*k) {
             builder = builder.add_attribute((*k, to_expression(value)?));
         }
