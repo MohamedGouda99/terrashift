@@ -1,0 +1,11 @@
+# Mirrors refs/stakpak/clippy.toml (per Article II — verbatim where applicable).
+#
+# Workspace lints in Cargo.toml deny `unwrap_used`, `expect_used`, and
+# `string_slice` everywhere. These options relax the first two for test
+# code only — production code stays strict, tests get the ergonomic API.
+#
+# `string_slice` stays denied even in tests (UTF-8 safety isn't optional
+# anywhere — see TERRASHIFT_MAPPING.md §D rule 3 commentary).
+
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
