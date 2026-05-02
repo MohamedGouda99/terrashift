@@ -11,3 +11,8 @@
 [toolchain]
 channel = "1.94.1"
 components = ["rustfmt", "clippy"]
+# Host triple defaults to the user's platform.
+# On Windows, this resolves to 1.94.1-x86_64-pc-windows-msvc (the standard
+# Rust-on-Windows target) which requires Visual Studio Build Tools or
+# WinGet/Choco-installed MSVC.
+# See pre-flight.md decision 8 for install instructions and toolchain options.

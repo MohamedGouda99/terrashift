@@ -2,6 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "model": "claude-opus-4-7",
   "outputStyle": "explanatory",
+
   "permissions": {
     "allow": [
       "Read",
@@ -33,7 +34,104 @@
       "Bash(mv:*)"
     ]
   },
+
   "env": {
     "RUST_BACKTRACE": "1"
-  }
+  },
+
+  "enabledPlugins": {
+    "opsera-devsecops@claude-plugins-official": false,
+    "aws-serverless@claude-plugins-official": false,
+    "migration-to-aws@claude-plugins-official": false,
+    "amazon-location-service@claude-plugins-official": false,
+    "deploy-on-aws@claude-plugins-official": false,
+    "helius@claude-plugins-official": false,
+    "firebase@claude-plugins-official": false,
+    "wix@claude-plugins-official": false,
+    "wordpress.com@claude-plugins-official": false,
+    "voila-api@claude-plugins-official": false,
+    "telegram@claude-plugins-official": false,
+    "discord@claude-plugins-official": false,
+    "imessage@claude-plugins-official": false,
+    "stripe@claude-plugins-official": false,
+    "sumup@claude-plugins-official": false,
+    "revenuecat@claude-plugins-official": false,
+    "legalzoom@claude-plugins-official": false,
+    "intercom@claude-plugins-official": false,
+    "zoominfo@claude-plugins-official": false,
+    "adspirer-ads-agent@claude-plugins-official": false,
+    "fiftyone@claude-plugins-official": false,
+    "huggingface-skills@claude-plugins-official": false,
+    "stagehand@claude-plugins-official": false,
+    "sentry@claude-plugins-official": false,
+    "atlassian@claude-plugins-official": false,
+    "vercel@claude-plugins-official": false,
+    "netlify-skills@claude-plugins-official": false,
+    "supabase@claude-plugins-official": false,
+    "planetscale@claude-plugins-official": false,
+    "cockroachdb@claude-plugins-official": false,
+    "cloudinary@claude-plugins-official": false,
+    "fastly-agent-toolkit@claude-plugins-official": false,
+    "railway@claude-plugins-official": false,
+    "flint@claude-plugins-official": false,
+    "followrabbit@claude-plugins-official": false,
+    "build-with-wordpress@claude-plugins-official": false,
+    "ai-firstify@claude-plugins-official": false,
+    "ai-plugins@claude-plugins-official": false,
+    "aikido@claude-plugins-official": false,
+    "data@claude-plugins-official": false,
+    "data-engineering@claude-plugins-official": false,
+    "wds-docs@claude-plugins-official": false,
+    "searchfit-seo@claude-plugins-official": false,
+    "product-tracking-skills@claude-plugins-official": false,
+    "postiz@claude-plugins-official": false,
+    "brightdata-plugin@claude-plugins-official": false,
+    "goodmem@claude-plugins-official": false,
+    "zoom@claude-plugins-official": false,
+    "zapier@claude-plugins-official": false,
+    "nightvision@claude-plugins-official": false,
+    "qodo-skills@claude-plugins-official": false,
+    "optibot@claude-plugins-official": false,
+    "pagerduty@claude-plugins-official": false,
+    "firetiger@claude-plugins-official": false,
+    "rc@claude-plugins-official": false,
+    "nimble@claude-plugins-official": false,
+    "Notion@claude-plugins-official": false,
+    "notion@claude-plugins-official": false,
+    "prisma@claude-plugins-official": false,
+    "build-with-wordpress@claude-plugins-official": false,
+    "build-with-aws@claude-plugins-official": false
+  },
+
+  "enabledMcpjsonServers": [
+    "filesystem-readonly-refs",
+    "stakpak-reference"
+  ],
+
+  "disabledMcpjsonServers": [
+    "aws-mcp",
+    "aws-serverless-mcp",
+    "awspricing",
+    "awsknowledge",
+    "gcloud",
+    "gcp-observability",
+    "gcp-storage",
+    "firebase",
+    "helius",
+    "DFlow",
+    "amazon-location-service",
+    "terraform-tools",
+    "stripe",
+    "sentry",
+    "supabase",
+    "vercel",
+    "atlassian",
+    "Atlassian Rovo",
+    "Gmail",
+    "Google Calendar",
+    "Google Drive",
+    "Indeed",
+    "Notion",
+    "ide"
+  ]
 }

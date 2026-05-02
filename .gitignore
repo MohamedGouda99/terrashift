@@ -38,3 +38,10 @@ specs/*/output/
 
 # Sandbox executor working directories (per P-09)
 /tmp/terrashift-exec-*/
+
+# Security scan artifacts (per session, not for repo)
+/checkov-report.json
+/checkov-stderr.txt
+/package-leakage-report.json
+/precommit-scan-*.md
+/precommit-scan-*.html

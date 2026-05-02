@@ -49,7 +49,7 @@ anyhow = "1"
 # Observability (per Article X)
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-tracing-opentelemetry = { version = "0.27", optional = true }
+tracing-opentelemetry = "0.27"
 
 # HTTP client (rustls only — no OpenSSL — for static linking)
 reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }

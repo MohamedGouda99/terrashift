@@ -25,15 +25,15 @@
 //! - `recovery/`       — true agent, Stage 2
 //! - `cost_optimizer/` — true agent, Stage 2
 
-pub mod scanner;
+pub mod cost_optimizer;
+pub mod executor;
+pub mod generator;
 pub mod mapper;
 pub mod planner;
-pub mod generator;
-pub mod validator;
-pub mod executor;
-pub mod verifier;
 pub mod recovery;
-pub mod cost_optimizer;
+pub mod scanner;
+pub mod validator;
+pub mod verifier;
 
 #[cfg(test)]
 mod tests {

@@ -21,7 +21,7 @@
 //! - `checkpoint.rs` — session serialization (P-14, per section 22)
 //! - `compact.rs` — three-mode compaction (Claude Code services/compact pattern)
 //! - `hooks.rs` — 5 lifecycle hooks: before_inference, after_inference,
-//!                before_tool_execution, after_tool_execution, on_error
+//!   before_tool_execution, after_tool_execution, on_error
 
 #[cfg(test)]
 mod tests {

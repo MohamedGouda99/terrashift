@@ -190,29 +190,75 @@ Then port `terrashift/CONSTITUTION.md` → `terrashift/.specify/memory/constitut
 | 7 | Spec Kit location | ⏳ Pending — recommend fresh init in this workspace |
 | 8 | **Rust install** | ⏳ **BLOCKING** — `rustc`/`cargo`/`rustup` not on PATH |
 
-### Item 8 — Install Rust
+### Item 8 — Install Rust + a working toolchain (✅ resolved on this machine)
 
-Required before `cargo check --all-targets` will work. Install via:
+**Verified-working solution on this machine (2026-05-02):**
+
+The combination that compiles all 15 crates cleanly on Windows without admin:
+
+| Component | Version | Location |
+|---|---|---|
+| Rust toolchain | `1.94.1-x86_64-pc-windows-gnullvm` | `~/.rustup/toolchains/...` |
+| LLVM-MinGW (clang + lld + dlltool + libunwind + compiler-rt) | latest UCRT release | `~/llvm-mingw/` |
+| Workspace override | `rustup override set 1.94.1-x86_64-pc-windows-gnullvm` | per-workspace state |
+
+**Three-line setup for fresh checkouts:**
 
 ```powershell
-# Recommended: rustup-init (Windows installer)
-# https://rustup.rs/  →  download rustup-init.exe  →  run interactively
-
-# Or in Git Bash:
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-
-# After install, restart shell, then:
-rustup toolchain install 1.94.1
-rustup default 1.94.1
-rustup component add rustfmt clippy
+cd C:\path\to\terrashift
+.\scripts\setup-toolchain.ps1   # idempotent; installs everything above
+cargo check --all-targets        # ~5-15 min first time
 ```
 
-Then run from this workspace:
+The script installs:
+1. LLVM-MinGW UCRT (~180 MB) into `~/llvm-mingw/` and adds bin to user PATH
+2. Rust `1.94.1-x86_64-pc-windows-gnullvm` toolchain (~200 MB) via rustup
+3. Sets the workspace override so cargo uses the matching pair
+
+#### Why this combination
+
+The Rust-on-Windows linker landscape has three options, only one of which works
+without admin and gives a successful `cargo check`:
+
+| Toolchain | Linker stack | Works without admin? | Verdict |
+|---|---|---|---|
+| `*-msvc` | Microsoft `link.exe` + VC++ runtime | ❌ needs VS Build Tools (~6 GB, admin) | viable but heavy |
+| `*-gnu` | GCC's `ld` + libgcc/libstdc++ | requires real MinGW-w64 GCC | clashes with LLVM-MinGW (`-lgcc_eh` not found) |
+| **`*-gnullvm`** | **clang/lld + libunwind/compiler-rt** | ✅ **with LLVM-MinGW** | **what we use** |
+
+The trap: **LLVM-MinGW alone is not enough** — it provides the linker stack, but
+without the matching `gnullvm` Rust target, rustc passes GCC-specific link
+flags (`-lgcc`, `-lgcc_eh`) that LLVM-MinGW can't satisfy. The two halves must
+match.
+
+#### Alternative paths if `setup-toolchain.ps1` doesn't fit
+
+**A. VS Build Tools (heaviest, most standard)**
 ```powershell
+# Admin shell:
+winget install --id Microsoft.VisualStudio.2022.BuildTools --override "--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
+# Workspace stays on default 1.94.1-msvc — no rustup override needed
 cargo check --all-targets
-cargo fmt -- --check
-cargo clippy --all-targets -- -D warnings
 ```
+
+**B. Real MinGW-w64 GCC + Rust gnu (not gnullvm)**
+```powershell
+choco install mingw -y   # admin shell
+rustup override set 1.94.1-x86_64-pc-windows-gnu
+cargo check --all-targets
+```
+
+#### Verify the install worked
+
+```powershell
+cd C:\Users\goda\Desktop\terrashift
+rustup show active-toolchain   # Should show: 1.94.1-x86_64-pc-windows-gnullvm
+cargo check --all-targets       # Should compile all 15 crates
+cargo fmt -- --check            # Should produce no diffs
+cargo clippy --all-targets -- -D warnings   # Should pass
+```
+
+Successful `cargo check` is the green-light gate for starting P-NN work.
 
 ---
 

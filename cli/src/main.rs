@@ -9,7 +9,11 @@ use anyhow::Result;
 use clap::Parser;
 
 #[derive(Parser, Debug)]
-#[command(name = "terrashift", version, about = "Cross-cloud Terraform migration")]
+#[command(
+    name = "terrashift",
+    version,
+    about = "Cross-cloud Terraform migration"
+)]
 struct Cli {
     /// Subcommand to run. When omitted, opens the TUI.
     #[command(subcommand)]
@@ -39,7 +43,10 @@ async fn main() -> Result<()> {
         }
         None => {
             // TUI dispatch lands here in P-14
-            println!("terrashift {} — TUI not yet implemented (see P-14)", env!("CARGO_PKG_VERSION"));
+            println!(
+                "terrashift {} — TUI not yet implemented (see P-14)",
+                env!("CARGO_PKG_VERSION")
+            );
         }
     }
 
