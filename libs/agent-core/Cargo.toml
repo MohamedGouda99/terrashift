@@ -24,5 +24,11 @@ async-trait = "0.1"
 uuid = { workspace = true }
 chrono = { workspace = true }
 
+# stakai for Message + Model in hooks (mirrors refs/stakpak/libs/agent-core/src/hooks.rs)
+stakai = { workspace = true }
+
 # Internal
 terrashift-shared = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true }

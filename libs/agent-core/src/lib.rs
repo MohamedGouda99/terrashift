@@ -1,30 +1,43 @@
-//! Tool trait, agent loop primitives, conversation state.
+//! Tool trait, agent loop primitives, lifecycle hooks.
 //!
-//! This is **the foundation that every Terrashift tool uses**.
+//! **The foundation that every Terrashift tool uses.**
 //!
 //! Pattern: stakpak_arch.md section 8 (THE CANONICAL AGENT LOOP — most
 //! important section in the architecture document).
+//! Source: refs/stakpak/libs/agent-core/src/lib.rs (subset — see
+//! `specs/002-tool-trait-and-executor/spec.md` for the deferred modules).
 //!
 //! Constitution: Article I (architectural restraint — agents have bounded
-//! blast radius via the subagent permission model), Article IV (failures
-//! must be loud), Article XIII rule 3 (no unwrap/expect/string-slice in
-//! production).
+//! blast radius via the seam model), Article II (mirror Stakpak), Article IV
+//! (failures must be loud), Article XIII rule 3 (no unwrap/expect/string-slice
+//! in production).
 //!
-//! Modules to be filled in by P-NN prompts:
-//! - `tool.rs` — Tool trait (P-02)
-//! - `executor.rs` — ToolExecutor trait per section 8 (P-02)
-//! - `registry.rs` — ToolRegistry; name → Tool dispatch (P-02)
-//! - `errors.rs` — ToolError per section 8 error taxonomy (P-02)
-//! - `agent_loop.rs` — generic LLM-with-tool-use loop (Recovery + Cost Optimizer agents, Stage 2)
-//! - `conversation.rs` — turn-based state machine (per Claude Code QueryEngine)
-//! - `permission.rs` — ApprovalStateMachine (per stakpak_arch.md section 8)
-//! - `checkpoint.rs` — session serialization (P-14, per section 22)
-//! - `compact.rs` — three-mode compaction (Claude Code services/compact pattern)
-//! - `hooks.rs` — 5 lifecycle hooks: before_inference, after_inference,
-//!   before_tool_execution, after_tool_execution, on_error
+//! ## P-02 module set (this commit)
+//!
+//! - `tools`    — `ToolExecutor` trait + `ToolExecutionResult` enum
+//! - `hooks`    — `AgentHook` trait, 5 lifecycle methods (default no-op)
+//! - `error`    — `AgentError` enum (minimal subset; grows per P-NN)
+//! - `types`    — `AgentRunContext`, `ProposedToolCall`, `ToolDecision`
+//! - `registry` — `ToolRegistry` (Terrashift addition; HashMap dispatch)
+//!
+//! ## Modules deferred to later P-NN (not yet present)
+//!
+//! - `agent`        — `run_agent` loop (Stage 2)
+//! - `approval`     — `ApprovalStateMachine` (P-09)
+//! - `compaction`   — `CompactionEngine` (Stage 2)
+//! - `context`      — `ContextReducer` (Stage 2)
+//! - `checkpoint`   — `CheckpointEnvelopeV1` (P-14)
+//! - `retry`, `stream`, `budget_context` — (Stage 2)
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn crate_compiles() {}
-}
+pub mod error;
+pub mod hooks;
+pub mod registry;
+pub mod tools;
+pub mod types;
+
+// Re-exports follow Stakpak's lib.rs pattern (subset).
+pub use error::AgentError;
+pub use hooks::AgentHook;
+pub use registry::ToolRegistry;
+pub use tools::{ToolExecutionResult, ToolExecutor};
+pub use types::{AgentRunContext, ProposedToolCall, ToolDecision};
