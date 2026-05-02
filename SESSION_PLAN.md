@@ -65,8 +65,8 @@ the next session. That's the load-bearing discipline.
 | 4a | Validator (P-06) — autonomous, no LLM | 1 | ✅ Done | `3525903` | All |
 | 4b | LLM client (P-03) + Mapper (P-05) structural | 1 | Blocked: structural code shippable; Groq integration test gated on `GROQ_API_KEY` | — | All |
 | 5 | Sandboxed Executor + Credential broker | 1 | Blocked: needs cloud test creds | — | All |
-| 6a | Release pipeline (P-13) | 1 | ⏳ Next | — | All |
-| 6b | TUI slash commands (P-14) | 1 | Planned | — | All |
+| 6a | Release pipeline (P-13) | 1 | ✅ Done | `920b7a4` | All |
+| 6b | TUI slash commands (P-14) | 1 | ✅ Done | this commit | All |
 | 7 | Eval expansion (3 → 5 → 10 golden migrations) | 1 | 🟡 Partial: 5/10 shipped (`a01797c`) | — | All |
 | 8 | Stage 1 exit gate (P-16) + remediation | 1 | Planned | — | All |
 | 9 | Agent loop kernel (run_agent, approval, retry) | 2 | Planned | — | MVP+ |
