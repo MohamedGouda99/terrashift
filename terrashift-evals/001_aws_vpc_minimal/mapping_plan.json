@@ -1,0 +1,18 @@
+{
+  "run_id": "00000000-0000-0000-0000-000000000001",
+  "source_provider": "google",
+  "target_provider": "aws",
+  "resources": [
+    {
+      "source_addr": "google_compute_network.main",
+      "target_addr": "aws_vpc.main",
+      "target_type": "aws_vpc",
+      "target_name": "main",
+      "attributes": {
+        "cidr_block": { "string": "10.0.0.0/16" },
+        "instance_tenancy": { "string": "default" }
+      },
+      "dependencies": []
+    }
+  ]
+}

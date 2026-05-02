@@ -1,8 +1,8 @@
 # Terrashift — Multi-Session Production Plan
 
 **Maintained:** auto-updated by each session at handoff.
-**Last updated:** 2026-05-02 by Session 3 (continuing in same conversation).
-**Last commit:** `4545065 feat(p11): Audit log — Ed25519 signed, hash-chained, append-only`.
+**Last updated:** 2026-05-02 by Session 3b (continuing in same conversation).
+**Last commit:** see `git log -1` — `feat(p-12): Eval framework — golden-file harness + 3 fixtures` closes S3b.
 
 This document divides the v5 plan (`terrashift_plan.md` §19, ~14 months for a
 team of 4-8) into **autonomous Claude Code sessions of 4-8 hours each**. Each
@@ -60,8 +60,8 @@ the next session. That's the load-bearing discipline.
 |---|---|---|---|---|---|
 | 1 | Foundation — D0 + D1 + P-02 + P-04 | 1 | ✅ Done | `f61dc31` | All |
 | 2 | Knowledge layer with RAG (P-07 expanded; was: schema cache + audit) | 1 | ✅ Done | `2b48216` | All |
-| 3 | Audit log (P-11) — Generator + Eval still pending | 1 | 🟡 Partial | `4545065` | All |
-| 3b | Generator (P-08) + Eval framework (P-12) | 1 | ⏳ Next | — | All |
+| 3 | Audit log (P-11) — Generator + Eval still pending | 1 | ✅ Done | `4545065` | All |
+| 3b | Generator (P-08) + Eval framework (P-12) | 1 | ✅ Done | `07d26b3` (P-08), this commit (P-12) | All |
 | 4 | LLM call (Groq) + Mapper + Validator | 1 | Blocked: needs `GROQ_API_KEY` | — | All |
 | 5 | Sandboxed Executor + Credential broker | 1 | Blocked: needs cloud test creds | — | All |
 | 6 | TUI slash commands + Release pipeline | 1 | Planned | — | All |

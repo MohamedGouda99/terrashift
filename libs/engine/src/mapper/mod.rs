@@ -63,8 +63,15 @@ pub struct MappedResource {
 /// 1. JSON-friendly serde for the Mapper-produced wire format.
 /// 2. `Reference` is a raw HCL expression (e.g., `aws_vpc.main.id`) that
 ///    must NOT be quoted at emit time — distinguishing data from syntax.
+///
+/// Serde representation: **externally tagged** (the default) — variants
+/// are wrapped in a single-key map, e.g. `{ "string": "10.0.0.0/16" }`,
+/// `{ "reference": "aws_vpc.main.id" }`. We can't use internally-tagged
+/// (`#[serde(tag = "...")]`) because the `String`/`Reference` newtype
+/// variants wrap primitives, not struct/maps, and serde rejects internal
+/// tagging on primitive newtypes at deserialize time.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(tag = "kind", rename_all = "snake_case")]
+#[serde(rename_all = "snake_case")]
 pub enum AttributeValue {
     String(String),
     Number(f64),

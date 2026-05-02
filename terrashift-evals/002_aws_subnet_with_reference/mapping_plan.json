@@ -1,0 +1,28 @@
+{
+  "run_id": "00000000-0000-0000-0000-000000000002",
+  "source_provider": "google",
+  "target_provider": "aws",
+  "resources": [
+    {
+      "source_addr": "google_compute_network.main",
+      "target_addr": "aws_vpc.main",
+      "target_type": "aws_vpc",
+      "target_name": "main",
+      "attributes": {
+        "cidr_block": { "string": "10.0.0.0/16" }
+      },
+      "dependencies": []
+    },
+    {
+      "source_addr": "google_compute_subnetwork.a",
+      "target_addr": "aws_subnet.a",
+      "target_type": "aws_subnet",
+      "target_name": "a",
+      "attributes": {
+        "cidr_block": { "string": "10.0.1.0/24" },
+        "vpc_id": { "reference": "aws_vpc.main.id" }
+      },
+      "dependencies": ["aws_vpc.main"]
+    }
+  ]
+}

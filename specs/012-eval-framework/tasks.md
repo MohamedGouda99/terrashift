@@ -1,0 +1,23 @@
+# Tasks — P-12
+
+- [ ] T1: Add `similar = "2"`, `toml = { workspace = true }`, `uuid = { workspace = true }` deps + `tempfile` dev-dep to `libs/eval/Cargo.toml`. Add `toml` and `similar` to workspace `[workspace.dependencies]` if missing.
+- [ ] T2: Write `libs/eval/src/errors.rs` (`EvalError` enum)
+- [ ] T3: Write `libs/eval/src/golden.rs` (`GoldenMigration`, `GoldenManifest`, `load_golden`, `discover_suite`)
+- [ ] T4: Write `libs/eval/src/scorer.rs` (`compare_directories`, `unified_diff`)
+- [ ] T5: Write `libs/eval/src/runner.rs` (`EvalRunner`, `EvalResult`, `SuiteReport`, `run_eval`, `run_suite`)
+- [ ] T6: Rewrite `libs/eval/src/lib.rs` (re-exports + crate doc)
+- [ ] T7: Hand-curate `terrashift-evals/001_aws_vpc_minimal/` (4 files)
+- [ ] T8: Hand-curate `terrashift-evals/002_aws_subnet_with_reference/` (5 files)
+- [ ] T9: Hand-curate `terrashift-evals/003_aws_s3_bucket/` (4 files)
+- [ ] T10: Write `terrashift-evals/README.md` (convention + "how to add" guide)
+- [ ] T11: Write `libs/eval/tests/eval_runner_test.rs` (suite discovery, 3 passes, mutation produces diff, manifest parse, determinism, hermeticism)
+- [ ] T12: `cargo check -p terrashift-eval --tests`
+- [ ] T13: `cargo clippy --workspace --all-targets -- -D warnings`
+- [ ] T14: `cargo fmt -- --check`
+- [ ] T15: `cargo test --workspace` (regression sweep)
+- [ ] T16: Run `code-reviewer` subagent on staged P-12 diff; resolve findings
+- [ ] T17: Run `constitution-checker` subagent; resolve findings
+- [ ] T18: Write `analyze.md` + `checklist.md` (post-impl docs)
+- [ ] T19: Update `SESSION_PLAN.md` row 3b status to ✅ with this commit's hash
+- [ ] T20: Commit `feat(p-12): Eval framework — golden-file harness + 3 fixtures`
+- [ ] T21: Run `/stage-gate` to close S3b

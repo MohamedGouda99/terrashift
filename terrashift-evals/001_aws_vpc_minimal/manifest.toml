@@ -1,0 +1,6 @@
+name = "001_aws_vpc_minimal"
+description = "Single AWS VPC; exercises basic block emission with required + optional string attributes"
+source_provider = "google"
+target_provider = "aws"
+token_cost_ceiling_micros = 0
+articles = [3, 6, 9]

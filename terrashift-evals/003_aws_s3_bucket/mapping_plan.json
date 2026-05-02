@@ -1,0 +1,18 @@
+{
+  "run_id": "00000000-0000-0000-0000-000000000003",
+  "source_provider": "google",
+  "target_provider": "aws",
+  "resources": [
+    {
+      "source_addr": "google_storage_bucket.assets",
+      "target_addr": "aws_s3_bucket.assets",
+      "target_type": "aws_s3_bucket",
+      "target_name": "assets",
+      "attributes": {
+        "bucket": { "string": "myorg-assets" },
+        "acl": { "string": "private" }
+      },
+      "dependencies": []
+    }
+  ]
+}
