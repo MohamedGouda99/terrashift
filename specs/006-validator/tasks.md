@@ -1,0 +1,22 @@
+# Tasks — P-06
+
+- [ ] T1: Write `libs/engine/src/validator/errors.rs` (`ValidatorError` enum)
+- [ ] T2: Write `libs/engine/src/validator/report.rs` (`ValidationReport`, `ValidationError`, `ValidationWarning`)
+- [ ] T3: Rewrite `libs/engine/src/validator/mod.rs` with `Validator::new`, `validate`
+- [ ] T4: Write `libs/engine/tests/validator_test.rs`:
+      - `valid_plan_passes`
+      - `hallucinated_attribute_fails_with_article_iii_message`
+      - `missing_required_attribute_fails`
+      - `unknown_resource_type_fails`
+      - `deprecated_attribute_warns_not_blocks`
+      - `multiple_errors_aggregate_not_fail_fast`
+      - `setting_computed_attribute_warns`
+- [ ] T5: `cargo check -p terrashift-engine --tests`
+- [ ] T6: `cargo clippy --workspace --all-targets -- -D warnings`
+- [ ] T7: `cargo fmt -- --check`
+- [ ] T8: `cargo test --workspace`
+- [ ] T9: Run `code-reviewer` subagent on staged diff
+- [ ] T10: Run `constitution-checker` subagent
+- [ ] T11: Write `analyze.md` + `checklist.md`
+- [ ] T12: Commit `feat(p-06): Validator — Article III enforcement gate`
+- [ ] T13: Update SESSION_PLAN.md row 4a → ✅

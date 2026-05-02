@@ -61,8 +61,9 @@ the next session. That's the load-bearing discipline.
 | 1 | Foundation — D0 + D1 + P-02 + P-04 | 1 | ✅ Done | `f61dc31` | All |
 | 2 | Knowledge layer with RAG (P-07 expanded; was: schema cache + audit) | 1 | ✅ Done | `2b48216` | All |
 | 3 | Audit log (P-11) — Generator + Eval still pending | 1 | ✅ Done | `4545065` | All |
-| 3b | Generator (P-08) + Eval framework (P-12) | 1 | ✅ Done | `07d26b3` (P-08), this commit (P-12) | All |
-| 4 | LLM call (Groq) + Mapper + Validator | 1 | Blocked: needs `GROQ_API_KEY` | — | All |
+| 3b | Generator (P-08) + Eval framework (P-12) | 1 | ✅ Done | `07d26b3` (P-08), `311b12c` (P-12) | All |
+| 4a | Validator (P-06) — autonomous, no LLM | 1 | ✅ Done | this commit | All |
+| 4b | LLM client (P-03) + Mapper (P-05) structural | 1 | ⏳ Next (structural; Groq integration test gated on `GROQ_API_KEY`) | — | All |
 | 5 | Sandboxed Executor + Credential broker | 1 | Blocked: needs cloud test creds | — | All |
 | 6 | TUI slash commands + Release pipeline | 1 | Planned | — | All |
 | 7 | Eval expansion (10 golden migrations) | 1 | Planned | — | All |
