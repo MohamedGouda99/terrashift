@@ -1,8 +1,8 @@
 # Terrashift — Multi-Session Production Plan
 
 **Maintained:** auto-updated by each session at handoff.
-**Last updated:** 2026-05-02 by Session 1.
-**Last commit:** `f61dc31 feat(p04): Scanner — deterministic HCL parser`.
+**Last updated:** 2026-05-02 by Session 2 (continuing in same conversation).
+**Last commit:** `2b48216 feat(p07): RAG-ready Knowledge layer`.
 
 This document divides the v5 plan (`terrashift_plan.md` §19, ~14 months for a
 team of 4-8) into **autonomous Claude Code sessions of 4-8 hours each**. Each
@@ -59,8 +59,8 @@ the next session. That's the load-bearing discipline.
 | # | Title | Stage | Status | Commit | Tier |
 |---|---|---|---|---|---|
 | 1 | Foundation — D0 + D1 + P-02 + P-04 | 1 | ✅ Done | `f61dc31` | All |
-| 2 | Knowledge schema cache + Audit log | 1 | ⏳ Next | — | All |
-| 3 | Eval framework + Generator | 1 | Planned | — | All |
+| 2 | Knowledge layer with RAG (P-07 expanded; was: schema cache + audit) | 1 | ✅ Done | `2b48216` | All |
+| 3 | Audit log + Generator + Eval framework | 1 | ⏳ Next | — | All |
 | 4 | LLM call (Groq) + Mapper + Validator | 1 | Blocked: needs `GROQ_API_KEY` | — | All |
 | 5 | Sandboxed Executor + Credential broker | 1 | Blocked: needs cloud test creds | — | All |
 | 6 | TUI slash commands + Release pipeline | 1 | Planned | — | All |
