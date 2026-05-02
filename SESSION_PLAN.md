@@ -62,11 +62,12 @@ the next session. That's the load-bearing discipline.
 | 2 | Knowledge layer with RAG (P-07 expanded; was: schema cache + audit) | 1 | ✅ Done | `2b48216` | All |
 | 3 | Audit log (P-11) — Generator + Eval still pending | 1 | ✅ Done | `4545065` | All |
 | 3b | Generator (P-08) + Eval framework (P-12) | 1 | ✅ Done | `07d26b3` (P-08), `311b12c` (P-12) | All |
-| 4a | Validator (P-06) — autonomous, no LLM | 1 | ✅ Done | this commit | All |
-| 4b | LLM client (P-03) + Mapper (P-05) structural | 1 | ⏳ Next (structural; Groq integration test gated on `GROQ_API_KEY`) | — | All |
+| 4a | Validator (P-06) — autonomous, no LLM | 1 | ✅ Done | `3525903` | All |
+| 4b | LLM client (P-03) + Mapper (P-05) structural | 1 | Blocked: structural code shippable; Groq integration test gated on `GROQ_API_KEY` | — | All |
 | 5 | Sandboxed Executor + Credential broker | 1 | Blocked: needs cloud test creds | — | All |
-| 6 | TUI slash commands + Release pipeline | 1 | Planned | — | All |
-| 7 | Eval expansion (10 golden migrations) | 1 | Planned | — | All |
+| 6a | Release pipeline (P-13) | 1 | ⏳ Next | — | All |
+| 6b | TUI slash commands (P-14) | 1 | Planned | — | All |
+| 7 | Eval expansion (3 → 5 → 10 golden migrations) | 1 | 🟡 Partial: 5/10 shipped (`a01797c`) | — | All |
 | 8 | Stage 1 exit gate (P-16) + remediation | 1 | Planned | — | All |
 | 9 | Agent loop kernel (run_agent, approval, retry) | 2 | Planned | — | MVP+ |
 | 10 | Recovery agent | 2 | Planned | — | MVP+ |

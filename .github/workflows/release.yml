@@ -1,0 +1,164 @@
+# Release pipeline — tag-triggered cross-platform binary build.
+#
+# Pattern: stakpak_arch.md §33 (release pipeline) + §35 (cliff.toml).
+# Source: refs/stakpak/.github/workflows/build-and-release.yml — adapted
+# down to Stage 1 scope. Drops:
+#   - jemalloc verification (Terrashift doesn't use jemalloc)
+#   - libsql feature flags (we use sqlite via sqlx)
+#   - crates.io publish (Stage 6 — pre-flight Decision 5; the workspace
+#     ships as a single binary, not a published library)
+#   - Docker image (Stage 2+)
+#   - Homebrew tap (Stage 6 — needs the tap repo first)
+#
+# Constitution: Article VII (single-binary distribution),
+# Article VIII (Stage 1 exit gate criterion #6: works on fresh
+# Linux + macOS install).
+
+name: Release
+
+on:
+  push:
+    branches: [main]    # main pushes build but don't release
+    tags: ['v*']        # tags trigger full release flow
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+  BINARY_NAME: terrashift
+
+jobs:
+  # Detect release type once — other jobs reference outputs.
+  setup:
+    runs-on: ubuntu-22.04
+    outputs:
+      is_beta: ${{ steps.check.outputs.is_beta }}
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - name: Identify release type
+        id: check
+        shell: bash
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          VERSION=${TAG#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          if [[ "$TAG" == *"-beta"* ]]; then
+            echo "is_beta=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_beta=false" >> $GITHUB_OUTPUT
+          fi
+
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-musl
+            artifact_name: terrashift-linux-x86_64
+          - os: macos-15
+            target: aarch64-apple-darwin
+            artifact_name: terrashift-darwin-aarch64
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.94.1
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: ${{ matrix.target }}
+
+      # Linux musl builds need musl-tools for static linking. macOS uses
+      # the system clang with no extra deps (rustls handles TLS — see
+      # workspace Cargo.toml `default-features = false`).
+      - name: Install musl-tools
+        if: endsWith(matrix.target, 'linux-musl')
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+
+      - name: Build (release, target ${{ matrix.target }})
+        run: cargo build --release --target ${{ matrix.target }} --bin ${{ env.BINARY_NAME }}
+
+      - name: Run target tests
+        run: cargo test --target ${{ matrix.target }} --release
+
+      # Strip on Linux to shrink the artifact. macOS uses dsymutil-style
+      # stripping which is more involved; skip for Stage 1.
+      - name: Strip binary (Linux only)
+        if: endsWith(matrix.target, 'linux-musl')
+        run: strip "target/${{ matrix.target }}/release/${{ env.BINARY_NAME }}"
+
+      - name: Package artifact
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: |
+          cd target/${{ matrix.target }}/release
+          tar czf "../../../${{ matrix.artifact_name }}.tar.gz" "${{ env.BINARY_NAME }}"
+          cd "${{ github.workspace }}"
+          # Generate SHA256 checksum alongside the archive.
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            shasum -a 256 "${{ matrix.artifact_name }}.tar.gz" > "${{ matrix.artifact_name }}.tar.gz.sha256"
+          else
+            sha256sum "${{ matrix.artifact_name }}.tar.gz" > "${{ matrix.artifact_name }}.tar.gz.sha256"
+          fi
+
+      - name: Upload artifact
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: |
+            ${{ matrix.artifact_name }}.tar.gz
+            ${{ matrix.artifact_name }}.tar.gz.sha256
+          retention-days: 1
+
+  release:
+    needs: [setup, build]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history for git-cliff
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Install git-cliff
+        run: cargo install git-cliff --version 2.0 --locked
+
+      - name: Generate release notes
+        shell: bash
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          PREV_TAG=$(git describe --tags --abbrev=0 "${VERSION}^" 2>/dev/null || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            echo "First tag — generating notes from repo start"
+            git-cliff --strip all > release_notes.md
+          else
+            git-cliff "${PREV_TAG}..${VERSION}" --strip all > release_notes.md
+          fi
+          # Fallback if cliff produced an empty file
+          if [ ! -s release_notes.md ]; then
+            echo "(release notes generation produced empty file; using auto-generate)" > release_notes.md
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            terrashift-linux-x86_64/terrashift-linux-x86_64.tar.gz
+            terrashift-linux-x86_64/terrashift-linux-x86_64.tar.gz.sha256
+            terrashift-darwin-aarch64/terrashift-darwin-aarch64.tar.gz
+            terrashift-darwin-aarch64/terrashift-darwin-aarch64.tar.gz.sha256
+          body_path: release_notes.md
+          draft: false
+          prerelease: ${{ needs.setup.outputs.is_beta == 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

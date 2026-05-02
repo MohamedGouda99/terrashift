@@ -50,12 +50,12 @@ jobs:
       - run: cargo test --workspace
 
   # Article XII rule 4 — token cost regression gate.
-  # Activated after libs/eval ships in P-12.
-  # Currently a no-op so the workflow file structure is in place.
+  # P-12 (libs/eval) shipped in commit 311b12c. Stage 1 placeholder runs
+  # the deterministic golden suite (token cost = 0). S7 expansion + S4
+  # Mapper integration activate the real >30% regression gate.
   eval:
-    name: eval (token cost regression gate)
+    name: eval (golden suite + token cost gate plumbing)
     runs-on: ubuntu-latest
-    if: false  # TODO: enable after P-12 (libs/eval ships)
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
