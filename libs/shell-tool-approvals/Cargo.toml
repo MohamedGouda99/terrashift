@@ -16,5 +16,9 @@ thiserror = { workspace = true }
 anyhow = { workspace = true }
 tracing = { workspace = true }
 
+# tree-sitter command parsing — mirrors refs/stakpak/libs/shell-tool-approvals/Cargo.toml:14-15
+tree-sitter = { workspace = true }
+tree-sitter-bash = { workspace = true }
+
 # Internal
 terrashift-shared = { workspace = true }
