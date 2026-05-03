@@ -3095,6 +3095,7 @@ dependencies = [
  "terrashift-creds",
  "terrashift-knowledge",
  "terrashift-shared",
+ "terrashift-shell-tool-approvals",
  "thiserror 1.0.69",
  "tokio",
  "tracing",
