@@ -1,6 +1,6 @@
 {
   "total_token_cost_micros": 0,
-  "last_refreshed_iso": "2026-05-02T00:00:00Z",
+  "last_refreshed_iso": "2026-05-03T00:00:00Z",
   "per_fixture": {
     "001_aws_vpc_minimal": { "token_cost_micros": 0 },
     "002_aws_subnet_with_reference": { "token_cost_micros": 0 },
@@ -12,6 +12,8 @@
     "008_azurerm_subnet": { "token_cost_micros": 0 },
     "009_azurerm_nsg": { "token_cost_micros": 0 },
     "010_azurerm_linux_vm": { "token_cost_micros": 0 },
+    "011_aws_iam_role": { "token_cost_micros": 0 },
+    "012_gcp_storage_bucket_lifecycle": { "token_cost_micros": 0 },
     "015_aws_full_stack": { "token_cost_micros": 0 }
   }
 }

@@ -55,6 +55,10 @@ impl TemplateRegistry {
         );
         by_type.insert("azurerm_storage_account", template_azurerm_storage_account);
 
+        // S14 — Stage 2 patterns.
+        by_type.insert("aws_iam_role", template_aws_iam_role);
+        by_type.insert("google_storage_bucket", template_google_storage_bucket);
+
         Self { by_type }
     }
 
@@ -285,6 +289,36 @@ fn template_azurerm_storage_account(r: &MappedResource) -> Result<Block, Generat
             "account_replication_type",
         ],
         &[],
+    )
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// S14 — Stage 2 templates
+// ─────────────────────────────────────────────────────────────────────────
+
+/// AWS IAM role. `assume_role_policy` is typically a JSON-encoded string
+/// (HCL idiomatic when the policy is small; large policies use
+/// `data "aws_iam_policy_document"` which is a Stage 5+ refinement).
+fn template_aws_iam_role(r: &MappedResource) -> Result<Block, GeneratorError> {
+    build_resource_block(
+        r,
+        &["assume_role_policy"],
+        &["name", "description", "path", "permissions_boundary"],
+    )
+}
+
+/// GCP storage bucket. Stage 2 covers the flat-attribute path; nested
+/// `lifecycle_rule` blocks land in Stage 5+ (P-27 dynamic blocks).
+fn template_google_storage_bucket(r: &MappedResource) -> Result<Block, GeneratorError> {
+    build_resource_block(
+        r,
+        &["name", "location"],
+        &[
+            "force_destroy",
+            "storage_class",
+            "uniform_bucket_level_access",
+            "versioning",
+        ],
     )
 }
 

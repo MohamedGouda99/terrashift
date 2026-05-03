@@ -1,0 +1,6 @@
+name = "012_gcp_storage_bucket_lifecycle"
+description = "AWS S3 bucket → GCP storage bucket; exercises nested-block emission via map-of-maps for lifecycle_rule"
+source_provider = "aws"
+target_provider = "google"
+token_cost_ceiling_micros = 0
+articles = [3, 6]

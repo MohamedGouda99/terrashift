@@ -1,0 +1,6 @@
+name = "011_aws_iam_role"
+description = "GCP service account → AWS IAM role; exercises HCL JSON-as-string emission for assume_role_policy"
+source_provider = "google"
+target_provider = "aws"
+token_cost_ceiling_micros = 0
+articles = [3, 6]

@@ -1,0 +1,20 @@
+{
+  "run_id": "00000000-0000-0000-0000-000000000012",
+  "source_provider": "aws",
+  "target_provider": "google",
+  "resources": [
+    {
+      "source_addr": "aws_s3_bucket.logs",
+      "target_addr": "google_storage_bucket.logs",
+      "target_type": "google_storage_bucket",
+      "target_name": "logs",
+      "attributes": {
+        "name": { "string": "terrashift-logs" },
+        "location": { "string": "US" },
+        "force_destroy": { "bool": false },
+        "storage_class": { "string": "STANDARD" }
+      },
+      "dependencies": []
+    }
+  ]
+}

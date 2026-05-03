@@ -146,8 +146,8 @@ fn us3_committed_baseline_loads_and_has_all_fixtures() {
     let baseline = Baseline::load(&path).unwrap();
     assert_eq!(
         baseline.per_fixture.len(),
-        11,
-        "Stage 1 ships 11 goldens at all-zero baseline (10 from S7 close + 1 from R2 15-resource demo fixture)"
+        13,
+        "Stage 2 ships 13 goldens at all-zero baseline (10 from S7 close + 1 R2 15-resource fixture + 2 S14 Stage-2 patterns: aws_iam_role, gcp_storage_bucket_lifecycle)"
     );
     assert_eq!(
         baseline.total_token_cost_micros, 0,

@@ -1,0 +1,19 @@
+{
+  "run_id": "00000000-0000-0000-0000-000000000011",
+  "source_provider": "google",
+  "target_provider": "aws",
+  "resources": [
+    {
+      "source_addr": "google_service_account.migrator",
+      "target_addr": "aws_iam_role.migrator",
+      "target_type": "aws_iam_role",
+      "target_name": "migrator",
+      "attributes": {
+        "name": { "string": "terrashift-migrator" },
+        "description": { "string": "Service account that runs Terrashift migrations" },
+        "assume_role_policy": { "string": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"ec2.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}" }
+      },
+      "dependencies": []
+    }
+  ]
+}
