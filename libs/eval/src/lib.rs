@@ -23,16 +23,22 @@
 //! ```
 //!
 //! ## Modules
-//! - `errors`  — `EvalError` enum
-//! - `golden`  — fixture loading + suite discovery
-//! - `scorer`  — directory-level byte comparison + unified diff
-//! - `runner`  — `EvalRunner`, `EvalResult`, `SuiteReport`
+//! - `errors`   — `EvalError` enum
+//! - `golden`   — fixture loading + suite discovery
+//! - `scorer`   — directory-level byte comparison + unified diff
+//! - `runner`   — `EvalRunner`, `EvalResult`, `SuiteReport`
+//! - `baseline` — Article XII rule 4 token-cost regression gate (R6)
 
+pub mod baseline;
 pub mod errors;
 pub mod golden;
 pub mod runner;
 pub mod scorer;
 
+pub use baseline::{
+    compare_against_baseline, default_baseline_path, Baseline, BaselineMode, FixtureBaseline,
+    FixtureDelta, RegressionReport, RegressionVerdict, REGRESSION_THRESHOLD_PCT,
+};
 pub use errors::EvalError;
 pub use golden::{discover_suite, load_golden, GoldenManifest, GoldenMigration};
 pub use runner::{EvalResult, EvalRunner, SuiteReport};

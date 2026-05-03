@@ -82,7 +82,7 @@ the next session. That's the load-bearing discipline.
 | 6a | Release pipeline (P-13) | 1 | ✅ Done | `920b7a4` | All |
 | 6b | TUI slash commands (P-14) | 1 | ✅ Done | this commit | All |
 | 7 | Eval expansion (3 → 5 → 10 golden migrations) | 1 | ✅ Done: 10/10 (`a01797c` 5/10, this commit 10/10) | — | All |
-| 8 | Stage 1 exit gate (P-16) + remediation | 1 | Planned | — | All |
+| 8 | Stage 1 exit gate (P-16) + remediation | 1 | 🟡 Partial: R6 (Article XII rule 4 baseline + active CI regression gate) shipped this commit; #4 graduates from NOT MEASURABLE → ACTIVELY ENFORCED-pending-LLM-data. Full close awaits S4 GROQ_API_KEY + S5 Docker/cloud creds. | — | All |
 | 9 | Agent loop kernel (run_agent, approval, retry) | 2 | Planned | — | MVP+ |
 | 10 | Recovery agent | 2 | Planned | — | MVP+ |
 | 11 | Cost Optimizer agent + Infracost service | 2 | Planned | — | MVP+ |
