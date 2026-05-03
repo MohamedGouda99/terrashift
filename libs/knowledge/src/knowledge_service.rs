@@ -161,6 +161,123 @@ impl KnowledgeService {
         Ok(resource_count)
     }
 
+    /// Bootstrap path — load a `ProviderSchema` directly from a bundled
+    /// or pre-fetched source (skipping `SchemaFetcher`). Does the same
+    /// cache-then-embed-then-vector-upsert pipeline as `sync_provider`,
+    /// just sourced from JSON or in-memory data instead of the network.
+    ///
+    /// Use case: `seed_from_bundle()` and CLI `terrashift schemas import`
+    /// (S17a). Avoids hitting the registry on cold-start when the
+    /// operator has already curated schemas (e.g., from CloudForge).
+    #[instrument(skip(self, schema), fields(provider = %schema.provider, version = %schema.version))]
+    pub async fn seed_provider(&self, schema: ProviderSchema) -> Result<usize, KnowledgeError> {
+        let resource_count = schema.resources.len();
+        info!(
+            "seeding {} resources for {}@{}",
+            resource_count, schema.provider, schema.version
+        );
+
+        // 1. Cache JSON
+        self.schema_store.cache_schema(&schema).await?;
+
+        // 2. Build embedding texts
+        let mut texts: Vec<String> = Vec::with_capacity(resource_count);
+        let mut ids: Vec<String> = Vec::with_capacity(resource_count);
+        for (rname, rschema) in &schema.resources {
+            let text = format!(
+                "{rname}: {}",
+                rschema.description.as_deref().unwrap_or("(no description)")
+            );
+            texts.push(text);
+            ids.push(format!("{}@{}::{}", schema.provider, schema.version, rname));
+        }
+
+        if texts.is_empty() {
+            warn!(
+                "seed: provider {}@{} has no resources to embed",
+                schema.provider, schema.version
+            );
+            return Ok(0);
+        }
+
+        // 3. Embed in batch
+        let vectors = self
+            .embedding_service
+            .embed_batch(&texts)
+            .await
+            .map_err(VectorStoreError::Embedding)?;
+
+        // 4. Upsert into vector store
+        let rows: Vec<VectorRow> = ids
+            .into_iter()
+            .zip(vectors)
+            .zip(schema.resources.keys())
+            .map(|((id, embedding), rname)| {
+                let mut metadata = BTreeMap::new();
+                metadata.insert("provider".to_string(), schema.provider.clone());
+                metadata.insert("version".to_string(), schema.version.clone());
+                metadata.insert("resource_type".to_string(), rname.clone());
+                VectorRow {
+                    id,
+                    embedding,
+                    metadata,
+                }
+            })
+            .collect();
+
+        self.vector_store.upsert(rows).await?;
+        Ok(resource_count)
+    }
+
+    /// Walk a directory of `*.json` files, parse each as `ProviderSchema`,
+    /// and seed the knowledge layer. Idempotent — `cache_schema` uses
+    /// `INSERT OR IGNORE`, so re-running is a no-op when versions match.
+    ///
+    /// Returns total resource count across all loaded schemas.
+    pub async fn seed_from_bundle(&self, dir: &std::path::Path) -> Result<usize, KnowledgeError> {
+        let mut total = 0_usize;
+        if !dir.exists() {
+            warn!("seed bundle dir does not exist: {}", dir.display());
+            return Ok(0);
+        }
+        let entries = std::fs::read_dir(dir).map_err(|e| {
+            KnowledgeError::Schema(crate::errors::SchemaError::Storage(
+                sqlx::Error::Configuration(format!("read seed dir: {e}").into()),
+            ))
+        })?;
+        for entry_result in entries {
+            let entry = match entry_result {
+                Ok(e) => e,
+                Err(e) => {
+                    warn!("seed: skipping unreadable dir entry: {e}");
+                    continue;
+                }
+            };
+            let path = entry.path();
+            if path.extension().and_then(|s| s.to_str()) != Some("json") {
+                continue;
+            }
+            let json = match std::fs::read_to_string(&path) {
+                Ok(s) => s,
+                Err(e) => {
+                    warn!("seed: skipping {} (read error: {e})", path.display());
+                    continue;
+                }
+            };
+            let schema: ProviderSchema = match serde_json::from_str(&json) {
+                Ok(s) => s,
+                Err(e) => {
+                    warn!("seed: skipping {} (parse error: {e})", path.display());
+                    continue;
+                }
+            };
+            let n = self.seed_provider(schema).await?;
+            info!("seed: loaded {} resources from {}", n, path.display());
+            total += n;
+        }
+        Ok(total)
+    }
+
     /// Mapper-facing: find resources semantically similar to `query`. Returns
     /// top-K hits with full schemas attached.
     ///

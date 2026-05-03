@@ -1,0 +1,208 @@
+{
+  "provider": "aws",
+  "version": "cloudforge-2025.01",
+  "fetched_at": "2025-01-01T00:00:00Z",
+  "data_sources": {},
+  "resources": {
+    "aws_vpc": {
+      "name": "aws_vpc",
+      "description": "Virtual Private Cloud - isolated virtual network in AWS for launching resources",
+      "attributes": {
+        "cidr_block": {
+          "name": "cidr_block",
+          "attribute_type": "string",
+          "required": false,
+          "optional": true,
+          "computed": false,
+          "sensitive": false,
+          "deprecated": null,
+          "description": "The IPv4 CIDR block for the VPC"
+        },
+        "instance_tenancy": {
+          "name": "instance_tenancy",
+          "attribute_type": "string",
+          "required": false,
+          "optional": true,
+          "computed": false,
+          "sensitive": false,
+          "deprecated": null,
+          "description": "Tenancy option for instances launched into the VPC (default | dedicated)"
+        },
+        "enable_dns_support": {
+          "name": "enable_dns_support",
+          "attribute_type": "bool",
+          "required": false,
+          "optional": true,
+          "computed": false,
+          "sensitive": false,
+          "deprecated": null,
+          "description": "Enable DNS support in the VPC"
+        },
+        "enable_dns_hostnames": {
+          "name": "enable_dns_hostnames",
+          "attribute_type": "bool",
+          "required": false,
+          "optional": true,
+          "computed": false,
+          "sensitive": false,
+          "deprecated": null,
+          "description": "Enable DNS hostnames in the VPC"
+        },
+        "tags": {
+          "name": "tags",
+          "attribute_type": "map(string)",
+          "required": false,
+          "optional": true,
+          "computed": false,
+          "sensitive": false,
+          "deprecated": null,
+          "description": "Tags to apply to the VPC"
+        }
+      }
+    },
+    "aws_subnet": {
+      "name": "aws_subnet",
+      "description": "A range of IP addresses in your VPC for launching resources",
+      "attributes": {
+        "vpc_id": {
+          "name": "vpc_id",
+          "attribute_type": "string",
+          "required": true,
+          "optional": false,
+          "computed": false,
+          "sensitive": false,
+          "deprecated": null,
+          "description": "VPC ID to create the subnet in (typically aws_vpc.X.id reference)"
+        },
+        "cidr_block": {
+          "name": "cidr_block",
+          "attribute_type": "string",
+          "required": false,
+          "optional": true,
+          "computed": false,
+          "sensitive": false,
+          "deprecated": null,
+          "description": "IPv4 CIDR block for the subnet"
+        },
+        "availability_zone": {
+          "name": "availability_zone",
+          "attribute_type": "string",
+          "required": false,
+          "optional": true,
+          "computed": false,
+          "sensitive": false,
+          "deprecated": null,
+          "description": "Availability zone for the subnet (e.g., us-east-1a)"
+        },
+        "map_public_ip_on_launch": {
+          "name": "map_public_ip_on_launch",
+          "attribute_type": "bool",
+          "required": false,
+          "optional": true,
+          "computed": false,
+          "sensitive": false,
+          "deprecated": null,
+          "description": "Auto-assign public IPv4 address on instance launch"
+        },
+        "tags": {
+          "name": "tags",
+          "attribute_type": "map(string)",
+          "required": false,
+          "optional": true,
+          "computed": false,
+          "sensitive": false,
+          "deprecated": null,
+          "description": "Tags to apply to the subnet"
+        }
+      }
+    },
+    "aws_internet_gateway": {
+      "name": "aws_internet_gateway",
+      "description": "Gateway for internet access from VPC",
+      "attributes": {
+        "vpc_id": {
+          "name": "vpc_id",
+          "attribute_type": "string",
+          "required": false,
+          "optional": true,
+          "computed": false,
+          "sensitive": false,
+          "deprecated": null,
+          "description": "VPC ID to attach the gateway to"
+        },
+        "tags": {
+          "name": "tags",
+          "attribute_type": "map(string)",
+          "required": false,
+          "optional": true,
+          "computed": false,
+          "sensitive": false,
+          "deprecated": null,
+          "description": "Tags to apply to the internet gateway"
+        }
+      }
+    },
+    "aws_route_table": {
+      "name": "aws_route_table",
+      "description": "Contains rules for routing network traffic",
+      "attributes": {
+        "vpc_id": {
+          "name": "vpc_id",
+          "attribute_type": "string",
+          "required": true,
+          "optional": false,
+          "computed": false,
+          "sensitive": false,
+          "deprecated": null,
+          "description": "VPC ID to create the route table in"
+        },
+        "tags": {
+          "name": "tags",
+          "attribute_type": "map(string)",
+          "required": false,
+          "optional": true,
+          "computed": false,
+          "sensitive": false,
+          "deprecated": null,
+          "description": "Tags to apply to the route table"
+        }
+      }
+    },
+    "aws_route_table_association": {
+      "name": "aws_route_table_association",
+      "description": "Associates a subnet or gateway with a route table",
+      "attributes": {
+        "route_table_id": {
+          "name": "route_table_id",
+          "attribute_type": "string",
+          "required": true,
+          "optional": false,
+          "computed": false,
+          "sensitive": false,
+          "deprecated": null,
+          "description": "ID of the route table to associate"
+        },
+        "subnet_id": {
+          "name": "subnet_id",
+          "attribute_type": "string",
+          "required": false,
+          "optional": true,
+          "computed": false,
+          "sensitive": false,
+          "deprecated": null,
+          "description": "Subnet ID to associate (mutually exclusive with gateway_id)"
+        },
+        "gateway_id": {
+          "name": "gateway_id",
+          "attribute_type": "string",
+          "required": false,
+          "optional": true,
+          "computed": false,
+          "sensitive": false,
+          "deprecated": null,
+          "description": "Gateway ID to associate (mutually exclusive with subnet_id)"
+        }
+      }
+    }
+  }
+}

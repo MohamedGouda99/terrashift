@@ -62,18 +62,19 @@ fn plan_with(resources: Vec<MappedResource>) -> MappingPlan {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// Test 1 — template registry sanity (Stage 2 has 12 templates)
-// Stage 1 shipped 10 (5 AWS + 5 Azure for the demo paths); S14 adds 2 more
-// (aws_iam_role for cross-resource policy strings, google_storage_bucket
-// for GCP→multi pattern).
+// Test 1 — template registry sanity (Stage 2 ships 17 templates)
+// Stage 1: 10 (5 AWS + 5 Azure for the demo paths). S14: +2 (aws_iam_role,
+// google_storage_bucket). Pratik-e2e expansion: +5 (azurerm_route_table,
+// azurerm_public_ip, azurerm_subnet_network_security_group_association,
+// azurerm_subnet_route_table_association, azurerm_resource_group).
 // ─────────────────────────────────────────────────────────────────────────
 #[test]
-fn template_count_is_12() {
+fn template_count_is_17() {
     let g = Generator::new();
     assert_eq!(
         g.template_count(),
-        12,
-        "Stage 2 ships 12 templates (10 Stage-1 + 2 S14 additions)"
+        17,
+        "Stage 2 ships 17 templates (10 Stage-1 + 2 S14 + 5 Pratik-e2e additions)"
     );
 }
 

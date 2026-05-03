@@ -59,6 +59,20 @@ impl TemplateRegistry {
         by_type.insert("aws_iam_role", template_aws_iam_role);
         by_type.insert("google_storage_bucket", template_google_storage_bucket);
 
+        // Pratik-fixture E2E expansion — additional azurerm types the
+        // Mapper proposes when migrating a real-world AWS VPC module.
+        by_type.insert("azurerm_route_table", template_azurerm_route_table);
+        by_type.insert("azurerm_public_ip", template_azurerm_public_ip);
+        by_type.insert(
+            "azurerm_subnet_network_security_group_association",
+            template_azurerm_subnet_nsg_association,
+        );
+        by_type.insert(
+            "azurerm_subnet_route_table_association",
+            template_azurerm_subnet_route_table_association,
+        );
+        by_type.insert("azurerm_resource_group", template_azurerm_resource_group);
+
         Self { by_type }
     }
 
@@ -320,6 +334,55 @@ fn template_google_storage_bucket(r: &MappedResource) -> Result<Block, Generator
             "versioning",
         ],
     )
+}
+
+/// Azure route table. The nested `route` blocks themselves are deferred
+/// to Stage 5+ (dynamic blocks); Stage 2 emits the table shell + flat
+/// attributes. Operators add routes via `azurerm_route` siblings.
+fn template_azurerm_route_table(r: &MappedResource) -> Result<Block, GeneratorError> {
+    build_resource_block(
+        r,
+        &["name", "location", "resource_group_name"],
+        &["disable_bgp_route_propagation"],
+    )
+}
+
+/// Azure public IP — typical mapping target when an `aws_internet_gateway`
+/// gets translated (Azure has no IGW concept; public IP is the closest
+/// concrete equivalent).
+fn template_azurerm_public_ip(r: &MappedResource) -> Result<Block, GeneratorError> {
+    build_resource_block(
+        r,
+        &[
+            "name",
+            "location",
+            "resource_group_name",
+            "allocation_method",
+        ],
+        &["sku", "domain_name_label", "ip_version"],
+    )
+}
+
+/// Azure subnet ↔ NSG association — what `aws_route_table_association`
+/// often gets mapped to (semantically debatable; Recovery agent typically
+/// fixes it to `azurerm_subnet_route_table_association`, but we register
+/// the template so Generator can emit either path without TemplateMiss).
+fn template_azurerm_subnet_nsg_association(r: &MappedResource) -> Result<Block, GeneratorError> {
+    build_resource_block(r, &["subnet_id", "network_security_group_id"], &[])
+}
+
+/// Azure subnet ↔ route table association — the semantically-correct
+/// target type for `aws_route_table_association` migrations.
+fn template_azurerm_subnet_route_table_association(
+    r: &MappedResource,
+) -> Result<Block, GeneratorError> {
+    build_resource_block(r, &["subnet_id", "route_table_id"], &[])
+}
+
+/// Azure resource group — top-level container that most other azurerm
+/// resources reference via `resource_group_name`.
+fn template_azurerm_resource_group(r: &MappedResource) -> Result<Block, GeneratorError> {
+    build_resource_block(r, &["name", "location"], &[])
 }
 
 /// Sort `MappedResource`s by `target_addr` for deterministic emission order
