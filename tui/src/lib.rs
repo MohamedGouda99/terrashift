@@ -1,15 +1,21 @@
-//! Terrashift TUI — Ratatui-based terminal UI.
+//! Terrashift TUI — Ratatui-based interactive terminal UI.
 //!
-//! Pattern: the architecture reference §16 (TUI structure: AppState, services/handlers,
-//! dual-channel mpsc contract InputEvent / OutputEvent).
-//! Constitution: Article XIII rule 8 (don't add new InputEvent/OutputEvent
-//! variants without updating is_backend_event() — silent UI freezes are
-//! the failure mode).
+//! Pattern: the architecture reference §16 (TUI structure: AppState,
+//! services/handlers, slash-command dispatch). Stage 2 narrowing —
+//! synchronous command dispatch, no agent-runtime streaming, no mouse
+//! capture, no banner overlays. Those land in S6.
 //!
 //! ## Modules
-//! - `commands` — slash-command registry + per-file commands (P-14;
-//!   adopts Claude Code's per-file pattern per TERRASHIFT_MAPPING.md §F1).
-//!   The Ratatui mainloop that *consumes* `CommandOutcome` arrives in
-//!   Stage 2 / P-14b.
+//! - `commands` — slash-command registry + per-file commands.
+//! - `app`      — `AppState` (message history, input buffer, cursor, scroll).
+//! - `view`     — single-frame ratatui rendering.
+//! - `event_loop` — `start_tui()` mainloop entry point.
 
+pub mod app;
 pub mod commands;
+pub mod event_loop;
+pub mod view;
+
+pub use app::{AppState, Message, MessageKind, StatusInfo};
+pub use commands::Registry;
+pub use event_loop::start_tui;

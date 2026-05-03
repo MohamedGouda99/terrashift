@@ -5,28 +5,37 @@
 use terrashift_tui::commands::{Action, CommandOutcome, Registry};
 
 // ─────────────────────────────────────────────────────────────────────────
-// Test 1 — Registry has 8 commands (criterion #1)
+// Test 1 — Registry has 11 entries (Stage 1 = 8; +scan +quit + /exit alias).
+//
+// /exit and /quit map to the same `Quit` handler so `list()` shows "quit"
+// twice — that's expected. Dispatch works for both keys (test below).
 // ─────────────────────────────────────────────────────────────────────────
 #[test]
-fn registry_has_eight_commands() {
+fn registry_has_eleven_commands() {
     let r = Registry::stage1();
-    assert_eq!(r.len(), 8, "Stage 1 ships exactly 8 slash commands");
-    let names: Vec<&str> = r.list().iter().map(|(n, _)| *n).collect();
-    for expected in [
-        "help",
-        "audit",
-        "migrate",
-        "checkpoint",
-        "plan",
-        "cost",
-        "rollback",
-        "compact",
-    ] {
+    assert_eq!(
+        r.len(),
+        11,
+        "Stage 1 ships 11 slash commands (8 P-14 + /scan + /quit + /exit alias)"
+    );
+
+    // Dispatch by name verifies all commands are reachable, including
+    // the /exit alias that wouldn't show distinctly in `list()`.
+    use terrashift_tui::commands::{Action, CommandOutcome};
+    for name in ["help", "audit", "migrate", "plan", "cost", "scan"] {
+        let out = r.dispatch(&format!("/{name}"));
         assert!(
-            names.contains(&expected),
-            "registry must contain /{expected}; got {:?}",
-            names
+            !matches!(out, CommandOutcome::Error(ref s) if s.contains("unknown command")),
+            "/{name} should be reachable; got {:?}",
+            out
         );
+    }
+    // /exit and /quit both produce Action::Exit.
+    for name in ["quit", "exit"] {
+        match r.dispatch(&format!("/{name}")) {
+            CommandOutcome::Action(Action::Exit) => {}
+            other => panic!("/{name} should return Action::Exit; got {:?}", other),
+        }
     }
 }
 

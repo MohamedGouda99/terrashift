@@ -21,3 +21,4 @@ serde = { workspace = true }
 # Internal
 terrashift-shared = { workspace = true }
 terrashift-agent-core = { workspace = true }
+terrashift-engine = { workspace = true }

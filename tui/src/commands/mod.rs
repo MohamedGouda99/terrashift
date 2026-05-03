@@ -22,7 +22,9 @@ pub mod cost;
 pub mod help;
 pub mod migrate;
 pub mod plan;
+pub mod quit;
 pub mod rollback;
+pub mod scan;
 
 use std::collections::BTreeMap;
 
@@ -54,6 +56,10 @@ pub enum CommandOutcome {
     Text(String),
     Action(Action),
     Error(String),
+    /// Operator-visible hint — the command is recognized but the
+    /// requested behaviour isn't yet wired into the TUI runtime
+    /// (typically because the agent loop integration is S6 work).
+    Hint(String),
 }
 
 /// Typed side effects. Each variant maps to an `OutputEvent` shape the
@@ -62,10 +68,16 @@ pub enum CommandOutcome {
 /// extension when that file lands (Stage 2 / P-14b).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Action {
-    StartMigration { plan_path: String },
+    StartMigration {
+        plan_path: String,
+    },
     Checkpoint,
-    Rollback { run_id: String },
+    Rollback {
+        run_id: String,
+    },
     Compact,
+    /// Graceful TUI shutdown — the event loop catches this and breaks.
+    Exit,
 }
 
 /// Slash-command registry. Construct once at TUI init; share via Arc
@@ -80,6 +92,7 @@ impl Registry {
     pub fn stage1() -> Self {
         let mut commands: BTreeMap<&'static str, Box<dyn SlashCommand>> = BTreeMap::new();
         commands.insert("help", Box::new(help::Help));
+        commands.insert("scan", Box::new(scan::Scan));
         commands.insert("audit", Box::new(audit::Audit));
         commands.insert("migrate", Box::new(migrate::Migrate));
         commands.insert("checkpoint", Box::new(checkpoint::Checkpoint));
@@ -87,6 +100,8 @@ impl Registry {
         commands.insert("cost", Box::new(cost::Cost));
         commands.insert("rollback", Box::new(rollback::Rollback));
         commands.insert("compact", Box::new(compact::Compact));
+        commands.insert("quit", Box::new(quit::Quit));
+        commands.insert("exit", Box::new(quit::Quit));
         Self { commands }
     }
 

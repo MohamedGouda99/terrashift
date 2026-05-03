@@ -62,29 +62,35 @@ async fn main() -> Result<()> {
         Some(Command::Migrate(args)) => commands::migrate::run(args, cli.profile).await?,
         Some(Command::Schemas(cmd)) => commands::schemas::run(cmd).await?,
         Some(Command::Scan(args)) => commands::scan::run(args).await?,
-        None => print_welcome(),
+        None => launch_tui(cli.profile).await?,
     }
 
     Ok(())
 }
 
+/// No-subcommand path — launch the interactive TUI. Mirrors the
+/// "type the binary name, get an interactive session" UX of stakpak,
+/// claude, etc.
+async fn launch_tui(profile: Option<std::path::PathBuf>) -> Result<()> {
+    use terrashift_tui::StatusInfo;
+
+    // Best-effort gather of status footer info. None of these failures
+    // should prevent the TUI from launching — operators can fix the
+    // profile and re-run /scan / /help inside the TUI.
+    let profile_path = commands::util::resolve_profile_path(profile).ok();
+
+    let status = StatusInfo {
+        profile_path: profile_path.clone(),
+        seed_resources: None,
+        tier: "eco".to_string(),
+    };
+
+    terrashift_tui::start_tui(status)
+        .await
+        .map_err(|e| anyhow::anyhow!("TUI failed: {e}"))
+}
+
 fn print_version() {
     println!("terrashift {}", env!("CARGO_PKG_VERSION"));
     println!("rust       {}", env!("CARGO_PKG_RUST_VERSION"));
-}
-
-fn print_welcome() {
-    let v = env!("CARGO_PKG_VERSION");
-    println!("terrashift {v} — cross-cloud Terraform migration\n");
-    println!("Common commands:");
-    println!("  terrashift migrate --source <dir> --from aws --to azurerm");
-    println!("                                Migrate a Terraform tree.");
-    println!("  terrashift scan <dir>          Print resource inventory of <dir>.");
-    println!("  terrashift schemas sync        Pull provider schemas from registry.");
-    println!("    --provider aws --version 5.30.0");
-    println!("  terrashift schemas list        Show what's in the local schema cache.");
-    println!("  terrashift schemas seed        Smoke-test the bundled seed loader.");
-    println!("  terrashift version             Print version.\n");
-    println!("Run `terrashift help <subcommand>` for full options.");
-    println!("Profile: ~/.terrashift/profile.toml (see assets/profile.example.toml).");
 }
