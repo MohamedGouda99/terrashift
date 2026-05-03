@@ -26,16 +26,18 @@
 //! ```
 //!
 //! ## Modules
-//! - `tier`      — `Tier` enum (`Eco | Smart`)
-//! - `errors`    — `AiError` enum
-//! - `metadata`  — `CompletionMetadata` (audit-friendly fields)
-//! - `profile`   — `Profile`, `ProviderConfig`, `Tiers` TOML schema
-//! - `resolver`  — 5-layer `Resolver` per terrashift_plan.md §6.X
-//! - `client`    — `LlmClient` trait + `StubClient`
-//! - `provider`  — `Provider` trait + `build_provider()` registry (§39 row 1)
-//! - `providers` — concrete provider impls: openai_compat (S1), anthropic/gemini/bedrock (S2+ stubs)
-//! - `real`      — `RealClient` facade dispatching via the registry
+//! - `tier`         — `Tier` enum (`Eco | Smart`)
+//! - `errors`       — `AiError` enum
+//! - `metadata`     — `CompletionMetadata` (audit-friendly fields)
+//! - `profile`      — `Profile`, `ProviderConfig`, `Tiers` TOML schema
+//! - `resolver`     — 5-layer `Resolver` per terrashift_plan.md §6.X
+//! - `client`       — `LlmClient` trait + `StubClient`
+//! - `provider`     — `Provider` trait + `build_provider()` registry (§39 row 1)
+//! - `providers`    — concrete provider impls: openai_compat (S1), anthropic/gemini/bedrock (S2+ stubs)
+//! - `real`         — `RealClient` facade dispatching via the registry
+//! - `agent_client` — `JsonAgentLlmClient` adapts `LlmClient` to the S9 agent-kernel `AgentLlmClient` trait
 
+pub mod agent_client;
 pub mod client;
 pub mod errors;
 pub mod metadata;
@@ -46,6 +48,7 @@ pub mod real;
 pub mod resolver;
 pub mod tier;
 
+pub use agent_client::JsonAgentLlmClient;
 pub use client::{LlmClient, StubClient};
 pub use errors::AiError;
 pub use metadata::CompletionMetadata;

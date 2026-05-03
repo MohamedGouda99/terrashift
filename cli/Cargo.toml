@@ -29,3 +29,13 @@ terrashift-shared = { workspace = true }
 terrashift-tui = { workspace = true }
 terrashift-engine = { workspace = true }
 terrashift-ai = { workspace = true }
+
+[dev-dependencies]
+terrashift-agent-core = { workspace = true }
+terrashift-notify = { workspace = true }
+tokio-util = { workspace = true }
+uuid = { workspace = true }
+serde_json = { workspace = true }
+async-trait = "0.1"
+stakai = { workspace = true }
+dirs = "5"

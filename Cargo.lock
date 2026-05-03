@@ -2983,16 +2983,24 @@ name = "terrashift"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "async-trait",
  "clap",
+ "dirs",
  "serde",
+ "serde_json",
+ "stakai",
+ "terrashift-agent-core",
  "terrashift-ai",
  "terrashift-engine",
+ "terrashift-notify",
  "terrashift-shared",
  "terrashift-tui",
  "tokio",
+ "tokio-util",
  "toml",
  "tracing",
  "tracing-subscriber",
+ "uuid",
 ]
 
 [[package]]
@@ -3033,6 +3041,7 @@ dependencies = [
  "tokio",
  "toml",
  "tracing",
+ "uuid",
 ]
 
 [[package]]

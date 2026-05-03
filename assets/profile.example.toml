@@ -1,0 +1,92 @@
+# Terrashift profile — example configuration.
+#
+# Save as ~/.terrashift/profile.toml (Linux/macOS) or
+# %USERPROFILE%/.terrashift/profile.toml (Windows). Set the referenced
+# environment variables before running terrashift; this file MUST NOT
+# contain raw API keys (Article V).
+#
+# To set env vars on Windows (PowerShell, persisted to your user scope):
+#   [Environment]::SetEnvironmentVariable('HF_TOKEN', '<your-hf-token>', 'User')
+#   [Environment]::SetEnvironmentVariable('INFRACOST_API_KEY', '<your-infracost-key>', 'User')
+#   [Environment]::SetEnvironmentVariable('SLACK_WEBHOOK_URL', '<your-slack-webhook>', 'User')
+# Then restart your shell.
+#
+# To set env vars on Linux/macOS:
+#   echo 'export HF_TOKEN="<your-hf-token>"'           >> ~/.bashrc
+#   echo 'export INFRACOST_API_KEY="<your-infracost-key>"' >> ~/.bashrc
+#   echo 'export SLACK_WEBHOOK_URL="<your-slack-webhook>"' >> ~/.bashrc
+
+# ─────────────────────────────────────────────────────────────────────
+# Profile bundle — multiple profiles can coexist; pick one with
+# `terrashift --profile <name>`. Default is `default`.
+# ─────────────────────────────────────────────────────────────────────
+
+[profiles.default]
+# Default model used when a tier-specific override isn't set. Format:
+# <provider_key>/<model_id>. The model_id may contain slashes (HF model
+# names are usually "<org>/<model>", so the full string is e.g.
+# "huggingface/meta-llama/Llama-3.3-70B-Instruct").
+model = "huggingface/meta-llama/Llama-3.3-70B-Instruct"
+
+  # ─── Tiers ────────────────────────────────────────────────────────
+  #
+  # Eco = cheap+fast (use for high-frequency calls like Mapper).
+  # Smart = expensive but more capable (Recovery + Cost Optimizer
+  # benefit from this when reasoning is hard).
+  #
+  # For free-tier HF testing, both tiers point to the same model.
+  # When you have a paid quota, swap the smart tier to Qwen2.5-Coder-32B
+  # or similar for stronger code/HCL reasoning.
+  [profiles.default.tiers]
+  eco   = "huggingface/meta-llama/Llama-3.3-70B-Instruct"
+  smart = "huggingface/meta-llama/Llama-3.3-70B-Instruct"
+
+  # ─── LLM provider: HuggingFace Inference Providers ────────────────
+  #
+  # The router endpoint is OpenAI-compatible — Terrashift's openai_compat
+  # provider works against it directly with no special-casing. Pick the
+  # backend provider via the URL path (`cerebras`, `together`, `nebius`,
+  # `sambanova`, `replicate`, `fal`). Cerebras is the fastest free tier.
+  #
+  # Verify the model is hosted on your chosen backend at:
+  #   https://huggingface.co/<org>/<model>?inference_provider=cerebras
+  [profiles.default.providers.huggingface]
+  type         = "openai-compatible"
+  api_endpoint = "https://router.huggingface.co/cerebras/v1"
+  api_key_env  = "HF_TOKEN"
+
+  # ─── Notifications: Slack Incoming Webhook ────────────────────────
+  #
+  # Stage 2 routes detached-mode events through here. Only Slack is
+  # wired today (libs/notify/src/slack.rs); email/webhook adapters
+  # land in S13b. The webhook URL itself is treated as a credential
+  # — we read it from an env var so the profile file stays committable.
+  [profiles.default.notifications.slack]
+  webhook_url_env = "SLACK_WEBHOOK_URL"
+  username        = "Terrashift"
+  icon_emoji      = ":hammer_and_wrench:"
+  channel         = "#migrations"
+
+  # ─── Cost Service: Infracost ──────────────────────────────────────
+  #
+  # The Cost Optimizer agent (libs/engine/src/cost_optimizer/) consults
+  # this service to estimate monthly USD per resource. Free tier covers
+  # ~1000 hits/month — plenty for migration runs.
+  [profiles.default.cost_service.infracost]
+  api_endpoint = "https://api.infracost.io/v1"
+  api_key_env  = "INFRACOST_API_KEY"
+
+  # ─── Cloud credentials (Stage 1: env-chain only; S12+ adds WIF) ───
+  #
+  # Stage 1 reads cloud creds from the standard provider chains
+  # (~/.aws/credentials, gcloud ADC, az login). Stage 2+ adds federated
+  # OIDC paths via libs/creds/src/federated.rs.
+  [profiles.default.cloud.aws]
+  region            = "us-east-1"
+  credentials_chain = ["env", "profile:default"]
+
+  [profiles.default.cloud.azurerm]
+  subscription_id_env = "ARM_SUBSCRIPTION_ID"
+
+  [profiles.default.cloud.google]
+  project_id_env = "GOOGLE_CLOUD_PROJECT"
