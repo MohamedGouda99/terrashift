@@ -28,5 +28,8 @@ chrono = { workspace = true }
 # Internal
 terrashift-shared = { workspace = true }
 
+[dependencies.tempfile]
+workspace = true
+
 [dev-dependencies]
 tokio = { workspace = true }

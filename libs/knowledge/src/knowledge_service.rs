@@ -303,6 +303,81 @@ impl KnowledgeService {
         Ok(total)
     }
 
+    /// First-launch boot: load the bundled seed (always), then for each
+    /// `(namespace, name, version)` in `providers_to_fetch` that isn't
+    /// already cached, fetch from the registry via the configured
+    /// `SchemaFetcher` and seed it. Idempotent — re-running on a
+    /// populated cache is a near-no-op.
+    ///
+    /// The registry-fetched schemas are STORED ALONGSIDE the seed (different
+    /// version row in SQLite) — `terrashift-seed-2025.01` for the bundled
+    /// curated catalog vs the real provider version (e.g., `5.30.0`) for
+    /// the registry pull. Mapper retrieval queries by `provider` only,
+    /// so both versions surface in candidate hits and the bigger /
+    /// more-current registry pull wins on coverage.
+    ///
+    /// Returns `(seed_count, fetched_provider_resource_counts)` so the
+    /// caller can log progress.
+    pub async fn first_launch_sync(
+        &self,
+        seed_dir: &std::path::Path,
+        providers_to_fetch: &[(String, String, String)],
+    ) -> Result<FirstLaunchReport, KnowledgeError> {
+        // 1. Always load the seed first (instant, offline-capable).
+        let seed_count = self.seed_from_bundle(seed_dir).await?;
+
+        // 2. For each (namespace, name, version), check cache; fetch if missing.
+        let mut per_provider: Vec<(String, String, usize, FetchOutcome)> =
+            Vec::with_capacity(providers_to_fetch.len());
+        for (namespace, name, version) in providers_to_fetch {
+            let already_cached = self
+                .schema_store
+                .fetch_provider_schema(name, version)
+                .await
+                .is_ok();
+
+            if already_cached {
+                info!("first_launch: {name}@{version} already cached; skipping fetch");
+                per_provider.push((
+                    name.clone(),
+                    version.clone(),
+                    0,
+                    FetchOutcome::AlreadyCached,
+                ));
+                continue;
+            }
+
+            info!("first_launch: fetching {namespace}/{name}@{version} from registry...");
+            match self.schema_fetcher.fetch(namespace, name, version).await {
+                Ok(schema) => {
+                    let n = self.seed_provider(schema).await?;
+                    info!(
+                        "first_launch: fetched + cached {} resources for {name}@{version}",
+                        n
+                    );
+                    per_provider.push((name.clone(), version.clone(), n, FetchOutcome::Fetched));
+                }
+                Err(err) => {
+                    warn!(
+                        "first_launch: failed to fetch {name}@{version}: {err} \
+                         (continuing — seed coverage still active)"
+                    );
+                    per_provider.push((
+                        name.clone(),
+                        version.clone(),
+                        0,
+                        FetchOutcome::FetchFailed(err.to_string()),
+                    ));
+                }
+            }
+        }
+
+        Ok(FirstLaunchReport {
+            seed_resource_count: seed_count,
+            per_provider,
+        })
+    }
+
     /// Mapper-facing: find resources semantically similar to `query`. Returns
     /// top-K hits with full schemas attached.
     ///
@@ -400,6 +475,29 @@ impl KnowledgeService {
             .fetch_provider_schema(provider, version)
             .await?)
     }
+}
+
+/// What `first_launch_sync` returns. Lets the caller log progress
+/// without scraping log lines.
+#[derive(Debug, Clone)]
+pub struct FirstLaunchReport {
+    pub seed_resource_count: usize,
+    /// One entry per `(namespace, name, version)` requested. The
+    /// `usize` is the resource count fetched from the registry; `0`
+    /// when the cache already had the schema or the fetch failed.
+    pub per_provider: Vec<(String, String, usize, FetchOutcome)>,
+}
+
+#[derive(Debug, Clone)]
+pub enum FetchOutcome {
+    /// `(provider, version)` was already in `schema_store`; skipped.
+    AlreadyCached,
+    /// Fetched from registry and cached. Resource count in the
+    /// `usize` field of the parent tuple.
+    Fetched,
+    /// Registry fetch failed. Operator decides whether to retry; the
+    /// seed still provides baseline coverage.
+    FetchFailed(String),
 }
 
 // ─────────────────────────────────────────────────────────────────────

@@ -3144,6 +3144,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sqlx",
+ "tempfile",
  "terrashift-shared",
  "thiserror 1.0.69",
  "tokio",

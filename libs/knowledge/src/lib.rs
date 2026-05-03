@@ -37,6 +37,7 @@ pub mod errors;
 pub mod knowledge_service;
 pub mod local_schema_store;
 pub mod registry_client;
+pub mod schema_fetcher_cli;
 pub mod schema_store;
 pub mod types;
 pub mod vector_store;
@@ -45,12 +46,15 @@ pub use embedding::{
     EmbeddingError, EmbeddingService, StubEmbeddingService, DEFAULT_EMBEDDING_DIM,
 };
 pub use errors::SchemaError;
-pub use knowledge_service::{KnowledgeError, KnowledgeService, ResourceMatch};
+pub use knowledge_service::{
+    FetchOutcome, FirstLaunchReport, KnowledgeError, KnowledgeService, ResourceMatch,
+};
 pub use local_schema_store::LocalSchemaStore;
 pub use registry_client::{
     ProviderMetadata, ProviderVersionEntry, ProviderVersions, RegistryError, SchemaFetcher,
     StubSchemaFetcher, TerraformRegistryClient,
 };
+pub use schema_fetcher_cli::TerraformCliSchemaFetcher;
 pub use schema_store::SchemaStore;
 pub use types::{AttributeSchema, MappingExample, ProviderSchema, ResourceSchema};
 pub use vector_store::{InMemoryVectorStore, VectorHit, VectorRow, VectorStore, VectorStoreError};
