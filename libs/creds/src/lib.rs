@@ -1,30 +1,44 @@
-//! Credential broker — Article V enforcement point.
+//! Terrashift credential broker — Article V cornerstone.
 //!
-//! Pattern: stakpak_arch.md section 27 (secret detection / redaction),
-//! terrashift_diagrams.html LLD-4 (credential flow with 9 numbered steps).
+//! Pattern: terrashift_plan.md §8 (auth & credentials),
+//! `Terrashift_Plan.docx §8` longform; stakpak_arch.md §27 (secret
+//! detection / redaction); refs/stakpak/libs/shared/src/secrets/
+//! (broker pattern + zeroize discipline).
 //!
-//! Constitution: Article V (heart of it — no long-lived credentials in
-//! process memory; LLM never sees raw secrets; every credential operation
-//! audited). Article XIII rules 5, 7, 10.
+//! Constitution: Article V (LLM never sees raw values; broker resolves
+//! at the tool-execution boundary; every operation audit-logged with
+//! reference, not value), Article XIII rule 5 (`pre_llm_check` is the
+//! outbound proactive layer; audit-writer panic is the inbound runtime
+//! layer), Article XIII rule 7 (no disk-bound secret writes — Stage 1
+//! is in-memory only), Article XIII rule 10 (`~/.terrashift/config.toml`
+//! is the only sanctioned credential location).
 //!
-//! Two credential classes are protected:
-//! 1. Cloud provider credentials (AWS STS, GCP ADC, Azure managed identity)
-//! 2. LLM provider keys (Anthropic, OpenAI, custom Vodafone gateway)
+//! ## Stage 1 status
 //!
-//! The LLM never sees raw secrets — only `{{secret:name}}` references
-//! resolved at the tool-execution boundary.
-//!
-//! Modules to be filled in by P-NN prompts (P-10):
-//! - `broker.rs` — CredentialBroker async trait
-//! - `aws.rs` — AwsBroker (STS AssumeRole)
-//! - `gcp.rs` — GcpBroker (ADC + workload identity federation)
-//! - `azure.rs` — AzureBroker (managed identity)
-//! - `secret_substitution.rs` — `{{secret:...}}` resolution
-//! - `scrubber.rs` — gitleaks rule set + entropy filter (per section 27)
-//! - `zeroize_wrapper.rs` — Zeroizing<Credential> wrapper
+//! - **Working today**: `StubBroker` (in-memory canned), `substitute`
+//!   (`{{secret:NAME}}` → value with `SubstitutionMap` for reverse
+//!   rebuild), `pre_llm_check` (gitleaks-pattern outbound scrubber via
+//!   `terrashift-audit::scrubber`), `Credential` `Zeroizing`-wrapped
+//!   with custom `Debug` that never echoes the value, audit emission
+//!   of `AuditPayload::CredentialResolution` on every fetch.
+//! - **`NotImplementedYet { session: "S5" }`**: `AwsBroker::fetch_aws`
+//!   (STS AssumeRole), `GcpBroker::fetch_gcp` (ADC + WIF),
+//!   `AzureBroker::fetch_azure` (managed identity / service principal).
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn crate_compiles() {}
-}
+pub mod aws;
+pub mod azure;
+pub mod broker;
+pub mod errors;
+pub mod gcp;
+pub mod scrub;
+pub mod stub;
+pub mod substitution;
+
+pub use aws::AwsBroker;
+pub use azure::AzureBroker;
+pub use broker::{Credential, CredentialBroker};
+pub use errors::CredsError;
+pub use gcp::GcpBroker;
+pub use scrub::{pre_llm_check, pre_llm_check_many};
+pub use stub::StubBroker;
+pub use substitution::{substitute, SubstitutionMap};

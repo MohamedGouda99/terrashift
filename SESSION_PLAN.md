@@ -78,7 +78,7 @@ the next session. That's the load-bearing discipline.
 | 3b | Generator (P-08) + Eval framework (P-12) | 1 | ✅ Done | `07d26b3` (P-08), `311b12c` (P-12) | All |
 | 4a | Validator (P-06) — autonomous, no LLM | 1 | ✅ Done | `3525903` | All |
 | 4b | LLM client (P-03) + Mapper (P-05) structural | 1 | ✅ Structural shipped (`e648dea` P-03, this commit P-05) — full S4 close (real-Groq round-trip) gated on `GROQ_API_KEY` in CI | — | All |
-| 5 | Sandboxed Executor + Credential broker | 1 | Blocked: needs cloud test creds | — | All |
+| 5 | Sandboxed Executor + Credential broker | 1 | 🟡 Partial: P-10 Cred broker structural ✅ this commit (security-auditor APPROVE'd; in-memory `StubBroker` + `Zeroizing` + scrubber + audit hook); P-09 Executor + real STS/ADC/managed-identity wires await Docker + cloud test creds | — | All |
 | 6a | Release pipeline (P-13) | 1 | ✅ Done | `920b7a4` | All |
 | 6b | TUI slash commands (P-14) | 1 | ✅ Done | this commit | All |
 | 7 | Eval expansion (3 → 5 → 10 golden migrations) | 1 | ✅ Done: 10/10 (`a01797c` 5/10, this commit 10/10) | — | All |
