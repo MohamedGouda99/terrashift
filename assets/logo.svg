@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 240" width="100%" style="max-width:1080px;" role="img" aria-label="Terrashift — cross-cloud Terraform migration, Rust-native">
+  <title>Terrashift</title>
+  <defs>
+    <linearGradient id="ts-rust" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF7A45"/>
+      <stop offset="50%" stop-color="#F7931E"/>
+      <stop offset="100%" stop-color="#CE422B"/>
+    </linearGradient>
+    <linearGradient id="ts-rust-soft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF7A45" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#CE422B" stop-opacity="0.10"/>
+    </linearGradient>
+    <filter id="ts-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- ─── Logo mark (left) ─────────────────────────────────────────── -->
+  <g transform="translate(40, 30)" filter="url(#ts-glow)">
+    <!-- Hexagonal frame -->
+    <polygon
+      points="90,5 165,48 165,132 90,175 15,132 15,48"
+      fill="url(#ts-rust-soft)"
+      stroke="url(#ts-rust)"
+      stroke-width="5"
+      stroke-linejoin="round"/>
+
+    <!-- Inner accent hex -->
+    <polygon
+      points="90,32 142,62 142,118 90,148 38,118 38,62"
+      fill="none"
+      stroke="url(#ts-rust)"
+      stroke-width="1.5"
+      stroke-dasharray="3 3"
+      opacity="0.55"/>
+
+    <!-- T mark — bold, centered. -->
+    <g fill="url(#ts-rust)">
+      <rect x="48" y="60"  width="84" height="14" rx="2"/>
+      <rect x="83" y="60"  width="14" height="74" rx="2"/>
+    </g>
+
+    <!-- Migration cascade — chevrons under the T, ramping in opacity to
+         suggest movement / shifting / forward motion. -->
+    <g stroke="url(#ts-rust)" stroke-width="3" fill="none"
+       stroke-linecap="round" stroke-linejoin="round">
+      <path d="M55 152 l8 -7 l8 7" opacity="1"/>
+      <path d="M76 152 l8 -7 l8 7" opacity="0.65"/>
+      <path d="M97 152 l8 -7 l8 7" opacity="0.35"/>
+    </g>
+  </g>
+
+  <!-- ─── Wordmark (right) ─────────────────────────────────────────── -->
+  <g transform="translate(240, 0)">
+    <text
+      x="0" y="120"
+      font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif"
+      font-weight="900"
+      font-size="84"
+      letter-spacing="-2.5">
+      <tspan fill="#94A3B8">TERRA</tspan><tspan fill="url(#ts-rust)">SHIFT</tspan>
+    </text>
+
+    <!-- Sub-tag in mono, 3-segment cap-text -->
+    <text
+      x="4" y="158"
+      font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace"
+      font-size="14"
+      fill="#94A3B8"
+      letter-spacing="3"
+      font-weight="500">
+      CROSS-CLOUD &#xB7; TERRAFORM &#xB7; RUST-NATIVE
+    </text>
+
+    <!-- Decorative migration arrows beside the wordmark -->
+    <g stroke="url(#ts-rust)" stroke-width="1.5" fill="none"
+       stroke-linecap="round" opacity="0.5">
+      <path d="M4 178 L160 178"/>
+      <path d="M150 172 L162 178 L150 184"/>
+    </g>
+  </g>
+
+  <!-- ─── Cloud badge cluster (right edge) ─────────────────────────── -->
+  <g transform="translate(820, 70)">
+    <!-- GCP -->
+    <g transform="translate(0, 0)">
+      <circle cx="24" cy="24" r="22" fill="none" stroke="#4285F4" stroke-width="2.2"/>
+      <text x="24" y="29" text-anchor="middle"
+            font-family="ui-monospace, 'SF Mono', Menlo, monospace"
+            font-weight="700" font-size="11" fill="#4285F4">GCP</text>
+    </g>
+    <!-- arrow 1 -->
+    <path d="M52 24 L88 24" stroke="url(#ts-rust)" stroke-width="2"
+          fill="none" stroke-dasharray="4 3" stroke-linecap="round"/>
+    <!-- AWS -->
+    <g transform="translate(96, 0)">
+      <circle cx="24" cy="24" r="22" fill="none" stroke="#FF9900" stroke-width="2.2"/>
+      <text x="24" y="29" text-anchor="middle"
+            font-family="ui-monospace, 'SF Mono', Menlo, monospace"
+            font-weight="700" font-size="11" fill="#FF9900">AWS</text>
+    </g>
+    <!-- arrow 2 -->
+    <path d="M148 24 L184 24" stroke="url(#ts-rust)" stroke-width="2"
+          fill="none" stroke-dasharray="4 3" stroke-linecap="round"/>
+    <!-- Azure -->
+    <g transform="translate(192, 0)">
+      <circle cx="24" cy="24" r="22" fill="none" stroke="#0078D4" stroke-width="2.2"/>
+      <text x="24" y="29" text-anchor="middle"
+            font-family="ui-monospace, 'SF Mono', Menlo, monospace"
+            font-weight="700" font-size="11" fill="#0078D4">AZ</text>
+    </g>
+
+    <!-- bidirectional return arrow (curved beneath) -->
+    <path
+      d="M24 60 Q120 110 216 60"
+      fill="none"
+      stroke="url(#ts-rust)"
+      stroke-width="2"
+      stroke-dasharray="4 3"
+      stroke-linecap="round"
+      opacity="0.6"/>
+    <path d="M30 56 L24 60 L30 64" stroke="url(#ts-rust)" stroke-width="2"
+          fill="none" stroke-linecap="round" opacity="0.6"/>
+  </g>
+</svg>

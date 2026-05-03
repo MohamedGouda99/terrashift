@@ -13,23 +13,23 @@ Cargo.lock.bak
 .DS_Store
 Thumbs.db
 
-# Local config — not committed (per Article XIII rule 10)
+# Local config — not committed (per repo policy on credentials)
 ~/.terrashift/
 .env
 .env.local
 *.local.toml
 
 # Reference codebases — junctions and large file copies, set up per developer
-# via scripts/setup-refs.ps1. Not committed because junctions don't survive git
-# and stakpak_arch.md is large; see pre-flight.md decision 2.
+# via scripts/setup-refs.ps1. Not committed because junctions don't survive
+# git and the source archives are large.
 /refs/
 
-# Test fixtures — external repos cloned for testing. Not committed because some
-# are GPL-2 (incompatible with Terrashift's Apache-2 distribution) and they bloat
-# the repo. Set up via scripts/setup-fixtures.ps1; see pre-flight.md decision 10.
+# Test fixtures — external repos cloned for testing. Not committed because
+# some are GPL-2 (incompatible with our Apache-2 distribution) and they bloat
+# the repo. Set up via scripts/setup-fixtures.ps1.
 /fixtures/
 
-# Audit log working files (per Article IX — user data, never auto-deleted)
+# Audit log working files (user data, never auto-deleted)
 .audit/
 .checkpoints/
 .backup/
@@ -41,7 +41,7 @@ Thumbs.db
 # Spec Kit feature workdirs
 specs/*/output/
 
-# Sandbox executor working directories (per P-09)
+# Sandbox executor working directories
 /tmp/terrashift-exec-*/
 
 # Security scan artifacts (per session, not for repo)
@@ -50,3 +50,28 @@ specs/*/output/
 /package-leakage-report.json
 /precommit-scan-*.md
 /precommit-scan-*.html
+
+# ────────────────────────────────────────────────────────────────────
+# Internal-only documentation (kept on disk, not pushed to GitHub)
+# These artifacts drive how the project is built, but they're not
+# useful to outside contributors / users. Keep them local.
+# ────────────────────────────────────────────────────────────────────
+
+# Internal governance + architecture docs
+/CLAUDE.md
+/CONSTITUTION.md
+/SESSION_PLAN.md
+/TERRASHIFT_MAPPING.md
+/pre-flight.md
+/terrashift_plan.md
+/terrashift_prompts.md
+
+# Internal Spec Kit infrastructure + feature specs
+/.specify/
+/specs/
+
+# Internal docs folder (decisions, drafts, internal references)
+/docs/
+
+# Claude Code session-local config
+/.claude/settings.local.json

@@ -1,9 +1,8 @@
 <!--
 PR template for Terrashift.
 
-Per CLAUDE.md, every PR description MUST include the three sections below.
-The code-reviewer agent and constitution-checker hook check for them.
-Delete the comments and the "Summary / Test plan" section is optional.
+Every PR must include the three required sections below. The CI pipeline
+verifies the format.
 -->
 
 ## Summary
@@ -16,30 +15,37 @@ Delete the comments and the "Summary / Test plan" section is optional.
 - [ ] `cargo fmt -- --check`
 - [ ] `cargo clippy --all-targets -- -D warnings`
 - [ ] `cargo test --workspace`
-- [ ] `cargo test --package terrashift-eval --release` (if eval-touching)
+- [ ] `cargo test --package terrashift-eval --release` (if touching the LLM path)
 
-## Constitution
-
-<!--
-Cite the article(s) this change is governed by, with a one-line rationale.
-Article XIII rule numbers go on a separate line. Required.
--->
-- Article N (rationale)
-- Article XIII rule M (where applicable)
-
-## stakpak_arch.md
+## Conventions
 
 <!--
-Cite the section(s) you patterned after. Required when adding/refactoring
-seams. "N/A — pure bug fix" is acceptable for narrow fixes.
+Which project conventions does this change invoke? Examples:
+- Bounded agents (only 3 named agents permitted; new agents need RFC)
+- Article III Validator gate (no HCL emit before Validator approval)
+- Loud failure (no silent stalls; all terminal states are explicit)
+- No `unwrap` / `expect` in production code
+- Cache-stable / monotonic context boundaries (Anthropic prompt cache)
+- Audit on every tool execution (Ed25519 chain integrity)
+Required.
 -->
-- section N (what was mirrored)
+- Convention N (rationale)
+
+## Architectural pattern
+
+<!--
+Cite the section / file from the architecture reference you patterned after.
+Required when adding or refactoring a seam (trait, agent, hook, etc.).
+"N/A — pure bug fix" is acceptable for narrow fixes.
+-->
+- pattern / section N (what was mirrored)
 
 ## Eval impact
 
 <!--
-Per Article XII rule 4. Required.
+Required.
 - For pure refactors with no LLM-path change: "0 (refactor)"
-- For LLM-path changes: token cost delta vs baseline (run `cargo test -p terrashift-eval --release`)
+- For LLM-path changes: token cost delta vs baseline
+  (run `cargo test -p terrashift-eval --release`)
 -->
 - Token cost delta vs baseline:
