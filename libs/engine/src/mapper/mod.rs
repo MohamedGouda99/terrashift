@@ -174,6 +174,10 @@ impl Mapper {
                         Role::System => "system",
                         Role::User => "user",
                         Role::Assistant => "assistant",
+                        // Mapper is single-shot in Stage 1 — it never emits
+                        // a Tool message. Variant covered for exhaustive
+                        // match per S9's Role::Tool addition.
+                        Role::Tool => "tool",
                     },
                     m.content
                 )

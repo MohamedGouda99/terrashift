@@ -44,6 +44,10 @@ pub enum Role {
     System,
     User,
     Assistant,
+    /// Tool result message — added in S9 for the agent kernel's tool
+    /// loop. Mapper (Stage 1, single-shot) does not produce Tool
+    /// messages but must handle the variant for exhaustive matches.
+    Tool,
 }
 
 /// Synchronous transform on a message list. Stage 1: the Passthrough

@@ -15,38 +15,55 @@
 //! ## Module set
 //!
 //! Stage 1 ships every seam from `stakpak_arch.md §39 rows 1-5` that
-//! has a Stage-1 consumer or a Default impl. The IMPLS that matter
-//! arrive in later P-NN; the SEAMS ship now so consumers compile
-//! against type-system-stable contracts.
+//! has a Stage-1 consumer or a Default impl. S9 (this commit) adds
+//! the agent-loop kernel modules so Stage 2 consumers (S10 Recovery
+//! agent, S11 Cost Optimizer) can compile against a type-system-stable
+//! contract.
 //!
 //! - `tools`      — `ToolExecutor` trait + `ToolExecutionResult` enum (P-02)
 //! - `hooks`      — `AgentHook` trait, 5 lifecycle methods (P-02)
-//! - `error`      — `AgentError` enum (P-02; grows per P-NN)
-//! - `types`      — `AgentRunContext`, `ProposedToolCall`, `ToolDecision` (P-02)
+//! - `error`      — `AgentError` enum (P-02; S9 extends with Approval, DuplicateToolCallId, InvalidConfig, LlmRetryExhausted, Compaction)
+//! - `types`      — Run context, tool call, decision, approval policy, retry config, agent commands, loop config + result (P-02 + S9)
 //! - `registry`   — `ToolRegistry` (P-02; Terrashift addition; HashMap dispatch)
-//! - `context`    — `ContextReducer` + `PassthroughContextReducer` (§A row 5; relocated from libs/engine/src/mapper/context.rs)
-//! - `compaction` — `CompactionEngine` + `PassthroughCompactionEngine` (§A row 4; new this commit)
+//! - `context`    — `ContextReducer` + `PassthroughContextReducer` (§A row 5)
+//! - `compaction` — `CompactionEngine` + `PassthroughCompactionEngine` (§A row 4)
+//! - `approval`   — `ApprovalStateMachine` for ordered tool dispatch (S9)
+//! - `retry`      — exponential backoff + retry-after parsing (S9)
+//! - `agent`      — `run_agent` kernel + `AgentLlmClient` trait (S9)
 //!
-//! ## Modules genuinely deferred (consumer-driven; ship when used)
+//! ## Modules deliberately deferred to S5+
 //!
-//! - `agent`      — `run_agent` loop (S9)
-//! - `approval`   — `ApprovalStateMachine` (S9 — agent loop consumer)
-//! - `checkpoint` — `CheckpointEnvelopeV1` (P-14 / S9)
-//! - `retry`, `stream`, `budget_context` — (S9+)
+//! - `stream`         — Stage 2 consumers don't stream; widens the LLM trait when they do
+//! - `checkpoint`     — `CheckpointEnvelopeV1` (P-14 / TUI integration)
+//! - `budget_context` — budget-aware reducer (replaces Passthrough in Stage 5)
 
+pub mod agent;
+pub mod approval;
 pub mod compaction;
 pub mod context;
 pub mod error;
 pub mod hooks;
 pub mod registry;
+pub mod retry;
 pub mod tools;
 pub mod types;
 
 // Re-exports follow Stakpak's lib.rs pattern (subset).
+pub use agent::{
+    run_agent, AgentLlmClient, AgentMessage, AgentToolDef, LlmTurnError, LlmTurnOutcome,
+};
+pub use approval::{ApprovalError, ApprovalStateMachine, ResolvedToolCall};
 pub use compaction::{CompactionEngine, CompactionResult, PassthroughCompactionEngine};
 pub use context::{ContextReducer, Message, PassthroughContextReducer, Role};
 pub use error::AgentError;
 pub use hooks::AgentHook;
 pub use registry::ToolRegistry;
+pub use retry::{
+    exponential_backoff_ms, parse_retry_delay_from_headers, resolve_retry_delay_ms, RetryDelay,
+    RetryDelaySource,
+};
 pub use tools::{ToolExecutionResult, ToolExecutor};
-pub use types::{AgentRunContext, ProposedToolCall, ToolDecision};
+pub use types::{
+    AgentCommand, AgentLoopConfig, AgentLoopReason, AgentLoopResult, AgentRunContext,
+    ProposedToolCall, RetryConfig, ToolApprovalAction, ToolApprovalPolicy, ToolDecision,
+};
