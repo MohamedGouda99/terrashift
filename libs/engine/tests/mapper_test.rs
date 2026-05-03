@@ -330,3 +330,106 @@ fn estate_cache_key_is_stable_across_runs() {
     assert_eq!(key1, key2, "Article VI: cache key byte-stable across runs");
     assert_eq!(key1.len(), 64, "sha256 hex digest is 64 hex chars");
 }
+
+// ─────────────────────────────────────────────────────────────────────
+// R5 — Mapper-level RealClient integration test (S4-close).
+//
+// Wires the actual `RealClient` (P-03) instead of `StubClient` and
+// runs Mapper.map() against the real Groq endpoint. `#[ignore]`'d AND
+// env-var-gated so default `cargo test` stays offline-safe; activates
+// with `cargo test -- --ignored` once GROQ_API_KEY is set.
+//
+// This test is the swap-pattern proof: in production code the only
+// difference between Stage 1 (StubClient) and S4-close (RealClient)
+// is *which type implements LlmClient* — `Mapper::map()` does not
+// know or care. When this test passes:
+// - Stage 1 P-16 criterion #3 (re-runs identical output) graduates
+//   PARTIAL → PASS for the LLM-side determinism
+//   (cache hit on second call avoids the LLM, verified by counter
+//   inside CountingLlmClient — but here we use RealClient directly,
+//   so the assertion is "first call returns parseable JSON; second
+//   call hits the cache without network")
+// - Criterion #4 (token cost) gets real data into the eval
+//   baseline.json refresh
+//
+// Per the user's R5 ticket, this `#[ignore]`'d test is the canonical
+// place where S4-close validation fires.
+// ─────────────────────────────────────────────────────────────────────
+
+#[tokio::test]
+#[ignore = "real Groq round-trip via Mapper; requires GROQ_API_KEY. Activate with: cargo test -p terrashift-engine real_mapper_round_trip_via_groq -- --ignored"]
+async fn real_mapper_round_trip_via_groq() {
+    // Belt-and-braces gate: skip silently if the env var isn't set even
+    // when --ignored is passed. Avoids surprising failures when the
+    // operator runs `cargo test -- --ignored` against an unrelated
+    // crate's ignored tests.
+    if std::env::var("GROQ_API_KEY").is_err() {
+        eprintln!(
+            "[skip] real_mapper_round_trip_via_groq: GROQ_API_KEY not set; \
+             this test is intentionally a no-op without the key."
+        );
+        return;
+    }
+
+    use terrashift_ai::{Profile, RealClient, Resolver};
+
+    // Same Stage-1 BYOK profile as P-03's integration test in
+    // libs/ai/tests/llm_client_test.rs::real_groq_completes.
+    let profile_toml = r#"
+[profiles.default]
+model = "groq/llama-3.3-70b-versatile"
+
+  [profiles.default.tiers]
+  eco   = "groq/llama-3.3-70b-versatile"
+  smart = "groq/llama-3.3-70b-versatile"
+
+  [profiles.default.providers.groq]
+  type = "openai-compatible"
+  api_endpoint = "https://api.groq.com/openai/v1"
+  api_key_env = "GROQ_API_KEY"
+"#;
+
+    let profile = Profile::from_toml(profile_toml).unwrap();
+    let resolved = Resolver::resolve_for_tier(&profile, None, None, Tier::Eco).unwrap();
+    let llm = RealClient::new(resolved).expect("RealClient construction (openai-compatible)");
+
+    // Tiny inventory — single GCP network — keeps token cost minimal
+    // for repeated CI runs once GROQ_API_KEY lands.
+    let estate = make_test_inventory(vec![("google_compute_network", "main")]);
+    let knowledge = make_test_knowledge().await;
+    let reducer = PassthroughContextReducer;
+    let mut cache = MapperCache::new();
+
+    let mapper = Mapper::new("google", "aws");
+    let plan = mapper
+        .map(&estate, &knowledge, &llm, &reducer, &mut cache)
+        .await
+        .expect("Mapper round-trip via Groq returns a parseable MappingPlan");
+
+    // The LLM may pick any reasonable mapping; we only assert the
+    // structural contract (Validator P-06 enforces deeper checks).
+    assert_eq!(plan.source_provider, "google");
+    assert_eq!(plan.target_provider, "aws");
+    assert!(
+        !plan.resources.is_empty(),
+        "real Mapper produced at least one mapped resource"
+    );
+
+    // Cache-hit invariant (Article XII rule 2): second call must hit
+    // the cache without re-invoking the LLM. We can't directly count
+    // RealClient's network calls, but we can verify the *output* is
+    // byte-identical (which proves no new LLM call happened — the
+    // cache returned the same plan).
+    let plan2 = mapper
+        .map(&estate, &knowledge, &llm, &reducer, &mut cache)
+        .await
+        .expect("second map call (cache hit)");
+
+    // The cache returns a clone of the same plan; the run_id will
+    // match because we cached the entire MappingPlan including run_id.
+    assert_eq!(
+        serde_json::to_string(&plan).unwrap(),
+        serde_json::to_string(&plan2).unwrap(),
+        "cache hit returns byte-identical plan (Article XII rule 2)"
+    );
+}
