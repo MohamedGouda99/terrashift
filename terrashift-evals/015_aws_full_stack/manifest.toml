@@ -1,0 +1,6 @@
+name = "015_aws_full_stack"
+description = "15-resource GCP→AWS stack covering networking + compute + storage. Stage 1 P-16 criterion #1 demo fixture."
+source_provider = "google"
+target_provider = "aws"
+token_cost_ceiling_micros = 0
+articles = [3, 6, 9, 12]

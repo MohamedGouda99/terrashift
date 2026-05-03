@@ -24,18 +24,18 @@ fn suite_root() -> PathBuf {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// Test 1 — discover_suite finds all 10 golden migrations (criterion #1).
-// S3b: 3 AWS-as-target. S7 prefetch: +2 Azure-as-target. S7 close (this
-// commit): +5 more covering remaining Stage 1 templates. Hits the S7
-// target of 10 from SESSION_PLAN row 7.
+// Test 1 — discover_suite finds all 11 golden migrations (criterion #1).
+// S3b: 3 AWS-as-target. S7 prefetch: +2 Azure-as-target. S7 close: +5
+// more (suite to 10/10). R2 (this commit): +1 fixture covering the Stage
+// 1 P-16 #1 demo scenario (15-resource GCP→AWS stack).
 // ─────────────────────────────────────────────────────────────────────────
 #[test]
 fn discover_suite_finds_all_goldens() {
     let goldens = discover_suite(&suite_root()).unwrap();
     assert_eq!(
         goldens.len(),
-        10,
-        "Stage 1 ships 10 hand-curated goldens (5 AWS-target, 5 Azure-target); suite_root = {:?}",
+        11,
+        "Stage 1 ships 11 hand-curated goldens (5 AWS-target, 5 Azure-target, 1 full-stack); suite_root = {:?}",
         suite_root()
     );
 
@@ -51,6 +51,7 @@ fn discover_suite_finds_all_goldens() {
         "008_azurerm_subnet",
         "009_azurerm_nsg",
         "010_azurerm_linux_vm",
+        "015_aws_full_stack",
     ] {
         assert!(
             names.contains(&expected),
@@ -79,10 +80,10 @@ fn manifest_toml_parses_correctly() {
 //  populates it.)
 // ─────────────────────────────────────────────────────────────────────────
 #[test]
-fn all_ten_goldens_pass() {
+fn all_eleven_goldens_pass() {
     let runner = EvalRunner::new();
     let report = runner.run_suite(&suite_root()).unwrap();
-    assert_eq!(report.total, 10);
+    assert_eq!(report.total, 11);
     assert!(
         report.all_passed(),
         "{} of {} goldens failed:\n{}",
@@ -100,11 +101,11 @@ fn all_ten_goldens_pass() {
             .collect::<Vec<_>>()
             .join("\n\n")
     );
-    assert_eq!(report.passed, 10);
+    assert_eq!(report.passed, 11);
     assert_eq!(report.failed, 0);
     assert_eq!(
         report.total_token_cost_micros, 0,
-        "S7 close: still 0 token cost — Mapper bypassed by P-12 design (goldens pre-curate mapping_plan.json)"
+        "Stage 1 still 0 token cost — Mapper bypassed by P-12 design (goldens pre-curate mapping_plan.json)"
     );
 }
 

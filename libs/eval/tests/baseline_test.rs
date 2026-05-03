@@ -141,13 +141,13 @@ fn us2_per_fixture_sorted_worst_first() {
 // ─────────────────────────────────────────────────────────────────
 
 #[test]
-fn us3_committed_baseline_loads_and_has_10_fixtures() {
+fn us3_committed_baseline_loads_and_has_all_fixtures() {
     let path = default_baseline_path(&suite_root());
     let baseline = Baseline::load(&path).unwrap();
     assert_eq!(
         baseline.per_fixture.len(),
-        10,
-        "Stage 1 ships exactly 10 goldens at all-zero baseline"
+        11,
+        "Stage 1 ships 11 goldens at all-zero baseline (10 from S7 close + 1 from R2 15-resource demo fixture)"
     );
     assert_eq!(
         baseline.total_token_cost_micros, 0,

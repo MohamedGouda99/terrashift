@@ -1,0 +1,175 @@
+{
+  "run_id": "00000000-0000-0000-0000-000000000015",
+  "source_provider": "google",
+  "target_provider": "aws",
+  "resources": [
+    {
+      "source_addr": "google_compute_network.main",
+      "target_addr": "aws_vpc.main",
+      "target_type": "aws_vpc",
+      "target_name": "main",
+      "attributes": {
+        "cidr_block": { "string": "10.0.0.0/16" },
+        "instance_tenancy": { "string": "default" }
+      },
+      "dependencies": []
+    },
+    {
+      "source_addr": "google_compute_subnetwork.public_a",
+      "target_addr": "aws_subnet.public_a",
+      "target_type": "aws_subnet",
+      "target_name": "public_a",
+      "attributes": {
+        "cidr_block": { "string": "10.0.1.0/24" },
+        "vpc_id": { "reference": "aws_vpc.main.id" }
+      },
+      "dependencies": ["aws_vpc.main"]
+    },
+    {
+      "source_addr": "google_compute_subnetwork.public_b",
+      "target_addr": "aws_subnet.public_b",
+      "target_type": "aws_subnet",
+      "target_name": "public_b",
+      "attributes": {
+        "cidr_block": { "string": "10.0.2.0/24" },
+        "vpc_id": { "reference": "aws_vpc.main.id" }
+      },
+      "dependencies": ["aws_vpc.main"]
+    },
+    {
+      "source_addr": "google_compute_subnetwork.private_a",
+      "target_addr": "aws_subnet.private_a",
+      "target_type": "aws_subnet",
+      "target_name": "private_a",
+      "attributes": {
+        "cidr_block": { "string": "10.0.10.0/24" },
+        "vpc_id": { "reference": "aws_vpc.main.id" }
+      },
+      "dependencies": ["aws_vpc.main"]
+    },
+    {
+      "source_addr": "google_compute_firewall.web",
+      "target_addr": "aws_security_group.web",
+      "target_type": "aws_security_group",
+      "target_name": "web",
+      "attributes": {
+        "name": { "string": "web" },
+        "vpc_id": { "reference": "aws_vpc.main.id" }
+      },
+      "dependencies": ["aws_vpc.main"]
+    },
+    {
+      "source_addr": "google_compute_firewall.db",
+      "target_addr": "aws_security_group.db",
+      "target_type": "aws_security_group",
+      "target_name": "db",
+      "attributes": {
+        "name": { "string": "db" },
+        "vpc_id": { "reference": "aws_vpc.main.id" }
+      },
+      "dependencies": ["aws_vpc.main"]
+    },
+    {
+      "source_addr": "google_compute_firewall.ssh",
+      "target_addr": "aws_security_group.ssh",
+      "target_type": "aws_security_group",
+      "target_name": "ssh",
+      "attributes": {
+        "name": { "string": "ssh" },
+        "vpc_id": { "reference": "aws_vpc.main.id" }
+      },
+      "dependencies": ["aws_vpc.main"]
+    },
+    {
+      "source_addr": "google_compute_instance.web1",
+      "target_addr": "aws_instance.web1",
+      "target_type": "aws_instance",
+      "target_name": "web1",
+      "attributes": {
+        "instance_type": { "string": "t3.small" },
+        "ami": { "string": "ami-0c55b159cbfafe1f0" },
+        "subnet_id": { "reference": "aws_subnet.public_a.id" }
+      },
+      "dependencies": ["aws_subnet.public_a"]
+    },
+    {
+      "source_addr": "google_compute_instance.web2",
+      "target_addr": "aws_instance.web2",
+      "target_type": "aws_instance",
+      "target_name": "web2",
+      "attributes": {
+        "instance_type": { "string": "t3.small" },
+        "ami": { "string": "ami-0c55b159cbfafe1f0" },
+        "subnet_id": { "reference": "aws_subnet.public_b.id" }
+      },
+      "dependencies": ["aws_subnet.public_b"]
+    },
+    {
+      "source_addr": "google_compute_instance.app1",
+      "target_addr": "aws_instance.app1",
+      "target_type": "aws_instance",
+      "target_name": "app1",
+      "attributes": {
+        "instance_type": { "string": "t3.medium" },
+        "ami": { "string": "ami-0c55b159cbfafe1f0" },
+        "subnet_id": { "reference": "aws_subnet.private_a.id" }
+      },
+      "dependencies": ["aws_subnet.private_a"]
+    },
+    {
+      "source_addr": "google_storage_bucket.assets",
+      "target_addr": "aws_s3_bucket.assets",
+      "target_type": "aws_s3_bucket",
+      "target_name": "assets",
+      "attributes": {
+        "bucket": { "string": "myorg-assets" },
+        "acl": { "string": "private" }
+      },
+      "dependencies": []
+    },
+    {
+      "source_addr": "google_storage_bucket.logs",
+      "target_addr": "aws_s3_bucket.logs",
+      "target_type": "aws_s3_bucket",
+      "target_name": "logs",
+      "attributes": {
+        "bucket": { "string": "myorg-logs" },
+        "acl": { "string": "private" }
+      },
+      "dependencies": []
+    },
+    {
+      "source_addr": "google_storage_bucket.backups",
+      "target_addr": "aws_s3_bucket.backups",
+      "target_type": "aws_s3_bucket",
+      "target_name": "backups",
+      "attributes": {
+        "bucket": { "string": "myorg-backups" },
+        "acl": { "string": "private" }
+      },
+      "dependencies": []
+    },
+    {
+      "source_addr": "google_storage_bucket.artifacts",
+      "target_addr": "aws_s3_bucket.artifacts",
+      "target_type": "aws_s3_bucket",
+      "target_name": "artifacts",
+      "attributes": {
+        "bucket": { "string": "myorg-artifacts" },
+        "acl": { "string": "private" }
+      },
+      "dependencies": []
+    },
+    {
+      "source_addr": "google_storage_bucket.uploads",
+      "target_addr": "aws_s3_bucket.uploads",
+      "target_type": "aws_s3_bucket",
+      "target_name": "uploads",
+      "attributes": {
+        "bucket": { "string": "myorg-uploads" },
+        "acl": { "string": "private" }
+      },
+      "dependencies": []
+    }
+  ]
+}

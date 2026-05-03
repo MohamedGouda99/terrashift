@@ -11,6 +11,7 @@
     "007_aws_instance": { "token_cost_micros": 0 },
     "008_azurerm_subnet": { "token_cost_micros": 0 },
     "009_azurerm_nsg": { "token_cost_micros": 0 },
-    "010_azurerm_linux_vm": { "token_cost_micros": 0 }
+    "010_azurerm_linux_vm": { "token_cost_micros": 0 },
+    "015_aws_full_stack": { "token_cost_micros": 0 }
   }
 }
