@@ -26,18 +26,22 @@
 //! ```
 //!
 //! ## Modules
-//! - `tier`     — `Tier` enum (`Eco | Smart`)
-//! - `errors`   — `AiError` enum
-//! - `metadata` — `CompletionMetadata` (audit-friendly fields)
-//! - `profile`  — `Profile`, `ProviderConfig`, `Tiers` TOML schema
-//! - `resolver` — 5-layer `Resolver` per terrashift_plan.md §6.X
-//! - `client`   — `LlmClient` trait + `StubClient`
-//! - `real`     — `RealClient` wrapping `stakai::Inference`
+//! - `tier`      — `Tier` enum (`Eco | Smart`)
+//! - `errors`    — `AiError` enum
+//! - `metadata`  — `CompletionMetadata` (audit-friendly fields)
+//! - `profile`   — `Profile`, `ProviderConfig`, `Tiers` TOML schema
+//! - `resolver`  — 5-layer `Resolver` per terrashift_plan.md §6.X
+//! - `client`    — `LlmClient` trait + `StubClient`
+//! - `provider`  — `Provider` trait + `build_provider()` registry (§39 row 1)
+//! - `providers` — concrete provider impls: openai_compat (S1), anthropic/gemini/bedrock (S2+ stubs)
+//! - `real`      — `RealClient` facade dispatching via the registry
 
 pub mod client;
 pub mod errors;
 pub mod metadata;
 pub mod profile;
+pub mod provider;
+pub mod providers;
 pub mod real;
 pub mod resolver;
 pub mod tier;
@@ -46,6 +50,7 @@ pub use client::{LlmClient, StubClient};
 pub use errors::AiError;
 pub use metadata::CompletionMetadata;
 pub use profile::{Profile, ProviderConfig, Tiers};
+pub use provider::{build_provider, Provider};
 pub use real::RealClient;
 pub use resolver::{ResolvedModel, Resolver};
 pub use tier::Tier;
