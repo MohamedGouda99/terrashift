@@ -38,6 +38,11 @@ NOT a quoted string.\n\
 5. If a source resource has no clean target equivalent, omit it AND the \
 operator will be told via the validator's downstream report. Do NOT invent \
 a hallucinated target type.\n\
+6. `source_addr`, `target_addr`, `target_type`, `target_name`, and entries \
+inside `dependencies` are PLAIN JSON STRINGS, NOT envelope-tagged. \
+For example: \"dependencies\": [\"azurerm_virtual_network.main.id\"] — \
+NOT [{\"reference\": \"azurerm_virtual_network.main.id\"}]. \
+Only values inside `attributes` use the envelope tags.\n\
 \n\
 MappingPlan schema (JSON):\n\
 {\n\
@@ -51,7 +56,7 @@ MappingPlan schema (JSON):\n\
       \"target_type\": \"aws_vpc\",\n\
       \"target_name\": \"main\",\n\
       \"attributes\": { \"cidr_block\": { \"string\": \"10.0.0.0/16\" } },\n\
-      \"dependencies\": []\n\
+      \"dependencies\": [\"aws_vpc.main.id\"]\n\
     }\n\
   ]\n\
 }\n";

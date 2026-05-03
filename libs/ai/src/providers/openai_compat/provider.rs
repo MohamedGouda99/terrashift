@@ -20,10 +20,16 @@ use async_trait::async_trait;
 use std::time::Instant;
 
 /// OpenAI-shape provider. Construction is trivial (no config);
-/// per-call state lives on the stack inside `complete`.
-pub struct OpenAiCompat {
-    inference: stakai::Inference,
-}
+/// per-call we build a stakai `Inference` configured with the
+/// resolver's `api_endpoint` + the operator's API key from env.
+///
+/// **Why per-call config**: the operator's profile may select different
+/// `api_endpoint` per provider entry (Groq vs Together vs HuggingFace
+/// Inference Providers vs custom Vodafone gateway), and each may use a
+/// different `api_key_env`. Stakai's `InferenceConfig` bakes both in,
+/// so we build a fresh `Inference` per call. Keeps Article V clean
+/// (no instance state holds creds).
+pub struct OpenAiCompat;
 
 impl Default for OpenAiCompat {
     fn default() -> Self {
@@ -33,9 +39,7 @@ impl Default for OpenAiCompat {
 
 impl OpenAiCompat {
     pub fn new() -> Self {
-        Self {
-            inference: stakai::Inference::new(),
-        }
+        Self
     }
 
     /// Read the API key from the env var named in
@@ -62,15 +66,26 @@ impl Provider for OpenAiCompat {
         }
 
         // Article V: read at request time, drop at end of scope.
-        // Stakai's openai provider reads its own env vars; this is
-        // the explicit Terrashift-side check that the operator's
-        // configured env var is set BEFORE we hand off to stakai.
-        let _api_key = Self::read_api_key(resolved)?;
+        // The api_key local moves into stakai's InferenceConfig and
+        // is dropped when the function returns.
+        let api_key = Self::read_api_key(resolved)?;
+
+        // Build a stakai Inference configured to route via the OpenAI
+        // provider but pointing at the operator's openai-compatible
+        // endpoint (Groq / HuggingFace Inference Providers / Together /
+        // a custom enterprise gateway / etc.). The `Model::custom`
+        // call in convert.rs uses provider="openai" so stakai's router
+        // dispatches through the OpenAI provider — that provider then
+        // uses the configured base_url instead of the default
+        // https://api.openai.com/v1.
+        let stakai_config =
+            stakai::InferenceConfig::new().openai(api_key, Some(resolved.api_endpoint.clone()));
+        let inference = stakai::Inference::with_config(stakai_config)
+            .map_err(|e| AiError::Stakai(Box::new(e)))?;
 
         let started = Instant::now();
         let request = build_request(tier, prompt, resolved);
-        let response = self
-            .inference
+        let response = inference
             .generate(&request)
             .await
             .map_err(|e| AiError::Stakai(Box::new(e)))?;

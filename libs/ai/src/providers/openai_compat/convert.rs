@@ -23,8 +23,15 @@ pub fn build_request(
     prompt: &str,
     resolved: &ResolvedModel,
 ) -> stakai::GenerateRequest {
+    // Always pass `"openai"` as the stakai provider key — stakai routes
+    // by this name and only knows the providers it ships with (`openai`,
+    // `anthropic`, `gemini`, `bedrock`, etc.). The operator-configured
+    // `provider_key` (e.g., `"huggingface"`, `"groq"`) is a Terrashift-
+    // side label kept for audit metadata + profile selection; the actual
+    // network dispatch goes through stakai's OpenAI provider, which
+    // honors the custom `api_endpoint` set in `InferenceConfig` upstream.
     stakai::GenerateRequest::new(
-        stakai::Model::custom(&resolved.model_id, &resolved.provider_key),
+        stakai::Model::custom(&resolved.model_id, "openai"),
         vec![stakai::Message::new(stakai::Role::User, prompt)],
     )
 }
