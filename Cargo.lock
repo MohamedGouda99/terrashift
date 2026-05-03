@@ -3098,6 +3098,7 @@ dependencies = [
  "terrashift-shell-tool-approvals",
  "thiserror 1.0.69",
  "tokio",
+ "tokio-util",
  "tracing",
  "uuid",
  "walkdir",
@@ -3195,6 +3196,21 @@ dependencies = [
  "thiserror 1.0.69",
  "tokio",
  "tracing",
+]
+
+[[package]]
+name = "terrashift-notify"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "chrono",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.69",
+ "tokio",
+ "tracing",
+ "uuid",
 ]
 
 [[package]]

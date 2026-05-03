@@ -47,4 +47,11 @@ pub enum CredsError {
     /// `sqlx::Error` which is large.
     #[error("audit append failed: {0}")]
     Audit(Box<terrashift_audit::AuditError>),
+
+    /// Federated token exchange (S12 — `FederatedTokenProvider`) failed
+    /// at the operator's mutex / internal state boundary. Generic
+    /// resolution-error catch-all that names the reference and the
+    /// cause without echoing any token contents (Article V).
+    #[error("federated token resolution failed: name='{name}' cause='{cause}'")]
+    ResolutionError { name: String, cause: String },
 }

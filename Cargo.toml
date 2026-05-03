@@ -15,6 +15,7 @@ members = [
     "libs/creds",
     "libs/audit",
     "libs/eval",
+    "libs/notify",
     "libs/shell-tool-approvals",
     "libs/mcp/client",
     "libs/mcp/server",
@@ -118,6 +119,7 @@ terrashift-engine = { path = "libs/engine" }
 terrashift-creds = { path = "libs/creds" }
 terrashift-audit = { path = "libs/audit" }
 terrashift-eval = { path = "libs/eval" }
+terrashift-notify = { path = "libs/notify" }
 terrashift-shell-tool-approvals = { path = "libs/shell-tool-approvals" }
 terrashift-mcp-client = { path = "libs/mcp/client" }
 terrashift-mcp-server = { path = "libs/mcp/server" }
