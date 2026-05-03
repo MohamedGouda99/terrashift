@@ -10,7 +10,7 @@
 //! we instruct via system prompt + parse the response as JSON. If
 //! eval signal shows malformed-JSON rates are problematic, S5+ adopts
 //! the tool-call channel pattern from
-//! refs/stakpak/libs/agent-core/src/agent.rs:284-298.
+//! the reference codebase (see ATTRIBUTIONS.md)
 //!
 //! Cache invariant: this prompt is the cache key's content half (the
 //! input half is the inventory hash). Article XIII rule 2 — once

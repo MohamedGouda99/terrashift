@@ -1,7 +1,7 @@
 //! Provider schema types for the Terrashift knowledge layer.
 //!
-//! Pattern: stakpak_arch.md §9 (typed substrate; analogous to Stakpak's Session/Checkpoint).
-//! Source: refs/stakpak/libs/api/src/storage.rs (typed Session struct shape).
+//! Pattern: the architecture reference §9 (typed substrate; analogous to the reference's Session/Checkpoint).
+//! Source: the reference codebase (see ATTRIBUTIONS.md) (typed Session struct shape).
 //! Constitution: Article VI (knowledge layer integrity — these types carry the
 //! version-pinned snapshot the Mapper + Validator depend on).
 

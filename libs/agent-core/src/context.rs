@@ -1,12 +1,12 @@
 //! `ContextReducer` — Article XIII rule 1 enforcement seam.
 //!
-//! Pattern: stakpak_arch.md §39 row 5 (TERRASHIFT_MAPPING.md §A row 5
+//! Pattern: the architecture reference §39 row 5 (TERRASHIFT_MAPPING.md §A row 5
 //! canonical location: `libs/agent-core/src/context.rs`).
-//! Source: refs/stakpak/libs/agent-core/src/context.rs:8-17 (trait
+//! Source: the reference codebase (see ATTRIBUTIONS.md) (trait
 //! definition) + :19-47 (`DefaultContextReducer`).
 //!
 //! Stage 1 narrows the trait signature: just `messages` instead of
-//! Stakpak's 5-arg form (`messages, model, max_output_tokens, tools,
+//! the reference's 5-arg form (`messages, model, max_output_tokens, tools,
 //! metadata`). The additional context only earns its keep when
 //! `BudgetAwareContextReducer` ships in S9. When S9 widens this trait,
 //! it MUST be additive — removing the existing `messages` parameter
@@ -22,7 +22,7 @@
 //! - The `ContextReducer` trait
 //! - `Message` + `Role` types (Stage-1-local; converge with stakai's
 //!   typed Message in S5+ when LlmClient evolves to typed messages)
-//! - `PassthroughContextReducer` — Stakpak's `Default` impl shape but
+//! - `PassthroughContextReducer` — the reference's `Default` impl shape but
 //!   with the narrowed signature
 
 use serde::{Deserialize, Serialize};
@@ -54,14 +54,14 @@ pub enum Role {
 /// impl just returns the input unchanged — Article XIII rule 1 is
 /// satisfied by *being on the path*, not by mutation. When real
 /// reducers ship (S9 — `BudgetAwareContextReducer` per
-/// stakpak_arch.md §39 row 5 expansion), consumer code stays
+/// the architecture reference §39 row 5 expansion), consumer code stays
 /// untouched because the trait signature doesn't change.
 pub trait ContextReducer: Send + Sync {
     fn reduce(&self, messages: Vec<Message>) -> Vec<Message>;
 }
 
-/// Stage 1 default. Mirrors `refs/stakpak/libs/agent-core/src/context.rs:19-47`'s
-/// `DefaultContextReducer` shape (no-op transform). Stakpak's variant
+/// Stage 1 default. Mirrors `the reference codebase (see ATTRIBUTIONS.md)`'s
+/// `DefaultContextReducer` shape (no-op transform). the reference's variant
 /// runs a 6-pass pipeline; we narrow to no-op until BudgetAware lands.
 pub struct PassthroughContextReducer;
 

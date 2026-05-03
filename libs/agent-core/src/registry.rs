@@ -1,6 +1,6 @@
 //! HashMap-backed multi-tool registry — convenience layer over ToolExecutor.
 //!
-//! **Terrashift addition** — not in Stakpak. Convenience layer over
+//! **Terrashift addition** — not in the reference. Convenience layer over
 //! `ToolExecutor` for multi-tool registration. See
 //! `specs/002-tool-trait-and-executor/clarify.md` Q3 for the rationale:
 //! every crate that wants to register multiple tools (`libs/engine` for
@@ -8,13 +8,13 @@
 //! re-invent this dispatch HashMap. ToolRegistry IS just that helper —
 //! it implements `ToolExecutor` by looking up `tool_call.name`.
 //!
-//! Stakpak's pattern is to have one `ToolExecutor` impl per crate that
+//! the reference's pattern is to have one `ToolExecutor` impl per crate that
 //! pattern-matches on `tool_call.name` directly. That works for stable tool
 //! sets but is awkward for the per-pipeline-component growth path Terrashift
 //! follows (P-04 adds Scanner, P-05 adds Mapper, etc., each in its own crate
 //! eventually). Registry decouples registration from dispatch.
 //!
-//! Constitution: Article XI (this is a deviation from Stakpak — registered
+//! Constitution: Article XI (this is a deviation from the reference — registered
 //! here as an additive convenience, not a replacement for ToolExecutor).
 
 use crate::{

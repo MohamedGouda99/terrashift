@@ -5,7 +5,7 @@
 //! `providers/openai_compat/provider.rs`; analogous sibling impls
 //! land in `providers/{anthropic,gemini,bedrock}/` in S2+.
 //!
-//! Per stakpak_arch.md §39 row 1 / TERRASHIFT_MAPPING.md §A row 1:
+//! Per the architecture reference §39 row 1 / TERRASHIFT_MAPPING.md §A row 1:
 //! `libs/ai/src/providers/{name}/{convert,mod,provider,stream,types}.rs`
 //! is the canonical shape. P-03 commit `e648dea` shipped the dispatch
 //! logic flat in this file as a Stage-1 narrowing; this commit

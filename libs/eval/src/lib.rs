@@ -1,8 +1,8 @@
 //! Terrashift Eval framework — golden-file harness for the deterministic
 //! pipeline.
 //!
-//! Pattern: stakpak_arch.md §32 (CI matrix; eval suite is one of the
-//! gated checks). Source: refs/stakpak/.github/workflows/ci.yml:38-43
+//! Pattern: the architecture reference §32 (CI matrix; eval suite is one of the
+//! gated checks). Source: the reference codebase (see ATTRIBUTIONS.md)
 //! (single-step feature-gated invocations — adopted in S7 expansion;
 //! Stage 1 runs inline via `cargo test --workspace`).
 //!

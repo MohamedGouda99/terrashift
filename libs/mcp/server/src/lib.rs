@@ -1,6 +1,6 @@
 //! MCP server — exposes Terrashift's tool surface as MCP tools.
 //!
-//! Pattern: stakpak_arch.md section 13.
+//! Pattern: the architecture reference section 13.
 //! Constitution: Article V (proxy boundary).
 
 #[cfg(test)]

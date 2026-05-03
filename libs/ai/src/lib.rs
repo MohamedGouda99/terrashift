@@ -1,7 +1,7 @@
 //! Terrashift AI client — wraps `stakai` with BYOK + tier routing.
 //!
-//! Pattern: terrashift_plan.md §6.3 (LLM Router design) + stakpak_arch.md §10.
-//! Source: refs/stakpak/libs/ai/src/ — stakai is the Stakpak-published
+//! Pattern: terrashift_plan.md §6.3 (LLM Router design) + the architecture reference §10.
+//! Source: the reference codebase (see ATTRIBUTIONS.md) — stakai is the an upstream-published
 //! SDK we depend on (workspace dep `stakai = "0.3"`); we wrap it in a
 //! thin facade.
 //!

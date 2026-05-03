@@ -1,10 +1,10 @@
 //! Executor — orchestration for terraform plan/apply with command-level
 //! approval (Article XIII rule 6) and audit emission.
 //!
-//! Pattern: stakpak_arch.md §29 (Warden sandbox) + §30 (shell command-
-//! level approvals). Source: refs/stakpak/cli/src/commands/warden.rs
+//! Pattern: the architecture reference §29 (Warden sandbox) + §30 (shell command-
+//! level approvals). Source: the reference codebase (see ATTRIBUTIONS.md)
 //! (the re-exec-in-Docker pattern for S5 close) +
-//! refs/stakpak/libs/shell-tool-approvals/src/ (the gate, lifted as
+//! the reference codebase (see ATTRIBUTIONS.md) (the gate, lifted as
 //! P-09a).
 //!
 //! ## Stage 1 vs S5 close

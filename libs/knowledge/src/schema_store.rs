@@ -1,8 +1,8 @@
 //! `SchemaStore` trait — the seam every knowledge backend implements.
 //!
-//! Pattern: stakpak_arch.md §9 (SessionStorage trait shape — async methods,
+//! Pattern: the architecture reference §9 (SessionStorage trait shape — async methods,
 //! Send+Sync, typed error).
-//! Source: refs/stakpak/libs/api/src/storage.rs:25 (`pub trait SessionStorage`).
+//! Source: the reference codebase (see ATTRIBUTIONS.md) (`pub trait SessionStorage`).
 //! Constitution: Article VI (knowledge integrity), X (every method gets a tracing span).
 
 use crate::errors::SchemaError;

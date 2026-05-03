@@ -1,6 +1,6 @@
 //! `bedrock` provider — AWS Bedrock-hosted models.
 //!
-//! Pattern: refs/stakpak/libs/ai/src/providers/bedrock/. Full impl
+//! Pattern: the reference codebase (see ATTRIBUTIONS.md) Full impl
 //! deferred to S3+ (multi-cloud stage; AWS Bedrock makes most sense
 //! once we have AWS-as-target migrations producing volume that
 //! benefits from the Bedrock free-tier credits). Stage 1: the seam

@@ -1,12 +1,12 @@
 //! Tree-sitter-bash command extraction.
 //!
-//! Pattern: stakpak_arch.md §17 (lines 1811-1886). Source:
-//! refs/stakpak/libs/shell-tool-approvals/src/parse.rs:63-111
+//! Pattern: the architecture reference §17 (lines 1811-1886). Source:
+//! the reference codebase (see ATTRIBUTIONS.md)
 //! (verbatim DFS walker + parser reuse + nested -c handling).
 //!
-//! Stage 1 mirrors Stakpak's structure exactly. The only narrowing:
+//! Stage 1 mirrors the reference's structure exactly. The only narrowing:
 //! we don't yet implement the `ENV_VALUED_ARGS` / `XARGS_VALUED_FLAGS`
-//! tables that Stakpak uses to handle env-var prefixes and xargs
+//! tables that the reference uses to handle env-var prefixes and xargs
 //! flag-arg pairing — Stage 1 Executor only invokes simple
 //! `terraform <subcommand>` and `cargo <subcommand>` shapes.
 //!
@@ -17,18 +17,18 @@ use thiserror::Error;
 use tree_sitter::{Node, Parser};
 
 /// Maximum recursion for nested `bash -c "..."` scripts. Stage 1
-/// matches Stakpak's `parse.rs:57` cap of 5; deeper nesting is
+/// matches the reference's `parse.rs:57` cap of 5; deeper nesting is
 /// adversarial input.
 pub const MAX_SCRIPT_DEPTH: usize = 5;
 
 /// Shells that take a `-c` script argument we should recurse into.
-/// Stage 1 mirrors Stakpak's set; Terrashift Executor doesn't
+/// Stage 1 mirrors the reference's set; Terrashift Executor doesn't
 /// invoke these directly but the resolver uses the same list to
 /// catch evasion attempts (`bash -c "rm -rf /"`).
 const SHELLS: &[&str] = &["sh", "bash", "zsh", "ksh", "dash"];
 
 /// One command extracted from the AST. Mirrors
-/// `refs/stakpak/libs/shell-tool-approvals/src/parse.rs:42-48`.
+/// `the reference codebase (see ATTRIBUTIONS.md)`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ParsedCommand {
     pub name: Option<String>,
@@ -52,7 +52,7 @@ pub enum ParseError {
 }
 
 /// Walk the AST and extract every command node. DFS with explicit
-/// stack (matches Stakpak's pattern at `parse.rs:84-106`). Reverse-
+/// stack (matches the reference's pattern at `parse.rs:84-106`). Reverse-
 /// child push so DFS yields commands in source order.
 ///
 /// Returns `Ok(vec![])` for empty / comment-only / whitespace-only
@@ -86,8 +86,8 @@ pub fn parse(input: &str) -> Result<Vec<ParsedCommand>, ParseError> {
                     // Detect nested shell -c "<inner>" — push the inner
                     // script onto the stack so we recurse into it.
                     //
-                    // **Divergence from Stakpak (security-auditor LOW #2):**
-                    // Stakpak's parser pushes BOTH the outer `bash` command
+                    // **Divergence from the reference (security-auditor LOW #2):**
+                    // the reference's parser pushes BOTH the outer `bash` command
                     // AND the inner script onto the result list (its
                     // `parse.rs:90-96` always pushes `cmd`). Terrashift
                     // narrows: when nested extraction succeeds, we elide
@@ -107,7 +107,7 @@ pub fn parse(input: &str) -> Result<Vec<ParsedCommand>, ParseError> {
                 }
             }
             // Push children in REVERSE so DFS visits them in source order.
-            // Mirrors Stakpak's `parse.rs:99-101` pattern.
+            // Mirrors the reference's `parse.rs:99-101` pattern.
             // tree-sitter 0.26: `child_count()` returns `usize`,
             // `child(i)` takes `u32`. AST child counts are always
             // tiny so a `try_from` overflow is unreachable; fall

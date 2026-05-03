@@ -37,7 +37,7 @@ impl ValidationReport {
 /// Why these are blocking and not warnings: each one means
 /// `terraform plan` will fail at Executor time with a deterministic
 /// error. Surfacing them at Validator-time (before HCL emit) is what
-/// makes Article III load-bearing — Stakpak agents would just plow
+/// makes Article III load-bearing — the reference agents would just plow
 /// through and discover it later.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ValidationError {

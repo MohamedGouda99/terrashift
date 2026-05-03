@@ -1,6 +1,6 @@
 //! Request-shape conversion: `(Tier, prompt)` → `stakai::GenerateRequest`.
 //!
-//! Pattern: refs/stakpak/libs/ai/src/providers/openai/convert.rs.
+//! Pattern: the reference codebase (see ATTRIBUTIONS.md)
 //! Stage 1: minimal — single user message, no system prompt at the
 //! provider layer (the Mapper assembles its own system+user via
 //! `libs/engine/src/mapper/prompt.rs`).

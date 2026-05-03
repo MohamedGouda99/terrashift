@@ -7,7 +7,7 @@
 //! - `RecordingHook` accumulates lifecycle phase names so we can
 //!   assert the canonical hook-fire order.
 //!
-//! Pattern: stakpak_arch.md §8 (agent loop kernel test contract).
+//! Pattern: the architecture reference §8 (agent loop kernel test contract).
 //! Spec: specs/015-agent-loop-kernel/spec.md (User Stories 1-4).
 
 use async_trait::async_trait;

@@ -1,6 +1,6 @@
 //! `OpenAiCompat` — `Provider` trait impl for OpenAI-shape endpoints.
 //!
-//! Pattern: refs/stakpak/libs/ai/src/providers/openai/provider.rs.
+//! Pattern: the reference codebase (see ATTRIBUTIONS.md)
 //! Source: P-03 commit `e648dea` shipped this logic in
 //! `libs/ai/src/real.rs`; this commit relocates it into the
 //! canonical providers/openai_compat/ subtree per §39 row 1.

@@ -14,10 +14,10 @@
 //! Pattern: terrashift_plan.md §5 (agentic-vs-deterministic split — Mapper
 //! is single-LLM-call structured-output, NOT an agent), §6.X (strict JSON
 //! conforming to schemars-derived schema). Source patterns:
-//! - refs/stakpak/libs/agent-core/src/context.rs (ContextReducer trait shape)
-//! - refs/stakpak/libs/agent-core/src/agent.rs:159-187 (canonical
+//! - the reference codebase (see ATTRIBUTIONS.md) (ContextReducer trait shape)
+//! - the reference codebase (see ATTRIBUTIONS.md) (canonical
 //!   `reduce → generate` happy-path sequence)
-//! - refs/stakpak/tui/src/services/plan.rs:137-141 (Sha256 cache-key idiom)
+//! - the reference codebase (see ATTRIBUTIONS.md) (Sha256 cache-key idiom)
 //!
 //! Constitution: Article I (NOT an agent; single LLM call), Article III
 //! (output validated by Validator P-06 downstream), Article IV (loud
@@ -80,7 +80,7 @@ impl Mapper {
     /// Stage 1 deviation from the P-05 prompt: stakai 0.3.x has no
     /// `response_format` field, so we use prompt-instructed JSON output
     /// and parse the response string. Tool-call channel pattern from
-    /// refs/stakpak/libs/agent-core/src/agent.rs:284-298 is the
+    /// the reference codebase (see ATTRIBUTIONS.md) is the
     /// production path; deferred to S5+ pending eval signal.
     #[allow(clippy::too_many_arguments)]
     pub async fn map(

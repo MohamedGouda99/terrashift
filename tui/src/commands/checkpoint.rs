@@ -1,7 +1,7 @@
 //! `/checkpoint` — snapshot current run state for resume.
 //!
 //! Pattern: refs/claude-code/src/commands/<corresponding>/index.ts.
-//! Cross-cutting: stakpak_arch.md §22 (checkpoint envelope discipline);
+//! Cross-cutting: the architecture reference §22 (checkpoint envelope discipline);
 //! the `Action::Checkpoint` variant maps to the V1 envelope shape that
 //! ships with the agent loop kernel in S9.
 //! Constitution: Article II.

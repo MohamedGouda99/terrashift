@@ -1,7 +1,7 @@
 //! `CredentialBroker` trait + `Credential` (Zeroizing-wrapped value).
 //!
-//! Pattern: refs/stakpak/libs/shared/src/secrets/secret_manager.rs
-//! (zeroize discipline) + stakpak_arch.md §27 (broker as the single
+//! Pattern: the reference codebase (see ATTRIBUTIONS.md)
+//! (zeroize discipline) + the architecture reference §27 (broker as the single
 //! source of truth at the tool-execution boundary).
 //!
 //! Constitution: Article V (heart — the broker is the ONLY layer that

@@ -4,7 +4,7 @@
 //! TERRASHIFT_MAPPING.md §F2, Claude Code splits compaction into
 //! manual / threshold / reactive entry points — Stage 2+ Terrashift
 //! adopts the same split. Stage 1 wires only the manual entry.
-//! Cross-cutting: stakpak_arch.md §8 (CompactionEngine).
+//! Cross-cutting: the architecture reference §8 (CompactionEngine).
 
 use super::{Action, CommandContext, CommandOutcome, SlashCommand};
 

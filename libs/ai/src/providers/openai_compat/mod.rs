@@ -2,7 +2,7 @@
 //! OpenAI-shape gateway (Vodafone-internal, Together, Anyscale,
 //! Fireworks, DeepInfra, etc.).
 //!
-//! Pattern: refs/stakpak/libs/ai/src/providers/openai/ shape, with
+//! Pattern: the reference codebase (see ATTRIBUTIONS.md) shape, with
 //! `provider.rs` carrying the `Provider` trait impl, `convert.rs`
 //! the request-shape conversion, `stream.rs` the streaming layer
 //! (S5+ stub for Stage 1), and `types.rs` provider-specific

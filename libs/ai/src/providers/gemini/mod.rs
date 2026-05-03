@@ -1,6 +1,6 @@
 //! `gemini` provider — Google Gemini via the Generative Language API.
 //!
-//! Pattern: refs/stakpak/libs/ai/src/providers/gemini/. Full impl
+//! Pattern: the reference codebase (see ATTRIBUTIONS.md) Full impl
 //! deferred to S2+. Stage 1: the seam exists with the canonical
 //! `Provider` trait impl returning `AiError::UnsupportedProviderType`
 //! so the registry compiles. Same stub pattern as `anthropic`.

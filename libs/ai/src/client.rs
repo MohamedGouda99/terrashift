@@ -1,6 +1,6 @@
 //! `LlmClient` trait + `StubClient`.
 //!
-//! Pattern: terrashift_plan.md §6.3 (LLM Router) + stakpak_arch.md §10
+//! Pattern: terrashift_plan.md §6.3 (LLM Router) + the architecture reference §10
 //! (provider-agnostic LLM interface). Stage 1 ships the trait + a
 //! deterministic stub for tests.
 //!

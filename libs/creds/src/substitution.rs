@@ -1,6 +1,6 @@
 //! `{{secret:NAME}}` substitution + reverse rebuild.
 //!
-//! Pattern: stakpak_arch.md §27 (`{{secret:name}}` reference shape;
+//! Pattern: the architecture reference §27 (`{{secret:name}}` reference shape;
 //! resolution at the tool-execution boundary).
 //! Constitution: Article V (LLM never sees raw values; only references
 //! travel through prompts), Article IV (malformed references and

@@ -1,11 +1,11 @@
 //! `Provider` trait — single seam every concrete provider implements.
 //!
-//! Pattern: stakpak_arch.md §39 row 1 / TERRASHIFT_MAPPING.md §A row 1
+//! Pattern: the architecture reference §39 row 1 / TERRASHIFT_MAPPING.md §A row 1
 //! canonical location: `libs/ai/src/provider/mod.rs` (trait) +
-//! `libs/ai/src/providers/{name}/` (concrete impls). Mirrors Stakpak's
-//! `refs/stakpak/libs/ai/src/provider/` shape.
+//! `libs/ai/src/providers/{name}/` (concrete impls). Mirrors the reference's
+//! `the reference codebase (see ATTRIBUTIONS.md)` shape.
 //!
-//! Stage 1 narrows the Stakpak `Provider` 4-method surface to a single
+//! Stage 1 narrows the the reference `Provider` 4-method surface to a single
 //! method (`complete`). Streaming + tool-call + structured-output
 //! methods land in S5+ when consumers (Recovery agent, Cost Optimizer)
 //! actually need them. The narrowing is documented inline so S5+
@@ -55,12 +55,12 @@ pub trait Provider: Send + Sync {
 ///
 /// This is the seam that grew naturally from P-03's hard-coded
 /// "if provider_type != 'openai-compatible' → Err" into the
-/// canonical Stakpak shape.
+/// canonical the reference shape.
 pub fn build_provider(resolved: &ResolvedModel) -> Result<Box<dyn Provider>, AiError> {
     use crate::providers::openai_compat;
 
     // Stage 1: only openai-compatible is functional. The stubs at
-    // `providers/{anthropic,gemini,bedrock}/` exist for Stakpak-shape
+    // `providers/{anthropic,gemini,bedrock}/` exist for the reference-shape
     // parity (so the `match` covers every type a profile might
     // declare), but `build_provider` short-circuits on those types
     // for fail-fast UX — operators learn at construction time, not
@@ -76,7 +76,7 @@ pub fn build_provider(resolved: &ResolvedModel) -> Result<Box<dyn Provider>, AiE
 }
 
 // Suppress dead-code warnings on the Stage 2+ stub provider structs
-// — they're public surface area for Stakpak shape parity, even
+// — they're public surface area for the reference shape parity, even
 // though `build_provider` doesn't construct them yet.
 #[doc(hidden)]
 #[allow(dead_code)]

@@ -1,9 +1,9 @@
 //! Tool execution seam — the trait every executor (per-tool dispatcher,
 //! ToolRegistry, sub-agent shells) implements.
 //!
-//! Pattern: stakpak_arch.md section 8 (THE CANONICAL AGENT LOOP — kernel-level
+//! Pattern: the architecture reference section 8 (THE CANONICAL AGENT LOOP — kernel-level
 //! seam #2 from TERRASHIFT_MAPPING.md §A).
-//! Source: refs/stakpak/libs/agent-core/src/tools.rs (verbatim — single
+//! Source: the reference codebase (see ATTRIBUTIONS.md) (verbatim — single
 //! source of truth for the dispatch contract).
 //! Constitution: Article I (architectural restraint), IV (failures loud).
 

@@ -1,7 +1,7 @@
 //! Per-command verdict resolver + max-restrictive aggregator.
 //!
-//! Pattern: stakpak_arch.md §17 + §30. Source:
-//! refs/stakpak/libs/shell-tool-approvals/src/resolver.rs:32-42
+//! Pattern: the architecture reference §17 + §30. Source:
+//! the reference codebase (see ATTRIBUTIONS.md)
 //! (per-command find_map + outer .max() aggregation, lifted with
 //! generics dropped — Stage 1 uses concrete `Verdict` instead of
 //! `T: Clone + Ord`).
@@ -14,7 +14,7 @@ use crate::Verdict;
 use std::collections::HashMap;
 
 /// `HashMap<scope_key, Verdict>` where scope_key is `::`-delimited.
-/// Examples (mirrors Stakpak's pattern at `resolver.rs:198-216`):
+/// Examples (mirrors the reference's pattern at `resolver.rs:198-216`):
 ///
 /// - `"run_command::terraform::apply" → Verdict::Deny`
 /// - `"run_command::terraform::plan"  → Verdict::Allow`
@@ -59,7 +59,7 @@ fn resolve_command(cmd: &ParsedCommand, policy: &Policy, default: Verdict) -> Ve
     //   run_command::terraform              (scope-only fallback)
     //   run_command                         (root scope)
     //
-    // Mirror of refs/stakpak/libs/shell-tool-approvals/src/resolver.rs:32-66
+    // Mirror of the reference codebase (see ATTRIBUTIONS.md)
     // narrowed to exact-match (no regex/glob arg patterns until S5+).
     let mut keys: Vec<String> = Vec::with_capacity(cmd.args.len() + 2);
 

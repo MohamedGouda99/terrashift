@@ -1,7 +1,7 @@
 //! `LocalSchemaStore` — sqlx + SQLite implementation of `SchemaStore`.
 //!
-//! Pattern: stakpak_arch.md §9 (analogous to Stakpak's local libsql backend).
-//! Source: refs/stakpak/libs/api/src/local/storage.rs (sqlx pattern reference).
+//! Pattern: the architecture reference §9 (analogous to the reference's local libsql backend).
+//! Source: the reference codebase (see ATTRIBUTIONS.md) (sqlx pattern reference).
 //! Constitution: Article VI (PK on (provider, version) enforces version pinning;
 //! INSERT OR IGNORE makes pinned-rewrite a silent no-op signaled via Ok(false)).
 

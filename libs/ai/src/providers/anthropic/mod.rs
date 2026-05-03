@@ -1,7 +1,7 @@
 //! `anthropic` provider — Claude / Sonnet / Opus / Haiku via the
 //! Anthropic Messages API.
 //!
-//! Pattern: refs/stakpak/libs/ai/src/providers/anthropic/. Full
+//! Pattern: the reference codebase (see ATTRIBUTIONS.md) Full
 //! impl deferred to S2+ when Recovery agent + Cost Optimizer agent
 //! actually use it (Article I — no new agents in Stage 1, so no
 //! consumer for the smart-tier model selection that drives Anthropic

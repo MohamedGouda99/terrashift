@@ -1,8 +1,8 @@
 //! `CompactionEngine` — overflow-recovery seam.
 //!
-//! Pattern: stakpak_arch.md §39 row 4 (TERRASHIFT_MAPPING.md §A row 4
+//! Pattern: the architecture reference §39 row 4 (TERRASHIFT_MAPPING.md §A row 4
 //! canonical location: `libs/agent-core/src/compaction.rs`).
-//! Source: refs/stakpak/libs/agent-core/src/compaction.rs:1-45
+//! Source: the reference codebase (see ATTRIBUTIONS.md)
 //! (trait + `PassthroughCompactionEngine`).
 //!
 //! Stage 1 ships the seam with the Passthrough impl. Real compaction
@@ -10,7 +10,7 @@
 //! arrives in S9 alongside the agent-loop kernel.
 //!
 //! ## Why ship the seam now
-//! Per `refs/stakpak/libs/agent-core/src/agent.rs:193-219`, compaction
+//! Per `the reference codebase (see ATTRIBUTIONS.md)`, compaction
 //! fires only on context-overflow errors during the agent loop —
 //! *not* on the happy path. Stage 1's deterministic pipeline doesn't
 //! invoke `compact()` at all (P-05 Mapper is a single LLM call; no
@@ -29,7 +29,7 @@ use async_trait::async_trait;
 
 /// What a `compact()` call returns.
 ///
-/// Mirrors `refs/stakpak/libs/agent-core/src/compaction.rs:5-11` shape.
+/// Mirrors `the reference codebase (see ATTRIBUTIONS.md)` shape.
 /// `tokens_before` / `tokens_after` are advisory; Stage 1's Passthrough
 /// reports them as equal (no truncation occurred). `truncated` flips
 /// to `true` only when a real compactor actually drops messages.
@@ -41,11 +41,11 @@ pub struct CompactionResult {
     pub truncated: bool,
 }
 
-/// The async trait Stakpak's agent loop calls when context overflows.
+/// The async trait the reference's agent loop calls when context overflows.
 /// Stage 1 Terrashift uses the same shape; Stage 1 doesn't actually
 /// invoke it (no agent loop yet) but the seam is ready.
 ///
-/// **Stage 1 narrowing**: Stakpak's `compact(messages, model)` carries
+/// **Stage 1 narrowing**: the reference's `compact(messages, model)` carries
 /// `&Model` so a budget-aware impl can compute per-model token budgets.
 /// Terrashift's Stage 1 `PassthroughCompactionEngine` ignores the
 /// argument; the seam is still there for S9. We use `crate::context::Message`
@@ -61,7 +61,7 @@ pub trait CompactionEngine: Send + Sync {
 }
 
 /// Stage 1 default — `Passthrough`, mirrors
-/// `refs/stakpak/libs/agent-core/src/compaction.rs:22-45`.
+/// `the reference codebase (see ATTRIBUTIONS.md)`.
 /// Returns input unchanged with token-counts derived from word-count
 /// proxy (no real tokenizer until S5+ when stakai's tokenizer is
 /// accessible without a model dependency).

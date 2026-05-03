@@ -4,11 +4,11 @@
 //!         (metadata + handler split, lazy-loaded). Adapted to Rust as
 //!         one `.rs` per command — no lazy load needed (Rust compiles
 //!         to one binary). Per TERRASHIFT_MAPPING.md §F1, this is the
-//!         *one* place we adopt Claude Code over Stakpak: Stakpak's
+//!         *one* place we adopt Claude Code over the reference: the reference's
 //!         centralised match in `cli/src/commands/mod.rs` requires
 //!         3 edit-sites per new command; ours stays at 1 file + 1
 //!         registry line.
-//! Stakpak counterpart: stakpak_arch.md §16 (TUI structure overall).
+//! the reference counterpart: the architecture reference §16 (TUI structure overall).
 //!
 //! Constitution: Article II (Claude Code conceptual borrow),
 //! Article IV (unknown commands → friendly Error, never silent),

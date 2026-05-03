@@ -1,8 +1,8 @@
 //! Terrashift credential broker — Article V cornerstone.
 //!
 //! Pattern: terrashift_plan.md §8 (auth & credentials),
-//! `Terrashift_Plan.docx §8` longform; stakpak_arch.md §27 (secret
-//! detection / redaction); refs/stakpak/libs/shared/src/secrets/
+//! `Terrashift_Plan.docx §8` longform; the architecture reference §27 (secret
+//! detection / redaction); the reference codebase (see ATTRIBUTIONS.md)
 //! (broker pattern + zeroize discipline).
 //!
 //! Constitution: Article V (LLM never sees raw values; broker resolves

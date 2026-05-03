@@ -1,6 +1,6 @@
 //! Terrashift TUI — Ratatui-based terminal UI.
 //!
-//! Pattern: stakpak_arch.md §16 (TUI structure: AppState, services/handlers,
+//! Pattern: the architecture reference §16 (TUI structure: AppState, services/handlers,
 //! dual-channel mpsc contract InputEvent / OutputEvent).
 //! Constitution: Article XIII rule 8 (don't add new InputEvent/OutputEvent
 //! variants without updating is_backend_event() — silent UI freezes are

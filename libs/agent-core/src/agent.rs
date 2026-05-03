@@ -1,7 +1,7 @@
 //! `run_agent` — the canonical Terrashift agent loop kernel (S9).
 //!
-//! Pattern: stakpak_arch.md §8 (THE CANONICAL AGENT LOOP).
-//! Source: refs/stakpak/libs/agent-core/src/agent.rs (859 lines, narrowed
+//! Pattern: the architecture reference §8 (THE CANONICAL AGENT LOOP).
+//! Source: the reference codebase (see ATTRIBUTIONS.md) (859 lines, narrowed
 //! for Stage 2 — see below).
 //!
 //! Constitution:
@@ -12,7 +12,7 @@
 //! - Article XIII rule 1 (ContextReducer on the LLM-call path).
 //! - Article XIII rule 9 (no duplicate tool_call_id within a turn).
 //!
-//! ## Stage 2 narrowing vs Stakpak's run_agent
+//! ## Stage 2 narrowing vs the reference's run_agent
 //!
 //! What we keep:
 //! - Multi-turn loop with bounded `max_turns`
@@ -205,7 +205,7 @@ pub trait AgentLlmClient: Send + Sync {
 /// Errors propagate up via `AgentError`. `Cancelled` from the
 /// `CancellationToken` is a clean stop — caller chooses whether to
 /// surface it as an error.
-#[allow(clippy::too_many_arguments)] // canonical Stakpak shape; keep parity
+#[allow(clippy::too_many_arguments)] // canonical the reference shape; keep parity
 pub async fn run_agent(
     config: &AgentLoopConfig,
     ctx: &AgentRunContext,

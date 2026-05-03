@@ -1,7 +1,7 @@
 //! Terrashift notifications — Stage-2 detached-mode surface.
 //!
 //! Pattern: terrashift_plan.md §13 (S13 — detached mode + notifications).
-//! Source: this is a Terrashift addition; no Stakpak counterpart (Stakpak
+//! Source: this is a Terrashift addition; no upstream counterpart (the reference
 //! ships a TUI / chat surface, not migration-job notifications).
 //!
 //! Constitution:

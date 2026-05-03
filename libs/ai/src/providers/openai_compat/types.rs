@@ -1,6 +1,6 @@
 //! Provider-specific request/response types — S5+ stub.
 //!
-//! Pattern: refs/stakpak/libs/ai/src/providers/openai/types.rs.
+//! Pattern: the reference codebase (see ATTRIBUTIONS.md)
 //! Stage 1 doesn't need provider-specific shapes: stakai's
 //! `GenerateRequest`/`GenerateResponse` cover everything the Mapper
 //! does today, and `convert.rs` translates `(Tier, prompt)` directly

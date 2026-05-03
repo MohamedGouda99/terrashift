@@ -1,8 +1,8 @@
 //! Retry policy — exponential backoff with header-driven override.
 //!
-//! Pattern: stakpak_arch.md §8 (kernel retry primitive).
-//! Source: refs/stakpak/libs/agent-core/src/retry.rs (verbatim port — the
-//! Stakpak impl is a clean ~185-line stateless function set; no Stage 2
+//! Pattern: the architecture reference §8 (kernel retry primitive).
+//! Source: the reference codebase (see ATTRIBUTIONS.md) (verbatim port — the
+//! the reference impl is a clean ~185-line stateless function set; no Stage 2
 //! narrowing needed).
 //!
 //! Constitution: Article IV (loud errors — exhausted retries surface as

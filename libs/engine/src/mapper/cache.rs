@@ -1,6 +1,6 @@
 //! `MapperCache` + `estate_cache_key` — Article XII rule 2 enforcement.
 //!
-//! Pattern: refs/stakpak/tui/src/services/plan.rs:137-141
+//! Pattern: the reference codebase (see ATTRIBUTIONS.md)
 //! (`compute_plan_hash` — `Sha256::new() → update(bytes) →
 //! format!("{:x}", finalize())`). Identical idiom; the cache key
 //! is the canonical-JSON hash of the input.

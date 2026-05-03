@@ -1,12 +1,12 @@
 //! Top-level agent error.
 //!
-//! Pattern: stakpak_arch.md section 8 (kernel error taxonomy).
-//! Source: refs/stakpak/libs/agent-core/src/error.rs (subset — see clarify Q4).
+//! Pattern: the architecture reference section 8 (kernel error taxonomy).
+//! Source: the reference codebase (see ATTRIBUTIONS.md) (subset — see clarify Q4).
 //! Constitution: Article IV (failures must be loud — every public method
 //! returning Result<_, AgentError> is auditable).
 //!
 //! P-02 scope: only the variants needed by `tools.rs`, `hooks.rs`,
-//! `registry.rs`. Stakpak's full enum has variants for approval, checkpoint,
+//! `registry.rs`. the reference's full enum has variants for approval, checkpoint,
 //! stream — those modules don't exist yet, so their `From` impls would not
 //! compile. Each variant arrives with its module:
 //!   - Approval     → S9 (this commit; agent loop kernel)
@@ -19,7 +19,7 @@ use thiserror::Error;
 
 /// Errors that propagate out of the agent kernel.
 ///
-/// Variant signatures match `refs/stakpak/libs/agent-core/src/error.rs`
+/// Variant signatures match `the reference codebase (see ATTRIBUTIONS.md)`
 /// exactly — future expansion is purely additive (new variants, never
 /// renamed).
 #[derive(Debug, Error)]

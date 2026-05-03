@@ -5,7 +5,7 @@
 //! XIII rule 5 — pre-write scrubber panics on detected raw secrets).
 //!
 //! Pattern: terrashift_plan.md §6.X (full schema + invariants).
-//! Source: refs/stakpak/libs/agent-core/src/checkpoint.rs (envelope discipline).
+//! Source: the reference codebase (see ATTRIBUTIONS.md) (envelope discipline).
 //! Constitution: Article V (audit invariant), IX (data governance —
 //! append-only, never auto-deleted), XIII rules 3 + 5.
 //!

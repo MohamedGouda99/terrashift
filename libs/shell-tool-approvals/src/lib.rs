@@ -4,8 +4,8 @@
 //! pipeline wholesale. The Executor (P-09b) consumes this crate to
 //! gate every `terraform plan`/`apply`/`destroy` invocation.
 //!
-//! Pattern: stakpak_arch.md §17 (lines 1811-1886) + §30 (lines
-//! 2307-2313). Source: refs/stakpak/libs/shell-tool-approvals/src/
+//! Pattern: the architecture reference §17 (lines 1811-1886) + §30 (lines
+//! 2307-2313). Source: the reference codebase (see ATTRIBUTIONS.md)
 //! (lifted with documented narrowing — Stage 1 has exact-match args
 //! only; full regex/glob/cache machinery deferred to S5+).
 //!
@@ -41,7 +41,7 @@ use std::collections::HashMap;
 /// `Ord` does the right thing under `Iterator::max()` —
 /// `Allow(0) < Prompt(1) < Deny(2)`. Most-restrictive wins.
 ///
-/// Mirrors `refs/stakpak/tui/src/services/auto_approve.rs:20-29`'s
+/// Mirrors `the reference codebase (see ATTRIBUTIONS.md)`'s
 /// `AutoApprovePolicy` shape: same numeric ordering, named differently
 /// because Terrashift's domain (terraform commands at the executor
 /// boundary) speaks the language of Allow/Prompt/Deny rather than
@@ -61,7 +61,7 @@ impl Default for Verdict {
     }
 }
 
-/// Failure-closed clamp idiom from `refs/stakpak/tui/src/services/auto_approve.rs:486-498`.
+/// Failure-closed clamp idiom from `the reference codebase (see ATTRIBUTIONS.md)`.
 /// Any `Allow` in the input snaps up to `Prompt`; `Deny` stays `Deny`.
 /// `ParseError` paths flow through here so a parse failure CAN NEVER
 /// yield `Allow` — Article IV / §30 idiom.
@@ -122,10 +122,10 @@ pub fn stage1_policy() -> Policy {
     p.insert("run_command::nc".to_string(), Verdict::Deny);
 
     // `env`/`xargs` evasion (Stage 1 stopgap; security-auditor LOW #1).
-    // Stakpak's parser handles `env bash -c "..."` by walking the
+    // the reference's parser handles `env bash -c "..."` by walking the
     // ENV_VALUED_ARGS table to find the inner script. Terrashift Stage 1
     // narrows the parser to direct `<shell> -c` only — so until S5+
-    // ports the env/xargs nested-script extraction (Stakpak parse.rs
+    // ports the env/xargs nested-script extraction (the reference parse.rs
     // lines 217-268), we slam the door on env-prefixed evasion by
     // marking `env` itself Deny. The Executor (P-09b) doesn't invoke
     // `env` directly so this has zero false-positive risk for Stage 1.

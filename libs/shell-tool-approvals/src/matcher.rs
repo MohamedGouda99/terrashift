@@ -1,12 +1,12 @@
 //! Argument-level pattern matcher (Stage 1: exact-match only).
 //!
-//! Pattern: refs/stakpak/libs/shell-tool-approvals/src/matcher.rs
+//! Pattern: the reference codebase (see ATTRIBUTIONS.md)
 //! ships full regex (`re:` prefix), glob auto-detection, and a
 //! `OnceLock<Mutex<PatternCache>>`. Stage 1 narrows to exact
 //! string equality — the rule maps Stage 1 needs (terraform/cargo/
 //! git/echo) don't yet require pattern matching.
 //!
-//! Stage 5+ swaps in the full Stakpak matcher when the rule map grows
+//! Stage 5+ swaps in the full the reference matcher when the rule map grows
 //! to include arg patterns (e.g., `terraform::apply::-target=*`).
 //!
 //! Constitution: Article IV (no silent partial-match fallthrough;

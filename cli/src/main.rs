@@ -2,7 +2,7 @@
 //!
 //! Argument parsing and command dispatch. Business logic lives in `libs/`.
 //!
-//! Pattern: stakpak_arch.md section 14 (CLI surface), section 16 (TUI integration).
+//! Pattern: the architecture reference section 14 (CLI surface), section 16 (TUI integration).
 //! Constitution: Article VII (repository hygiene — thin CLI, fat libs).
 
 use anyhow::Result;

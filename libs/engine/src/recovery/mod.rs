@@ -3,7 +3,7 @@
 //!
 //! Pattern: terrashift_plan.md §5 (one of 3 allowed agents per Article I).
 //! Source: Terrashift addition; uses S9's `terrashift_agent_core::run_agent`
-//! kernel. No direct Stakpak counterpart — Stakpak's agent loop is generic;
+//! kernel. No direct the reference counterpart — the reference's agent loop is generic;
 //! Terrashift specializes it to "fix HCL emit errors" here.
 //!
 //! Constitution:

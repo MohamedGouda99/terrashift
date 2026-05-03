@@ -1,7 +1,7 @@
 //! Audit entry types — the on-disk schema that compliance reviewers will read.
 //!
 //! Pattern: terrashift_plan.md §6.X (full AuditPayload variants).
-//! Source: refs/stakpak/libs/agent-core/src/checkpoint.rs (envelope shape inspiration).
+//! Source: the reference codebase (see ATTRIBUTIONS.md) (envelope shape inspiration).
 //! Constitution: Article V (audit invariant — every LLM-touching op has provider+model_id+endpoint),
 //! Article IX (append-only, never auto-deleted).
 

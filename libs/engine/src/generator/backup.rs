@@ -1,9 +1,9 @@
 //! Reversible file operations — move-to-backup with EXDEV fallback.
 //!
-//! Pattern: stakpak_arch.md §28 (reversible file operations).
-//! Source: refs/stakpak/libs/shared/src/file_backup_manager.rs:13-42
+//! Pattern: the architecture reference §28 (reversible file operations).
+//! Source: the reference codebase (see ATTRIBUTIONS.md)
 //!         (verbatim shape; Terrashift adds an EXDEV copy+remove fallback
-//!         that Stakpak lacks per §28's caveat list).
+//!         that the reference lacks per §28's caveat list).
 //! Constitution: Article IV (loud failures), Article V (reversible),
 //!               Article IX (backups archival, never auto-deleted),
 //!               Article XIII rule 3 (no unwrap/expect/string-slice).
@@ -12,8 +12,8 @@ use crate::generator::errors::BackupError;
 use std::path::{Path, PathBuf};
 use uuid::Uuid;
 
-/// Where backups for a given run live. Stakpak's path is
-/// `.stakpak/session/backups/{uuid}/` (per `file_backup_manager.rs:21-23`).
+/// Where backups for a given run live. the reference's path is
+/// `.the reference/session/backups/{uuid}/` (per `file_backup_manager.rs:21-23`).
 /// Terrashift adds the `run_id` layer so audit replay can scope by run —
 /// orphan backups without a run scope would be a bug (Article IV).
 pub fn backup_root(cwd: &Path, run_id: Uuid) -> PathBuf {
@@ -27,13 +27,13 @@ pub fn backup_root(cwd: &Path, run_id: Uuid) -> PathBuf {
 /// backup path.
 ///
 /// Mirrors `FileBackupManager::move_local_path_to_backup` at
-/// `refs/stakpak/libs/shared/src/file_backup_manager.rs:13-42`. The
-/// per-call `op_uuid` is generated fresh (line 20 in the Stakpak source).
+/// `the reference codebase (see ATTRIBUTIONS.md)`. The
+/// per-call `op_uuid` is generated fresh (line 20 in the the reference source).
 ///
-/// **Deviation from Stakpak (deliberate):** when `std::fs::rename` fails
+/// **Deviation from the reference (deliberate):** when `std::fs::rename` fails
 /// because the source and destination are on different mounts (EXDEV on
 /// Linux/macOS, ERROR_NOT_SAME_DEVICE on Windows), we fall back to
-/// `copy + remove_file` instead of bubbling the OS error up. Stakpak
+/// `copy + remove_file` instead of bubbling the OS error up. the reference
 /// (`file_backup_manager.rs:35-41`) bails on EXDEV; that turns a backup
 /// into a hard error in cases where the user's `output_dir` happens to
 /// be on a different mount than `cwd` — common on Windows with separate
@@ -51,7 +51,7 @@ pub fn move_to_backup(cwd: &Path, run_id: Uuid, path: &Path) -> Result<PathBuf, 
         source: e,
     })?;
 
-    // Stakpak `file_backup_manager.rs:29-32` falls back on a fixed name if
+    // the reference `file_backup_manager.rs:29-32` falls back on a fixed name if
     // the original lacks a representable file_name — same here, but routed
     // through `unwrap_or` (allowed when the fallback is a deliberate
     // default, not a panic-shortcut; Article XIII rule 3 covers actual
@@ -78,7 +78,7 @@ pub fn move_to_backup(cwd: &Path, run_id: Uuid, path: &Path) -> Result<PathBuf, 
 /// Same EXDEV fallback applies in reverse.
 pub fn restore_from_backup(backup_path: &Path, original_path: &Path) -> Result<(), BackupError> {
     // Ensure parent exists. We can't use let-chains (workspace edition is
-    // 2021); refs/stakpak/libs/shared/src/local_store.rs:27-29 uses them
+    // 2021); the reference codebase (see ATTRIBUTIONS.md) uses them
     // (edition 2024).
     if let Some(parent) = original_path.parent() {
         if !parent.exists() {

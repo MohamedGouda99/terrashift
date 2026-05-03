@@ -34,8 +34,8 @@ use std::path::{Path, PathBuf};
 /// merge in `BaselineMode::Strict`.
 ///
 /// 30 chosen because it's a generous tolerance for prompt-tuning churn
-/// without letting cost drift go undetected. Stakpak's CI uses 25%
-/// (refs/stakpak — informal); we picked 30% in `Constitution.md`
+/// without letting cost drift go undetected. the reference's CI uses 25%
+/// (refs/the reference — informal); we picked 30% in `Constitution.md`
 /// Article XII rule 4 to give Mapper prompt iteration breathing room
 /// during Stage 1-2.
 pub const REGRESSION_THRESHOLD_PCT: f64 = 30.0;

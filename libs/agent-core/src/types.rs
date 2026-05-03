@@ -1,8 +1,8 @@
 //! Core agent types: run context, proposed tool calls, decisions, approval
 //! policy, retry config, agent commands, and loop result.
 //!
-//! Pattern: stakpak_arch.md section 8 (the canonical agent loop kernel).
-//! Source: refs/stakpak/libs/agent-core/src/types.rs (subset — only what
+//! Pattern: the architecture reference section 8 (the canonical agent loop kernel).
+//! Source: the reference codebase (see ATTRIBUTIONS.md) (subset — only what
 //! the Stage-1 + S9 surface needs).
 //! Constitution: Article I (architectural restraint), II (verbatim mirror),
 //! XIII rule 9 (no duplicate tool_call_id — enforced at the AgentCommand
@@ -19,7 +19,7 @@ use uuid::Uuid;
 /// Per-run identity passed into every `ToolExecutor::execute_tool_call` and
 /// every `AgentHook` lifecycle method.
 ///
-/// Verbatim from Stakpak (`refs/stakpak/libs/agent-core/src/types.rs:8-12`).
+/// Verbatim from the reference codebase (see ATTRIBUTIONS.md).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AgentRunContext {
     pub run_id: Uuid,
@@ -28,7 +28,7 @@ pub struct AgentRunContext {
 
 /// A tool call proposed by the LLM, before approval and execution.
 ///
-/// Verbatim from Stakpak (`refs/stakpak/libs/agent-core/src/types.rs:336-343`).
+/// Verbatim from the reference codebase (see ATTRIBUTIONS.md).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProposedToolCall {
     pub id: String,
@@ -40,7 +40,7 @@ pub struct ProposedToolCall {
 
 /// User decision on a proposed tool call, returned by the approval flow.
 ///
-/// Verbatim from Stakpak (`refs/stakpak/libs/agent-core/src/types.rs:311-315`).
+/// Verbatim from the reference codebase (see ATTRIBUTIONS.md).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ToolDecision {
     Accept,
@@ -54,7 +54,7 @@ pub enum ToolDecision {
 
 /// What the approval policy says to do for a given tool call.
 ///
-/// Verbatim from Stakpak (`refs/stakpak/libs/agent-core/src/types.rs`).
+/// Verbatim from the reference codebase (see ATTRIBUTIONS.md).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ToolApprovalAction {
     /// Auto-accept without user prompt.
@@ -109,7 +109,7 @@ impl ToolApprovalPolicy {
 
 /// Retry policy for transient LLM errors (rate limits, 5xx, timeouts).
 ///
-/// Verbatim from Stakpak (`refs/stakpak/libs/agent-core/src/types.rs`).
+/// Verbatim from the reference codebase (see ATTRIBUTIONS.md).
 #[derive(Debug, Clone, PartialEq)]
 pub struct RetryConfig {
     pub max_attempts: usize,
@@ -137,7 +137,7 @@ impl Default for RetryConfig {
 /// approval-resolution commands; Stage 5 (S13 detached mode) extends with
 /// `Steer`, `FollowUp`, `SwitchModel`, `Abort`.
 ///
-/// Pattern: refs/stakpak/libs/agent-core/src/types.rs (narrowed).
+/// Pattern: the reference codebase (see ATTRIBUTIONS.md) (narrowed).
 #[derive(Debug, Clone)]
 pub enum AgentCommand {
     /// Resolve a single proposed tool call.
@@ -176,7 +176,7 @@ impl Default for AgentLoopConfig {
             max_turns: 8,
             retry: RetryConfig::default(),
             approval_policy: ToolApprovalPolicy::None,
-            // 70k matches Stakpak's default for Anthropic 200k context;
+            // 70k matches the reference's default for Anthropic 200k context;
             // proper per-model thresholds arrive in Stage 5+ when the
             // tier-aware router widens the trait surface.
             compaction_threshold_tokens: 70_000,

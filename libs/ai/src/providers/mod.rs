@@ -1,8 +1,8 @@
 //! Concrete provider implementations.
 //!
-//! Pattern: stakpak_arch.md §39 row 1 / refs/stakpak/libs/ai/src/providers/.
+//! Pattern: the architecture reference §39 row 1 / the reference codebase (see ATTRIBUTIONS.md)
 //! Each provider lives in its own subdirectory with the canonical
-//! `{convert, mod, provider, stream, types}.rs` shape (Stakpak parity).
+//! `{convert, mod, provider, stream, types}.rs` shape (the reference parity).
 //!
 //! Stage 1 active:
 //! - `openai_compat` — Groq, OpenAI, custom OpenAI-shape gateways

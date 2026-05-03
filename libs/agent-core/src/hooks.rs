@@ -1,9 +1,9 @@
 //! Lifecycle hooks — observation seam for cross-cutting concerns (audit,
 //! credential resolution, telemetry, cost tracking).
 //!
-//! Pattern: stakpak_arch.md section 8 (kernel seam #3 from
+//! Pattern: the architecture reference section 8 (kernel seam #3 from
 //! TERRASHIFT_MAPPING.md §A — `AgentHook` with 5 default-no-op methods).
-//! Source: refs/stakpak/libs/agent-core/src/hooks.rs (verbatim).
+//! Source: the reference codebase (see ATTRIBUTIONS.md) (verbatim).
 //! Constitution: Article I (bounded blast radius via observation, not
 //! mutation), V (audit hook is REQUIRED on `after_tool_execution`).
 //!

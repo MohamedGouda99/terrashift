@@ -1,7 +1,7 @@
 //! Validator — Article III enforcement gate.
 //!
-//! Pattern: Terrashift-specific (no Stakpak counterpart — migration domain).
-//! Closest analog is `stakpak_arch.md §27` (single redaction enforcement
+//! Pattern: Terrashift-specific (no upstream counterpart — migration domain).
+//! Closest analog is `the architecture reference §27` (single redaction enforcement
 //! point), which we mirror in spirit: one place where the AI-safety
 //! invariant gets enforced, bypassing it is a CI failure.
 //!

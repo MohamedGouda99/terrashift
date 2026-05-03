@@ -1,8 +1,8 @@
 //! `ApprovalStateMachine` — ordered tool-call approval dispatcher.
 //!
-//! Pattern: stakpak_arch.md §8 (kernel safety primitive).
-//! Source: refs/stakpak/libs/agent-core/src/approval.rs (verbatim port; the
-//! Stakpak impl is a clean, self-contained 320-line state machine that
+//! Pattern: the architecture reference §8 (kernel safety primitive).
+//! Source: the reference codebase (see ATTRIBUTIONS.md) (verbatim port; the
+//! the reference impl is a clean, self-contained 320-line state machine that
 //! enforces ordered dispatch — no Stage 2 narrowing needed).
 //!
 //! Constitution: Article XIII rule 9 (no duplicate tool_call_id; this

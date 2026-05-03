@@ -2,19 +2,19 @@
 //!
 //! **The foundation that every Terrashift tool uses.**
 //!
-//! Pattern: stakpak_arch.md section 8 (THE CANONICAL AGENT LOOP — most
+//! Pattern: the architecture reference section 8 (THE CANONICAL AGENT LOOP — most
 //! important section in the architecture document).
-//! Source: refs/stakpak/libs/agent-core/src/lib.rs (subset — see
+//! Source: the reference codebase (see ATTRIBUTIONS.md) (subset — see
 //! `specs/002-tool-trait-and-executor/spec.md` for the deferred modules).
 //!
 //! Constitution: Article I (architectural restraint — agents have bounded
-//! blast radius via the seam model), Article II (mirror Stakpak), Article IV
+//! blast radius via the seam model), Article II (mirror the reference), Article IV
 //! (failures must be loud), Article XIII rule 3 (no unwrap/expect/string-slice
 //! in production).
 //!
 //! ## Module set
 //!
-//! Stage 1 ships every seam from `stakpak_arch.md §39 rows 1-5` that
+//! Stage 1 ships every seam from `the architecture reference §39 rows 1-5` that
 //! has a Stage-1 consumer or a Default impl. S9 (this commit) adds
 //! the agent-loop kernel modules so Stage 2 consumers (S10 Recovery
 //! agent, S11 Cost Optimizer) can compile against a type-system-stable
@@ -48,7 +48,7 @@ pub mod retry;
 pub mod tools;
 pub mod types;
 
-// Re-exports follow Stakpak's lib.rs pattern (subset).
+// Re-exports follow the reference's lib.rs pattern (subset).
 pub use agent::{
     run_agent, AgentLlmClient, AgentMessage, AgentToolDef, LlmTurnError, LlmTurnOutcome,
 };

@@ -1,6 +1,6 @@
 //! HCL emit + file write — composes blocks into `Body`, serializes, writes.
 //!
-//! Pattern: stakpak_arch.md §28 (file ops via the backup wrapper).
+//! Pattern: the architecture reference §28 (file ops via the backup wrapper).
 //! Constitution: Article VI (deterministic — sort + stable serialization),
 //!               Article XIII rule 3 (no unwrap/expect in production).
 
@@ -27,8 +27,8 @@ pub struct EmittedFile {
 /// `EmittedFile` list.
 ///
 /// `cwd` is the working directory (for placing the `.terrashift/` backup
-/// tree). Stakpak uses `std::env::current_dir()` directly
-/// (`refs/stakpak/libs/shared/src/local_store.rs:7-11`); we accept it as a
+/// tree). the reference uses `std::env::current_dir()` directly
+/// (`the reference codebase (see ATTRIBUTIONS.md)`); we accept it as a
 /// parameter so tests can isolate via `tempfile`.
 pub fn emit(
     cwd: &Path,

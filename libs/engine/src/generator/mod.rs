@@ -5,8 +5,8 @@
 //! files in the output directory. Pure deterministic Rust — NO LLM in
 //! the happy path (Article I).
 //!
-//! Pattern: stakpak_arch.md §28 (reversible file operations).
-//! Source: refs/stakpak/libs/shared/src/file_backup_manager.rs:13-70
+//! Pattern: the architecture reference §28 (reversible file operations).
+//! Source: the reference codebase (see ATTRIBUTIONS.md)
 //!         (verbatim move-to-backup; we add EXDEV copy+remove fallback).
 //! Constitution: Article I (deterministic, not an agent),
 //!               Article IV (loud failures on template miss),
@@ -69,7 +69,7 @@ impl Generator {
     /// 2. Groups by `target_type` → one file per type.
     /// 3. For each existing file at the target path: moves to
     ///    `<cwd>/.terrashift/runs/{run_id}/backups/{op_uuid}/<filename>`
-    ///    (mirrors `refs/stakpak/libs/shared/src/file_backup_manager.rs:13-42`).
+    ///    (mirrors `the reference codebase (see ATTRIBUTIONS.md)`).
     /// 4. Writes the new content.
     ///
     /// `cwd` is where the `.terrashift/` backup tree lives. Tests pass a

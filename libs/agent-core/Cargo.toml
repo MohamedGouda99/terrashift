@@ -24,7 +24,7 @@ async-trait = "0.1"
 uuid = { workspace = true }
 chrono = { workspace = true }
 
-# stakai for Message + Model in hooks (mirrors refs/stakpak/libs/agent-core/src/hooks.rs)
+# stakai for Message + Model in hooks (mirrors the reference codebase (see ATTRIBUTIONS.md))
 stakai = { workspace = true }
 
 # Internal
