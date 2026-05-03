@@ -1,0 +1,60 @@
+name: Bug report
+description: Something doesn't work the way the docs/spec say it should.
+title: "[bug] "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing a bug. Please include enough detail that someone
+        can reproduce it from a clean checkout.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Actual behaviour vs. expected.
+      placeholder: |
+        I ran `terrashift migrate ...` and got X. I expected Y per docs.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: Minimal command sequence + fixture/profile.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Terrashift version
+      description: Output of `terrashift --version`.
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: stage
+    attributes:
+      label: Stage
+      description: Which production-readiness tier are you on?
+      options:
+        - "Stage 1 (MVP)"
+        - "Stage 2 (MVP+)"
+        - "Stage 3+ (Production / GA)"
+        - "Not sure"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / audit-log entry
+      description: Relevant log output. Redact creds before posting.
+      render: shell
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Constitution check
+      options:
+        - label: I have not pasted any secrets, API keys, or PII (Article V).
+          required: true

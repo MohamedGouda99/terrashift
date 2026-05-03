@@ -1,0 +1,38 @@
+# Dependabot — supply chain hygiene for Cargo + GitHub Actions.
+# Pattern: Article XIII rule 10 (no untracked dependency drift).
+# Constitution: Article VII (repository hygiene).
+
+version: 2
+updates:
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    groups:
+      rust-deps:
+        patterns: ["*"]
+        exclude-patterns: ["stakai", "rmcp"]
+    # stakai + rmcp are pinned per CLAUDE.md (LLM/MCP plumbing) —
+    # bumping them needs an explicit refs/ re-audit, not a PR-bot bump.
+    ignore:
+      - dependency-name: "stakai"
+      - dependency-name: "rmcp"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore(ci)"
+      include: "scope"

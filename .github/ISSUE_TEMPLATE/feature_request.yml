@@ -1,0 +1,48 @@
+name: Feature request
+description: Propose a new feature, agent, or seam. New agents require RFC.
+title: "[feat] "
+labels: ["feature", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Per Constitution Article I, **adding a new agent requires an RFC + stage-gate approval.**
+        Plain seam/feature additions can use this form directly.
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: What problem does this solve? Who needs it?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What should change? Reference stakpak_arch.md §N if mirroring a Stakpak pattern.
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options:
+        - "New seam / library"
+        - "New agent (requires RFC — see Article I)"
+        - "Behaviour change to existing seam"
+        - "CLI / TUI surface change"
+        - "Eval / fixture addition"
+        - "Other"
+    validations:
+      required: true
+  - type: input
+    id: stage
+    attributes:
+      label: Target stage
+      placeholder: "Stage 1 / 2 / 3 / 4 / 5 / 6"
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered

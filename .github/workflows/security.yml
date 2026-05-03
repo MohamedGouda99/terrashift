@@ -1,0 +1,39 @@
+# Security audit pipeline — cargo-audit + gitleaks.
+# Pattern: stakpak_arch.md section 32 (CI matrix), Article V (creds).
+# Constitution: Article XIII rule 5 (no raw secrets in committed code or logs).
+
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly Monday 06:00 UTC — same cadence as dependabot
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  cargo-audit:
+    name: cargo audit (RUSTSEC advisories)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: rustsec/audit-check@v2.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  gitleaks:
+    name: gitleaks (secret scanning)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

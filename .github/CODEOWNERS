@@ -1,0 +1,28 @@
+# CODEOWNERS — review gate for high-blast-radius seams.
+# Pattern: stakpak_arch.md §39 (canonical seam map).
+# Constitution: Article V (creds), Article XIII rules 5+6 (audit / shell approvals).
+#
+# Entries below require explicit review before merge. The repo owner
+# is the default reviewer until additional maintainers are added.
+
+# Default — repo owner reviews everything not covered below
+*                              @MohamedGouda99
+
+# Constitution + plan + mapping — never edit without author sign-off
+/CONSTITUTION.md               @MohamedGouda99
+/TERRASHIFT_MAPPING.md         @MohamedGouda99
+/terrashift_plan.md            @MohamedGouda99
+/SESSION_PLAN.md               @MohamedGouda99
+/CLAUDE.md                     @MohamedGouda99
+
+# High-blast-radius seams (Article V / XIII rule 5)
+/libs/audit/                   @MohamedGouda99
+/libs/creds/                   @MohamedGouda99
+/libs/engine/src/executor/     @MohamedGouda99
+/libs/ai/src/provider/         @MohamedGouda99
+/libs/ai/src/providers/        @MohamedGouda99
+
+# CI + release pipeline
+/.github/workflows/            @MohamedGouda99
+/Cargo.toml                    @MohamedGouda99
+/Cargo.lock                    @MohamedGouda99
