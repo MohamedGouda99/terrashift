@@ -27,13 +27,19 @@
 //! is a Stage-1 local that converges with stakai's in S5+).
 
 pub mod cache;
-pub mod context;
 pub mod errors;
 pub mod prompt;
 
 pub use cache::{estate_cache_key, MapperCache};
-pub use context::{ContextReducer, Message, PassthroughContextReducer, Role};
 pub use errors::MapperError;
+
+// Article II + TERRASHIFT_MAPPING.md §A row 5: ContextReducer is a
+// kernel-level seam in `terrashift-agent-core`, not a mapper-local
+// type. The previous mapper-local `mod context` was a P-05 Stage-1
+// shortcut; relocated to `libs/agent-core/src/context.rs` so
+// Recovery / Cost Optimizer (S10/S11) can use the same trait without
+// importing libs/engine.
+pub use terrashift_agent_core::{ContextReducer, Message, PassthroughContextReducer, Role};
 
 use crate::scanner::EstateInventory;
 use serde::{Deserialize, Serialize};

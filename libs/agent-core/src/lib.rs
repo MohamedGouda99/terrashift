@@ -12,23 +12,30 @@
 //! (failures must be loud), Article XIII rule 3 (no unwrap/expect/string-slice
 //! in production).
 //!
-//! ## P-02 module set (this commit)
+//! ## Module set
 //!
-//! - `tools`    — `ToolExecutor` trait + `ToolExecutionResult` enum
-//! - `hooks`    — `AgentHook` trait, 5 lifecycle methods (default no-op)
-//! - `error`    — `AgentError` enum (minimal subset; grows per P-NN)
-//! - `types`    — `AgentRunContext`, `ProposedToolCall`, `ToolDecision`
-//! - `registry` — `ToolRegistry` (Terrashift addition; HashMap dispatch)
+//! Stage 1 ships every seam from `stakpak_arch.md §39 rows 1-5` that
+//! has a Stage-1 consumer or a Default impl. The IMPLS that matter
+//! arrive in later P-NN; the SEAMS ship now so consumers compile
+//! against type-system-stable contracts.
 //!
-//! ## Modules deferred to later P-NN (not yet present)
+//! - `tools`      — `ToolExecutor` trait + `ToolExecutionResult` enum (P-02)
+//! - `hooks`      — `AgentHook` trait, 5 lifecycle methods (P-02)
+//! - `error`      — `AgentError` enum (P-02; grows per P-NN)
+//! - `types`      — `AgentRunContext`, `ProposedToolCall`, `ToolDecision` (P-02)
+//! - `registry`   — `ToolRegistry` (P-02; Terrashift addition; HashMap dispatch)
+//! - `context`    — `ContextReducer` + `PassthroughContextReducer` (§A row 5; relocated from libs/engine/src/mapper/context.rs)
+//! - `compaction` — `CompactionEngine` + `PassthroughCompactionEngine` (§A row 4; new this commit)
 //!
-//! - `agent`        — `run_agent` loop (Stage 2)
-//! - `approval`     — `ApprovalStateMachine` (P-09)
-//! - `compaction`   — `CompactionEngine` (Stage 2)
-//! - `context`      — `ContextReducer` (Stage 2)
-//! - `checkpoint`   — `CheckpointEnvelopeV1` (P-14)
-//! - `retry`, `stream`, `budget_context` — (Stage 2)
+//! ## Modules genuinely deferred (consumer-driven; ship when used)
+//!
+//! - `agent`      — `run_agent` loop (S9)
+//! - `approval`   — `ApprovalStateMachine` (S9 — agent loop consumer)
+//! - `checkpoint` — `CheckpointEnvelopeV1` (P-14 / S9)
+//! - `retry`, `stream`, `budget_context` — (S9+)
 
+pub mod compaction;
+pub mod context;
 pub mod error;
 pub mod hooks;
 pub mod registry;
@@ -36,6 +43,8 @@ pub mod tools;
 pub mod types;
 
 // Re-exports follow Stakpak's lib.rs pattern (subset).
+pub use compaction::{CompactionEngine, CompactionResult, PassthroughCompactionEngine};
+pub use context::{ContextReducer, Message, PassthroughContextReducer, Role};
 pub use error::AgentError;
 pub use hooks::AgentHook;
 pub use registry::ToolRegistry;
