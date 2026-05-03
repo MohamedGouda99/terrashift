@@ -1,0 +1,86 @@
+{
+  "name": "aws_dx_connection",
+  "description": "Dedicated private network connection from on-premises to AWS for consistent, high-bandwidth connectivity",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the Direct Connect connection"
+    },
+    "bandwidth": {
+      "name": "bandwidth",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Bandwidth of the connection"
+    },
+    "location": {
+      "name": "location",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "AWS Direct Connect location code where the connection is located"
+    },
+    "provider_name": {
+      "name": "provider_name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the service provider for the connection"
+    },
+    "request_macsec": {
+      "name": "request_macsec",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Request MACsec-capable ports for the connection (forces new resource)"
+    },
+    "encryption_mode": {
+      "name": "encryption_mode",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Connection MAC Security encryption mode (MACsec connections only)"
+    },
+    "skip_destroy": {
+      "name": "skip_destroy",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Set to true to delete only the Terraform resource but not the actual connection"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the connection"
+    }
+  }
+}

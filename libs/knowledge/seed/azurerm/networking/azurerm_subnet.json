@@ -1,0 +1,86 @@
+{
+  "name": "azurerm_subnet",
+  "description": "Manages a subnet. Subnets represent network segments within the IP space defined by the virtual network.",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The name of the subnet"
+    },
+    "resource_group_name": {
+      "name": "resource_group_name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The name of the resource group in which to create the subnet"
+    },
+    "virtual_network_name": {
+      "name": "virtual_network_name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The name of the virtual network to which to attach the subnet"
+    },
+    "address_prefixes": {
+      "name": "address_prefixes",
+      "attribute_type": "list(string)",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The address prefixes to use for the subnet"
+    },
+    "private_endpoint_network_policies_enabled": {
+      "name": "private_endpoint_network_policies_enabled",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable or Disable network policies for the private endpoint on the subnet"
+    },
+    "private_link_service_network_policies_enabled": {
+      "name": "private_link_service_network_policies_enabled",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable or Disable network policies for the private link service on the subnet"
+    },
+    "service_endpoints": {
+      "name": "service_endpoints",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The list of Service endpoints to associate with the subnet (e.g., Microsoft.Storage, Microsoft.Sql)"
+    },
+    "service_endpoint_policy_ids": {
+      "name": "service_endpoint_policy_ids",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The list of IDs of Service Endpoint Policies to associate with the subnet"
+    }
+  }
+}

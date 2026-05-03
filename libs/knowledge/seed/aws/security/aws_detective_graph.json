@@ -1,0 +1,16 @@
+{
+  "name": "aws_detective_graph",
+  "description": "Creates an Amazon Detective behavior graph that enables investigation of security incidents by analyzing data from AWS CloudTrail, VPC Flow Logs, and Amazon GuardDuty.",
+  "attributes": {
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Key-value map of resource tags."
+    }
+  }
+}

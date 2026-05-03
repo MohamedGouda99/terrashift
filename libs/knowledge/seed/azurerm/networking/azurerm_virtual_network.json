@@ -1,0 +1,86 @@
+{
+  "name": "azurerm_virtual_network",
+  "description": "Manages a virtual network including any configured subnets",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The name of the virtual network"
+    },
+    "resource_group_name": {
+      "name": "resource_group_name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The name of the resource group in which to create the virtual network"
+    },
+    "location": {
+      "name": "location",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The location/region where the virtual network is created"
+    },
+    "address_space": {
+      "name": "address_space",
+      "attribute_type": "list(string)",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The address space that is used the virtual network"
+    },
+    "dns_servers": {
+      "name": "dns_servers",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "List of IP addresses of DNS servers"
+    },
+    "bgp_community": {
+      "name": "bgp_community",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The BGP community attribute in format <as-number>:<community-value>"
+    },
+    "flow_timeout_in_minutes": {
+      "name": "flow_timeout_in_minutes",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The flow timeout in minutes for the Virtual Network"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "A mapping of tags to assign to the resource"
+    }
+  }
+}

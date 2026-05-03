@@ -1,0 +1,36 @@
+{
+  "name": "aws_apprunner_service",
+  "description": "Fully managed container service for running web applications and APIs",
+  "attributes": {
+    "service_name": {
+      "name": "service_name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the App Runner service"
+    },
+    "auto_scaling_configuration_arn": {
+      "name": "auto_scaling_configuration_arn",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "ARN of App Runner auto scaling configuration"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the service"
+    }
+  }
+}

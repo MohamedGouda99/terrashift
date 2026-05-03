@@ -1,0 +1,46 @@
+{
+  "name": "aws_nat_gateway",
+  "description": "Network address translation gateway for private subnets",
+  "attributes": {
+    "subnet_id": {
+      "name": "subnet_id",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Subnet ID to place the NAT gateway in"
+    },
+    "allocation_id": {
+      "name": "allocation_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Elastic IP allocation ID (required for public NAT)"
+    },
+    "connectivity_type": {
+      "name": "connectivity_type",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Connectivity type (public or private)"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the NAT gateway"
+    }
+  }
+}

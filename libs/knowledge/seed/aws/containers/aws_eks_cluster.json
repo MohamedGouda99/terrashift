@@ -1,0 +1,56 @@
+{
+  "name": "aws_eks_cluster",
+  "description": "Managed Kubernetes cluster on Amazon EKS",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the cluster"
+    },
+    "role_arn": {
+      "name": "role_arn",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "ARN of the IAM role for the cluster"
+    },
+    "version": {
+      "name": "version",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Kubernetes version"
+    },
+    "enabled_cluster_log_types": {
+      "name": "enabled_cluster_log_types",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Control plane logging types"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the cluster"
+    }
+  }
+}

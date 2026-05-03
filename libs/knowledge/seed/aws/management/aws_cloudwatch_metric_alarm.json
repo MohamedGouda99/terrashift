@@ -1,0 +1,206 @@
+{
+  "name": "aws_cloudwatch_metric_alarm",
+  "description": "CloudWatch metric alarm for monitoring and notifications",
+  "attributes": {
+    "alarm_name": {
+      "name": "alarm_name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Descriptive name for the alarm"
+    },
+    "comparison_operator": {
+      "name": "comparison_operator",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Arithmetic operation to use for the comparison"
+    },
+    "evaluation_periods": {
+      "name": "evaluation_periods",
+      "attribute_type": "number",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Number of periods over which data is compared"
+    },
+    "metric_name": {
+      "name": "metric_name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the metric"
+    },
+    "namespace": {
+      "name": "namespace",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Namespace for the metric"
+    },
+    "period": {
+      "name": "period",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Period in seconds over which the statistic is applied"
+    },
+    "statistic": {
+      "name": "statistic",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Statistic to apply to the metric"
+    },
+    "threshold": {
+      "name": "threshold",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Value to compare against"
+    },
+    "threshold_metric_id": {
+      "name": "threshold_metric_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Metric ID for anomaly detection threshold"
+    },
+    "actions_enabled": {
+      "name": "actions_enabled",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable actions for state transitions"
+    },
+    "alarm_actions": {
+      "name": "alarm_actions",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Actions to take on ALARM state"
+    },
+    "ok_actions": {
+      "name": "ok_actions",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Actions to take on OK state"
+    },
+    "insufficient_data_actions": {
+      "name": "insufficient_data_actions",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Actions to take on INSUFFICIENT_DATA state"
+    },
+    "alarm_description": {
+      "name": "alarm_description",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Description for the alarm"
+    },
+    "datapoints_to_alarm": {
+      "name": "datapoints_to_alarm",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Number of datapoints that must breach threshold"
+    },
+    "dimensions": {
+      "name": "dimensions",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Dimensions for the metric"
+    },
+    "extended_statistic": {
+      "name": "extended_statistic",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Percentile statistic (e.g., p90)"
+    },
+    "treat_missing_data": {
+      "name": "treat_missing_data",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "How to treat missing data"
+    },
+    "unit": {
+      "name": "unit",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Unit for the metric"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the alarm"
+    }
+  }
+}

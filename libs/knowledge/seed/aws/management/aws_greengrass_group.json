@@ -1,0 +1,36 @@
+{
+  "name": "aws_greengrass_group",
+  "description": "Creates an AWS IoT Greengrass V1 group for extending AWS IoT functionality to edge devices. Note: Greengrass V1 is in maintenance mode — use aws_greengrassv2_component_version for new workloads.",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The name of the Greengrass group."
+    },
+    "role_arn": {
+      "name": "role_arn",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The ARN of the IAM Role used to allow Greengrass access."
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Key-value map of resource tags."
+    }
+  }
+}

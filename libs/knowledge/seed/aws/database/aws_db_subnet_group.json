@@ -1,0 +1,56 @@
+{
+  "name": "aws_db_subnet_group",
+  "description": "Subnet group for RDS database instances",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the DB subnet group"
+    },
+    "subnet_ids": {
+      "name": "subnet_ids",
+      "attribute_type": "set(string)",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "List of subnet IDs for the group"
+    },
+    "name_prefix": {
+      "name": "name_prefix",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Prefix for auto-generated name"
+    },
+    "description": {
+      "name": "description",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Description of the DB subnet group"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the subnet group"
+    }
+  }
+}

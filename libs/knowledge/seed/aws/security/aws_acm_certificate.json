@@ -1,0 +1,106 @@
+{
+  "name": "aws_acm_certificate",
+  "description": "AWS Certificate Manager SSL/TLS certificate",
+  "attributes": {
+    "domain_name": {
+      "name": "domain_name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Domain name for the certificate"
+    },
+    "subject_alternative_names": {
+      "name": "subject_alternative_names",
+      "attribute_type": "set(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Subject Alternative Names (SANs)"
+    },
+    "validation_method": {
+      "name": "validation_method",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Method of domain validation"
+    },
+    "certificate_body": {
+      "name": "certificate_body",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Certificate body (for imported certificates)"
+    },
+    "private_key": {
+      "name": "private_key",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Private key (for imported certificates)"
+    },
+    "certificate_chain": {
+      "name": "certificate_chain",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Certificate chain (for imported certificates)"
+    },
+    "certificate_authority_arn": {
+      "name": "certificate_authority_arn",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "ARN of a private CA for issuing certificates"
+    },
+    "early_renewal_duration": {
+      "name": "early_renewal_duration",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Duration before expiration to renew (e.g., 30d)"
+    },
+    "key_algorithm": {
+      "name": "key_algorithm",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Cryptographic algorithm for the key pair"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the certificate"
+    }
+  }
+}

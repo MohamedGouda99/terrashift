@@ -1,0 +1,236 @@
+{
+  "name": "aws_autoscaling_group",
+  "description": "Automatically scales EC2 instances based on demand",
+  "attributes": {
+    "min_size": {
+      "name": "min_size",
+      "attribute_type": "number",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Minimum number of instances in the group"
+    },
+    "max_size": {
+      "name": "max_size",
+      "attribute_type": "number",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Maximum number of instances in the group"
+    },
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the Auto Scaling group"
+    },
+    "name_prefix": {
+      "name": "name_prefix",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Creates a unique name beginning with the specified prefix"
+    },
+    "desired_capacity": {
+      "name": "desired_capacity",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Desired number of instances in the group"
+    },
+    "vpc_zone_identifier": {
+      "name": "vpc_zone_identifier",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "List of subnet IDs to launch instances in"
+    },
+    "availability_zones": {
+      "name": "availability_zones",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "List of availability zones"
+    },
+    "health_check_type": {
+      "name": "health_check_type",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Type of health check to perform"
+    },
+    "health_check_grace_period": {
+      "name": "health_check_grace_period",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Time after instance launch before health checking starts (seconds)"
+    },
+    "default_cooldown": {
+      "name": "default_cooldown",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Time between scaling activities (seconds)"
+    },
+    "default_instance_warmup": {
+      "name": "default_instance_warmup",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Time until a new instance contributes to CloudWatch metrics (seconds)"
+    },
+    "force_delete": {
+      "name": "force_delete",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Delete the ASG without waiting for instances to terminate"
+    },
+    "termination_policies": {
+      "name": "termination_policies",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Policies to decide which instances to terminate first"
+    },
+    "suspended_processes": {
+      "name": "suspended_processes",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Processes to suspend"
+    },
+    "enabled_metrics": {
+      "name": "enabled_metrics",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Metrics to collect"
+    },
+    "metrics_granularity": {
+      "name": "metrics_granularity",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Granularity of metrics"
+    },
+    "protect_from_scale_in": {
+      "name": "protect_from_scale_in",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Protect instances from scale-in"
+    },
+    "target_group_arns": {
+      "name": "target_group_arns",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "ARNs of target groups to associate"
+    },
+    "load_balancers": {
+      "name": "load_balancers",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Names of classic load balancers"
+    },
+    "service_linked_role_arn": {
+      "name": "service_linked_role_arn",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "ARN of the service-linked role"
+    },
+    "max_instance_lifetime": {
+      "name": "max_instance_lifetime",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Maximum amount of time an instance can be in service (seconds)"
+    },
+    "capacity_rebalance": {
+      "name": "capacity_rebalance",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable capacity rebalancing for Spot Instances"
+    },
+    "wait_for_capacity_timeout": {
+      "name": "wait_for_capacity_timeout",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Timeout waiting for capacity"
+    }
+  }
+}

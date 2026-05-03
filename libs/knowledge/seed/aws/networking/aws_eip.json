@@ -1,0 +1,46 @@
+{
+  "name": "aws_eip",
+  "description": "Static public IPv4 address for AWS resources",
+  "attributes": {
+    "domain": {
+      "name": "domain",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Indicates if this EIP is for use in VPC"
+    },
+    "instance": {
+      "name": "instance",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "EC2 instance ID to associate with"
+    },
+    "network_interface": {
+      "name": "network_interface",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Network interface ID to associate with"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply"
+    }
+  }
+}

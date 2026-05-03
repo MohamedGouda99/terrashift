@@ -1,0 +1,126 @@
+{
+  "name": "aws_ebs_volume",
+  "description": "Persistent block storage for EC2 instances with encryption and snapshot support",
+  "attributes": {
+    "availability_zone": {
+      "name": "availability_zone",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Availability zone for the volume (must match attached EC2 instance)"
+    },
+    "size": {
+      "name": "size",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Size of the volume in GiB"
+    },
+    "type": {
+      "name": "type",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Volume type"
+    },
+    "iops": {
+      "name": "iops",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Provisioned IOPS (io1: 100-64000, io2: 100-256000, gp3: 3000-16000)"
+    },
+    "throughput": {
+      "name": "throughput",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Throughput in MiB/s (gp3 only, 125-1000)"
+    },
+    "encrypted": {
+      "name": "encrypted",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable encryption at rest"
+    },
+    "kms_key_id": {
+      "name": "kms_key_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "KMS key ARN for encryption"
+    },
+    "snapshot_id": {
+      "name": "snapshot_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "EBS snapshot ID to create volume from"
+    },
+    "outpost_arn": {
+      "name": "outpost_arn",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "ARN of the Outpost for volume creation"
+    },
+    "multi_attach_enabled": {
+      "name": "multi_attach_enabled",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable Multi-Attach (io1/io2 only, Nitro instances)"
+    },
+    "final_snapshot": {
+      "name": "final_snapshot",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Create snapshot before volume deletion"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the volume"
+    }
+  }
+}

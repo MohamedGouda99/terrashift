@@ -1,0 +1,36 @@
+{
+  "name": "aws_kinesis_firehose_delivery_stream",
+  "description": "Delivery stream for loading streaming data into data stores",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the delivery stream"
+    },
+    "destination": {
+      "name": "destination",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Destination for the delivery stream"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the delivery stream"
+    }
+  }
+}

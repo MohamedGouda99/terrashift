@@ -1,0 +1,56 @@
+{
+  "name": "google_pubsub_topic",
+  "description": "A named resource to which messages are sent by publishers",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the topic"
+    },
+    "project": {
+      "name": "project",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The ID of the project in which the resource belongs"
+    },
+    "labels": {
+      "name": "labels",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "A set of key/value label pairs to assign to this Topic"
+    },
+    "kms_key_name": {
+      "name": "kms_key_name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The resource name of the Cloud KMS CryptoKey to be used to protect access to messages published on this topic"
+    },
+    "message_retention_duration": {
+      "name": "message_retention_duration",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Indicates the minimum duration to retain a message after it is published to the topic"
+    }
+  }
+}

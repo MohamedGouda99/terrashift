@@ -1,0 +1,56 @@
+{
+  "name": "aws_s3_bucket",
+  "description": "Highly scalable object storage with lifecycle management and versioning",
+  "attributes": {
+    "bucket": {
+      "name": "bucket",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the bucket (globally unique, conflicts with bucket_prefix)"
+    },
+    "bucket_prefix": {
+      "name": "bucket_prefix",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Prefix for auto-generated bucket name (conflicts with bucket)"
+    },
+    "force_destroy": {
+      "name": "force_destroy",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Allow bucket destruction even with non-empty objects"
+    },
+    "object_lock_enabled": {
+      "name": "object_lock_enabled",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable S3 Object Lock (cannot be disabled once enabled)"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the bucket"
+    }
+  }
+}

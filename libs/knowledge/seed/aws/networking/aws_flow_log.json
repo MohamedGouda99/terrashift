@@ -1,0 +1,106 @@
+{
+  "name": "aws_flow_log",
+  "description": "Captures information about IP traffic going to and from network interfaces in a VPC",
+  "attributes": {
+    "vpc_id": {
+      "name": "vpc_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "VPC ID to attach the flow log to"
+    },
+    "subnet_id": {
+      "name": "subnet_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Subnet ID to attach the flow log to"
+    },
+    "eni_id": {
+      "name": "eni_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Elastic Network Interface ID to attach the flow log to"
+    },
+    "traffic_type": {
+      "name": "traffic_type",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Type of traffic to capture"
+    },
+    "log_destination_type": {
+      "name": "log_destination_type",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Type of destination for flow log data"
+    },
+    "log_destination": {
+      "name": "log_destination",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "ARN of the logging destination (CloudWatch Log Group, S3 bucket, or Kinesis Firehose)"
+    },
+    "iam_role_arn": {
+      "name": "iam_role_arn",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IAM role ARN for publishing to CloudWatch Logs"
+    },
+    "log_format": {
+      "name": "log_format",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Fields to include in the flow log record"
+    },
+    "max_aggregation_interval": {
+      "name": "max_aggregation_interval",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Maximum interval of time during which a flow of packets is captured (seconds)"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the flow log"
+    }
+  }
+}

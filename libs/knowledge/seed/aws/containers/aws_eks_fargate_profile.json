@@ -1,0 +1,56 @@
+{
+  "name": "aws_eks_fargate_profile",
+  "description": "Defines which pods run on AWS Fargate in an EKS cluster",
+  "attributes": {
+    "cluster_name": {
+      "name": "cluster_name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the EKS cluster"
+    },
+    "fargate_profile_name": {
+      "name": "fargate_profile_name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the Fargate profile"
+    },
+    "pod_execution_role_arn": {
+      "name": "pod_execution_role_arn",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IAM role ARN for pod execution"
+    },
+    "subnet_ids": {
+      "name": "subnet_ids",
+      "attribute_type": "set(string)",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Subnet IDs for running Fargate pods"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the Fargate profile"
+    }
+  }
+}

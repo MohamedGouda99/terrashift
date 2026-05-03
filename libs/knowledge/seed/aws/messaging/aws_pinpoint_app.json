@@ -1,0 +1,26 @@
+{
+  "name": "aws_pinpoint_app",
+  "description": "Creates an Amazon Pinpoint app for multi-channel customer engagement campaigns via email, SMS, push notifications, and voice.",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The application name."
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Key-value map of resource tags."
+    }
+  }
+}

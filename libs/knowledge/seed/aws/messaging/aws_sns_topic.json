@@ -1,0 +1,276 @@
+{
+  "name": "aws_sns_topic",
+  "description": "Simple Notification Service topic for pub/sub messaging with fan-out support",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the topic (conflicts with name_prefix)"
+    },
+    "name_prefix": {
+      "name": "name_prefix",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Prefix for auto-generated name (conflicts with name)"
+    },
+    "display_name": {
+      "name": "display_name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Display name for SMS subscriptions (max 100 chars)"
+    },
+    "policy": {
+      "name": "policy",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Access policy document (JSON)"
+    },
+    "delivery_policy": {
+      "name": "delivery_policy",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "HTTP/S endpoint retry policy (JSON)"
+    },
+    "application_success_feedback_role_arn": {
+      "name": "application_success_feedback_role_arn",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IAM role ARN for successful application delivery feedback"
+    },
+    "application_success_feedback_sample_rate": {
+      "name": "application_success_feedback_sample_rate",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Success sample rate for application feedback (0-100)"
+    },
+    "application_failure_feedback_role_arn": {
+      "name": "application_failure_feedback_role_arn",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IAM role ARN for failed application delivery feedback"
+    },
+    "http_success_feedback_role_arn": {
+      "name": "http_success_feedback_role_arn",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IAM role ARN for successful HTTP delivery feedback"
+    },
+    "http_success_feedback_sample_rate": {
+      "name": "http_success_feedback_sample_rate",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Success sample rate for HTTP feedback (0-100)"
+    },
+    "http_failure_feedback_role_arn": {
+      "name": "http_failure_feedback_role_arn",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IAM role ARN for failed HTTP delivery feedback"
+    },
+    "lambda_success_feedback_role_arn": {
+      "name": "lambda_success_feedback_role_arn",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IAM role ARN for successful Lambda delivery feedback"
+    },
+    "lambda_success_feedback_sample_rate": {
+      "name": "lambda_success_feedback_sample_rate",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Success sample rate for Lambda feedback (0-100)"
+    },
+    "lambda_failure_feedback_role_arn": {
+      "name": "lambda_failure_feedback_role_arn",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IAM role ARN for failed Lambda delivery feedback"
+    },
+    "sqs_success_feedback_role_arn": {
+      "name": "sqs_success_feedback_role_arn",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IAM role ARN for successful SQS delivery feedback"
+    },
+    "sqs_success_feedback_sample_rate": {
+      "name": "sqs_success_feedback_sample_rate",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Success sample rate for SQS feedback (0-100)"
+    },
+    "sqs_failure_feedback_role_arn": {
+      "name": "sqs_failure_feedback_role_arn",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IAM role ARN for failed SQS delivery feedback"
+    },
+    "firehose_success_feedback_role_arn": {
+      "name": "firehose_success_feedback_role_arn",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IAM role ARN for successful Firehose delivery feedback"
+    },
+    "firehose_success_feedback_sample_rate": {
+      "name": "firehose_success_feedback_sample_rate",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Success sample rate for Firehose feedback (0-100)"
+    },
+    "firehose_failure_feedback_role_arn": {
+      "name": "firehose_failure_feedback_role_arn",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IAM role ARN for failed Firehose delivery feedback"
+    },
+    "kms_master_key_id": {
+      "name": "kms_master_key_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "KMS key ID for encryption at rest"
+    },
+    "signature_version": {
+      "name": "signature_version",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Message signature version"
+    },
+    "tracing_config": {
+      "name": "tracing_config",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tracing mode for X-Ray"
+    },
+    "fifo_topic": {
+      "name": "fifo_topic",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable FIFO topic (name must end in .fifo)"
+    },
+    "content_based_deduplication": {
+      "name": "content_based_deduplication",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable content-based deduplication (FIFO only)"
+    },
+    "archive_policy": {
+      "name": "archive_policy",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Message archive policy (JSON) for message archive and replay"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the topic"
+    }
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "name": "aws_connect_instance",
+  "description": "Creates an Amazon Connect instance for deploying cloud-based contact centers with omnichannel customer service capabilities.",
+  "attributes": {
+    "identity_management_type": {
+      "name": "identity_management_type",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Specifies the identity management type."
+    },
+    "inbound_calls_enabled": {
+      "name": "inbound_calls_enabled",
+      "attribute_type": "bool",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Specifies whether your contact center handles incoming contacts."
+    },
+    "outbound_calls_enabled": {
+      "name": "outbound_calls_enabled",
+      "attribute_type": "bool",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Specifies whether your contact center allows outbound calls."
+    },
+    "instance_alias": {
+      "name": "instance_alias",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Specifies the name of the instance. Required if directory_id not specified."
+    },
+    "directory_id": {
+      "name": "directory_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The identifier for the directory if identity_management_type is EXISTING_DIRECTORY."
+    },
+    "auto_resolve_best_voices_enabled": {
+      "name": "auto_resolve_best_voices_enabled",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Specifies whether auto resolve best voices is enabled."
+    },
+    "contact_flow_logs_enabled": {
+      "name": "contact_flow_logs_enabled",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Specifies whether contact flow logs are enabled."
+    },
+    "contact_lens_enabled": {
+      "name": "contact_lens_enabled",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Specifies whether contact lens is enabled."
+    },
+    "early_media_enabled": {
+      "name": "early_media_enabled",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Specifies whether early media for outbound calls is enabled."
+    },
+    "multi_party_conference_enabled": {
+      "name": "multi_party_conference_enabled",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Specifies whether multi-party calls/conference is enabled."
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Key-value map of resource tags."
+    }
+  }
+}

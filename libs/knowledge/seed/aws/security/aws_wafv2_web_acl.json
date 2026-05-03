@@ -1,0 +1,46 @@
+{
+  "name": "aws_wafv2_web_acl",
+  "description": "AWS WAF Web Application Firewall access control list for protecting web applications",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Friendly name of the WebACL"
+    },
+    "scope": {
+      "name": "scope",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Scope of the WebACL (REGIONAL for ALB/API Gateway, CLOUDFRONT for CloudFront)"
+    },
+    "description": {
+      "name": "description",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Description of the WebACL"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the WebACL"
+    }
+  }
+}

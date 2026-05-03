@@ -1,0 +1,106 @@
+{
+  "name": "google_cloudbuild_trigger",
+  "description": "Configuration for an automated build in response to source repository changes",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the trigger"
+    },
+    "project": {
+      "name": "project",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The ID of the project in which the resource belongs"
+    },
+    "description": {
+      "name": "description",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Human-readable description of the trigger"
+    },
+    "disabled": {
+      "name": "disabled",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Whether the trigger is disabled or not"
+    },
+    "filename": {
+      "name": "filename",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Path, from the source root, to a file whose contents is used for the template"
+    },
+    "ignored_files": {
+      "name": "ignored_files",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "ignoredFiles and includedFiles are file glob matches extended with support for ** in the directory portion"
+    },
+    "included_files": {
+      "name": "included_files",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "If any of the files altered in the commit pass the ignoredFiles filter and includedFiles is not empty, then we make sure that at least one of those files matches"
+    },
+    "substitutions": {
+      "name": "substitutions",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Substitutions data for Build resource"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags for annotation of a BuildTrigger"
+    },
+    "service_account": {
+      "name": "service_account",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The service account used for all user-controlled operations"
+    }
+  }
+}

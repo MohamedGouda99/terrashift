@@ -1,0 +1,16 @@
+{
+  "name": "aws_ses_email_identity",
+  "description": "Creates an Amazon Simple Email Service (SES) email identity for sending and receiving email at scale.",
+  "attributes": {
+    "email": {
+      "name": "email",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The email address to assign to SES."
+    }
+  }
+}

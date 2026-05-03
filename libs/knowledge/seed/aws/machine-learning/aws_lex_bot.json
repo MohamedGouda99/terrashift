@@ -1,0 +1,106 @@
+{
+  "name": "aws_lex_bot",
+  "description": "Creates an Amazon Lex bot for building conversational interfaces using voice and text.",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The name of the bot."
+    },
+    "child_directed": {
+      "name": "child_directed",
+      "attribute_type": "bool",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "By specifying true, you confirm that your use of Amazon Lex is related to a website, program, or other application that is directed in whole or in part, to children under age 13."
+    },
+    "description": {
+      "name": "description",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "A description of the bot."
+    },
+    "locale": {
+      "name": "locale",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Specifies the target locale for the bot."
+    },
+    "idle_session_ttl_in_seconds": {
+      "name": "idle_session_ttl_in_seconds",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The maximum time in seconds that Amazon Lex retains the data gathered in a conversation."
+    },
+    "detect_sentiment": {
+      "name": "detect_sentiment",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "When set to true user utterances are sent to Amazon Comprehend for sentiment analysis."
+    },
+    "enable_model_improvements": {
+      "name": "enable_model_improvements",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Set to true to enable access to natural language understanding improvements."
+    },
+    "nlu_intent_confidence_threshold": {
+      "name": "nlu_intent_confidence_threshold",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Determines the threshold where Amazon Lex will insert the AMAZON.FallbackIntent."
+    },
+    "process_behavior": {
+      "name": "process_behavior",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "If you set the process_behavior element to BUILD, Amazon Lex builds the bot."
+    },
+    "voice_id": {
+      "name": "voice_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The Amazon Polly voice ID that you want Amazon Lex to use for voice interactions with the user."
+    }
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "name": "aws_security_group",
+  "description": "Virtual firewall for controlling inbound and outbound traffic to AWS resources",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the security group (conflicts with name_prefix)"
+    },
+    "name_prefix": {
+      "name": "name_prefix",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Prefix for auto-generated name (conflicts with name)"
+    },
+    "description": {
+      "name": "description",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Description of the security group (cannot be empty)"
+    },
+    "vpc_id": {
+      "name": "vpc_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "VPC ID to create the security group in (uses default VPC if omitted)"
+    },
+    "revoke_rules_on_delete": {
+      "name": "revoke_rules_on_delete",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Revoke all rules before deletion to avoid dependency errors"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the security group"
+    }
+  }
+}

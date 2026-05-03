@@ -1,0 +1,186 @@
+{
+  "name": "aws_vpn_connection",
+  "description": "Encrypted IPsec VPN tunnel connecting on-premises network to AWS VPC via Virtual Private Gateway or Transit Gateway",
+  "attributes": {
+    "customer_gateway_id": {
+      "name": "customer_gateway_id",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "ID of the customer gateway (forces new resource)"
+    },
+    "type": {
+      "name": "type",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Type of VPN connection (currently only ipsec.1)"
+    },
+    "vpn_gateway_id": {
+      "name": "vpn_gateway_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "ID of the Virtual Private Gateway (conflicts with transit_gateway_id)"
+    },
+    "transit_gateway_id": {
+      "name": "transit_gateway_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "ID of the EC2 Transit Gateway (conflicts with vpn_gateway_id)"
+    },
+    "static_routes_only": {
+      "name": "static_routes_only",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Use static routes only (required for devices that do not support BGP)"
+    },
+    "enable_acceleration": {
+      "name": "enable_acceleration",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable accelerated VPN connection (Transit Gateway only, forces new resource)"
+    },
+    "local_ipv4_network_cidr": {
+      "name": "local_ipv4_network_cidr",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IPv4 CIDR on the customer gateway (on-premises) side"
+    },
+    "remote_ipv4_network_cidr": {
+      "name": "remote_ipv4_network_cidr",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IPv4 CIDR on the AWS side"
+    },
+    "tunnel_inside_ip_version": {
+      "name": "tunnel_inside_ip_version",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IP version for tunnel traffic"
+    },
+    "tunnel1_inside_cidr": {
+      "name": "tunnel1_inside_cidr",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "CIDR block for inside IP addresses of tunnel 1 (/30 from 169.254.0.0/16)"
+    },
+    "tunnel2_inside_cidr": {
+      "name": "tunnel2_inside_cidr",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "CIDR block for inside IP addresses of tunnel 2 (/30 from 169.254.0.0/16)"
+    },
+    "tunnel1_preshared_key": {
+      "name": "tunnel1_preshared_key",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Pre-shared key for tunnel 1 authentication (8-64 chars)"
+    },
+    "tunnel2_preshared_key": {
+      "name": "tunnel2_preshared_key",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Pre-shared key for tunnel 2 authentication (8-64 chars)"
+    },
+    "tunnel1_ike_versions": {
+      "name": "tunnel1_ike_versions",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IKE versions accepted for tunnel 1"
+    },
+    "tunnel2_ike_versions": {
+      "name": "tunnel2_ike_versions",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IKE versions accepted for tunnel 2"
+    },
+    "tunnel1_startup_action": {
+      "name": "tunnel1_startup_action",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Action to take when establishing tunnel 1"
+    },
+    "tunnel2_startup_action": {
+      "name": "tunnel2_startup_action",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Action to take when establishing tunnel 2"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the VPN connection"
+    }
+  }
+}

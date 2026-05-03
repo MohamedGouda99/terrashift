@@ -1,0 +1,116 @@
+{
+  "name": "aws_lambda_permission",
+  "description": "Permission to invoke a Lambda function from an AWS service",
+  "attributes": {
+    "action": {
+      "name": "action",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Lambda action to allow"
+    },
+    "function_name": {
+      "name": "function_name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name or ARN of the Lambda function"
+    },
+    "principal": {
+      "name": "principal",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Principal to grant permission to"
+    },
+    "statement_id": {
+      "name": "statement_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Unique statement identifier"
+    },
+    "statement_id_prefix": {
+      "name": "statement_id_prefix",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Prefix for auto-generated statement ID"
+    },
+    "event_source_token": {
+      "name": "event_source_token",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Token for Alexa Smart Home invocation"
+    },
+    "function_url_auth_type": {
+      "name": "function_url_auth_type",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Function URL auth type for permission"
+    },
+    "principal_org_id": {
+      "name": "principal_org_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Organization ID for cross-org access"
+    },
+    "qualifier": {
+      "name": "qualifier",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Function version or alias"
+    },
+    "source_account": {
+      "name": "source_account",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "AWS account ID for the source"
+    },
+    "source_arn": {
+      "name": "source_arn",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "ARN of the source triggering invocation"
+    }
+  }
+}

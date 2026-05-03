@@ -1,0 +1,86 @@
+{
+  "name": "aws_sfn_state_machine",
+  "description": "State machine for orchestrating serverless workflows",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the state machine"
+    },
+    "role_arn": {
+      "name": "role_arn",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IAM role ARN for the state machine"
+    },
+    "definition": {
+      "name": "definition",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "State machine definition in Amazon States Language JSON"
+    },
+    "name_prefix": {
+      "name": "name_prefix",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Prefix for auto-generated name (conflicts with name)"
+    },
+    "type": {
+      "name": "type",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Type of the state machine (cannot be changed after creation)"
+    },
+    "publish": {
+      "name": "publish",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Publish a version on each update"
+    },
+    "encryption_configuration": {
+      "name": "encryption_configuration",
+      "attribute_type": "object",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Encryption configuration for the state machine"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the state machine"
+    }
+  }
+}

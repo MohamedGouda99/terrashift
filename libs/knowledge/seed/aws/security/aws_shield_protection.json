@@ -1,0 +1,36 @@
+{
+  "name": "aws_shield_protection",
+  "description": "AWS Shield Advanced protection for resources against DDoS attacks",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Friendly name for the Shield protection"
+    },
+    "resource_arn": {
+      "name": "resource_arn",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "ARN of the resource to protect (CloudFront, ALB, EIP, Route53, Global Accelerator)"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the protection"
+    }
+  }
+}

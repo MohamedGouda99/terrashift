@@ -1,0 +1,36 @@
+{
+  "name": "aws_network_acl",
+  "description": "Network access control list for subnet-level traffic filtering",
+  "attributes": {
+    "vpc_id": {
+      "name": "vpc_id",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "VPC ID to create the network ACL in"
+    },
+    "subnet_ids": {
+      "name": "subnet_ids",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Subnet IDs to associate with this ACL"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the network ACL"
+    }
+  }
+}

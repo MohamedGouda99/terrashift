@@ -1,0 +1,26 @@
+{
+  "name": "aws_route_table",
+  "description": "Contains rules for routing network traffic",
+  "attributes": {
+    "vpc_id": {
+      "name": "vpc_id",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "VPC ID to create the route table in"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the route table"
+    }
+  }
+}

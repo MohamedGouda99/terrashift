@@ -1,0 +1,36 @@
+{
+  "name": "aws_route_table_association",
+  "description": "Associates a subnet or gateway with a route table",
+  "attributes": {
+    "route_table_id": {
+      "name": "route_table_id",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "ID of the route table to associate"
+    },
+    "subnet_id": {
+      "name": "subnet_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Subnet ID to associate (mutually exclusive with gateway_id)"
+    },
+    "gateway_id": {
+      "name": "gateway_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Gateway ID to associate (mutually exclusive with subnet_id)"
+    }
+  }
+}

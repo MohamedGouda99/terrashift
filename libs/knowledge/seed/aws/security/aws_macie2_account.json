@@ -1,0 +1,26 @@
+{
+  "name": "aws_macie2_account",
+  "description": "Amazon Macie data security and privacy service for discovering sensitive data in S3",
+  "attributes": {
+    "finding_publishing_frequency": {
+      "name": "finding_publishing_frequency",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Frequency of publishing findings to Security Hub and EventBridge"
+    },
+    "status": {
+      "name": "status",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Status of the Macie account (ENABLED or PAUSED)"
+    }
+  }
+}

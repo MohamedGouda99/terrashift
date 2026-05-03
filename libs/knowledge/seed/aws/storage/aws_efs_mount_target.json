@@ -1,0 +1,46 @@
+{
+  "name": "aws_efs_mount_target",
+  "description": "Mount target for an EFS file system in a specific subnet",
+  "attributes": {
+    "file_system_id": {
+      "name": "file_system_id",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "ID of the EFS file system"
+    },
+    "subnet_id": {
+      "name": "subnet_id",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Subnet ID for the mount target"
+    },
+    "ip_address": {
+      "name": "ip_address",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IP address within the subnet for the mount target"
+    },
+    "security_groups": {
+      "name": "security_groups",
+      "attribute_type": "set(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Security group IDs for the mount target"
+    }
+  }
+}

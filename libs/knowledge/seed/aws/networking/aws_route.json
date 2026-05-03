@@ -1,0 +1,66 @@
+{
+  "name": "aws_route",
+  "description": "Route entry in a route table",
+  "attributes": {
+    "route_table_id": {
+      "name": "route_table_id",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Route table ID"
+    },
+    "destination_cidr_block": {
+      "name": "destination_cidr_block",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Destination CIDR block"
+    },
+    "gateway_id": {
+      "name": "gateway_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Internet gateway ID"
+    },
+    "nat_gateway_id": {
+      "name": "nat_gateway_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "NAT gateway ID"
+    },
+    "vpc_peering_connection_id": {
+      "name": "vpc_peering_connection_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "VPC peering connection ID"
+    },
+    "transit_gateway_id": {
+      "name": "transit_gateway_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Transit gateway ID"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "aws_backup_plan",
+  "description": "Centralized backup plan defining schedules, retention policies, and copy rules for AWS resources",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Display name for the backup plan (1-50 characters, alphanumeric, hyphens, underscores, periods)"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the backup plan"
+    }
+  }
+}

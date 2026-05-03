@@ -1,0 +1,56 @@
+{
+  "name": "aws_comprehend_entity_recognizer",
+  "description": "Creates an Amazon Comprehend custom entity recognizer for detecting and extracting custom entities from text.",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The name of the entity recognizer."
+    },
+    "data_access_role_arn": {
+      "name": "data_access_role_arn",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "ARN of the IAM role that grants access to the training data."
+    },
+    "language_code": {
+      "name": "language_code",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The language of the input documents."
+    },
+    "model_kms_key_id": {
+      "name": "model_kms_key_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "KMS key to encrypt trained custom model."
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Key-value map of resource tags."
+    }
+  }
+}

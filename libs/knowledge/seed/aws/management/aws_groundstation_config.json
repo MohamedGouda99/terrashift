@@ -1,0 +1,36 @@
+{
+  "name": "aws_groundstation_config",
+  "description": "Creates an AWS Ground Station configuration for controlling satellite communications, including antennas, data flows, and tracking.",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The name of the config object."
+    },
+    "config_data": {
+      "name": "config_data",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Object containing the parameters of a config in JSON format."
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Key-value map of resource tags."
+    }
+  }
+}

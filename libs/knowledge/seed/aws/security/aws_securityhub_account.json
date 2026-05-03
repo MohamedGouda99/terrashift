@@ -1,0 +1,46 @@
+{
+  "name": "aws_securityhub_account",
+  "description": "Enables AWS Security Hub for the current AWS account, providing a comprehensive view of security alerts and compliance status.",
+  "attributes": {
+    "auto_enable_controls": {
+      "name": "auto_enable_controls",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Whether to automatically enable new controls when they are added to an existing enabled standard."
+    },
+    "enable_default_standards": {
+      "name": "enable_default_standards",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Whether to enable the security standards that Security Hub has designated as automatically enabled."
+    },
+    "control_finding_generator": {
+      "name": "control_finding_generator",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Updates whether the calling account has consolidated control findings turned on."
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Key-value map of resource tags."
+    }
+  }
+}

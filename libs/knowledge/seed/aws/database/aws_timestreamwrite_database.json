@@ -1,0 +1,36 @@
+{
+  "name": "aws_timestreamwrite_database",
+  "description": "Serverless time-series database service for IoT and operational applications",
+  "attributes": {
+    "database_name": {
+      "name": "database_name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the Timestream database (3-64 characters, forces new resource)"
+    },
+    "kms_key_id": {
+      "name": "kms_key_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "ARN of the KMS key to encrypt data (defaults to Timestream managed key)"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the database"
+    }
+  }
+}

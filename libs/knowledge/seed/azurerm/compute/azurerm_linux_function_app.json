@@ -1,0 +1,106 @@
+{
+  "name": "azurerm_linux_function_app",
+  "description": "Manages a Linux Function App",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Specifies the name of the Function App"
+    },
+    "resource_group_name": {
+      "name": "resource_group_name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The name of the Resource Group in which the Function App should be created"
+    },
+    "location": {
+      "name": "location",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Specifies the supported Azure location where the Function App should exist"
+    },
+    "service_plan_id": {
+      "name": "service_plan_id",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The ID of the App Service Plan within which to create this Function App"
+    },
+    "storage_account_name": {
+      "name": "storage_account_name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The backend storage account name which will be used by this Function App"
+    },
+    "storage_account_access_key": {
+      "name": "storage_account_access_key",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The access key which will be used to access the backend storage account for the Function App"
+    },
+    "app_settings": {
+      "name": "app_settings",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "A map of key-value pairs for App Settings"
+    },
+    "https_only": {
+      "name": "https_only",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Can the Function App only be accessed via HTTPS?"
+    },
+    "functions_extension_version": {
+      "name": "functions_extension_version",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The runtime version associated with the Function App"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "A mapping of tags to assign to the resource"
+    }
+  }
+}

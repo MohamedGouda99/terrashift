@@ -1,0 +1,246 @@
+{
+  "name": "aws_lb",
+  "description": "Elastic Load Balancer supporting Application, Network, and Gateway types",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the load balancer (max 32 chars, unique per account)"
+    },
+    "name_prefix": {
+      "name": "name_prefix",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Prefix for auto-generated load balancer name"
+    },
+    "internal": {
+      "name": "internal",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Create an internal load balancer (not internet-facing)"
+    },
+    "load_balancer_type": {
+      "name": "load_balancer_type",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Type of load balancer to create"
+    },
+    "security_groups": {
+      "name": "security_groups",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Security group IDs to associate (Application/Network LB only)"
+    },
+    "subnets": {
+      "name": "subnets",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Subnet IDs to attach the load balancer"
+    },
+    "ip_address_type": {
+      "name": "ip_address_type",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Type of IP addresses used by subnets"
+    },
+    "customer_owned_ipv4_pool": {
+      "name": "customer_owned_ipv4_pool",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Customer-owned IPv4 address pool ID"
+    },
+    "enable_deletion_protection": {
+      "name": "enable_deletion_protection",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Prevent load balancer from being deleted via API"
+    },
+    "enable_cross_zone_load_balancing": {
+      "name": "enable_cross_zone_load_balancing",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable cross-zone load balancing"
+    },
+    "enable_http2": {
+      "name": "enable_http2",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable HTTP/2 support (Application LB only)"
+    },
+    "enable_waf_fail_open": {
+      "name": "enable_waf_fail_open",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Route requests when WAF is unavailable"
+    },
+    "enable_zonal_shift": {
+      "name": "enable_zonal_shift",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable zonal shift capability"
+    },
+    "idle_timeout": {
+      "name": "idle_timeout",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Connection idle timeout in seconds (Application LB only)"
+    },
+    "client_keep_alive": {
+      "name": "client_keep_alive",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Client keep-alive value in seconds"
+    },
+    "desync_mitigation_mode": {
+      "name": "desync_mitigation_mode",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "HTTP desync handling mode"
+    },
+    "dns_record_client_routing_policy": {
+      "name": "dns_record_client_routing_policy",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Traffic distribution policy across AZs"
+    },
+    "drop_invalid_header_fields": {
+      "name": "drop_invalid_header_fields",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Remove invalid HTTP headers (Application LB only)"
+    },
+    "preserve_host_header": {
+      "name": "preserve_host_header",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Preserve Host header unchanged (Application LB only)"
+    },
+    "enable_tls_version_and_cipher_suite_headers": {
+      "name": "enable_tls_version_and_cipher_suite_headers",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Add TLS negotiation headers (Application LB only)"
+    },
+    "enable_xff_client_port": {
+      "name": "enable_xff_client_port",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Preserve source port in X-Forwarded-For (Application LB only)"
+    },
+    "xff_header_processing_mode": {
+      "name": "xff_header_processing_mode",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "X-Forwarded-For header modification mode (Application LB only)"
+    },
+    "enforce_security_group_inbound_rules_on_private_link_traffic": {
+      "name": "enforce_security_group_inbound_rules_on_private_link_traffic",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enforce inbound rules on PrivateLink traffic (Network LB only)"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the load balancer"
+    }
+  }
+}

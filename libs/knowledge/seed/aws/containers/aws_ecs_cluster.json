@@ -1,0 +1,36 @@
+{
+  "name": "aws_ecs_cluster",
+  "description": "Logical grouping of tasks and services for Amazon ECS",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the cluster"
+    },
+    "capacity_providers": {
+      "name": "capacity_providers",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Capacity providers to associate with the cluster"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the cluster"
+    }
+  }
+}

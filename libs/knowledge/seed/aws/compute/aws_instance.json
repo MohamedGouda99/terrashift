@@ -1,0 +1,176 @@
+{
+  "name": "aws_instance",
+  "description": "Virtual server in the AWS cloud for running applications",
+  "attributes": {
+    "ami": {
+      "name": "ami",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "AMI ID to use for the instance"
+    },
+    "instance_type": {
+      "name": "instance_type",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Type of instance to start"
+    },
+    "availability_zone": {
+      "name": "availability_zone",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "AZ to start the instance in"
+    },
+    "subnet_id": {
+      "name": "subnet_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "VPC Subnet ID to launch in"
+    },
+    "vpc_security_group_ids": {
+      "name": "vpc_security_group_ids",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "List of security group IDs to associate"
+    },
+    "key_name": {
+      "name": "key_name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Key pair name for SSH access"
+    },
+    "iam_instance_profile": {
+      "name": "iam_instance_profile",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IAM Instance Profile to attach"
+    },
+    "user_data": {
+      "name": "user_data",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "User data script to run at launch"
+    },
+    "user_data_base64": {
+      "name": "user_data_base64",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Base64-encoded user data script"
+    },
+    "associate_public_ip_address": {
+      "name": "associate_public_ip_address",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Associate a public IP address with the instance"
+    },
+    "private_ip": {
+      "name": "private_ip",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Private IP address to associate with the instance"
+    },
+    "monitoring": {
+      "name": "monitoring",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable detailed CloudWatch monitoring"
+    },
+    "disable_api_termination": {
+      "name": "disable_api_termination",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable termination protection"
+    },
+    "ebs_optimized": {
+      "name": "ebs_optimized",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable EBS optimization"
+    },
+    "tenancy": {
+      "name": "tenancy",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tenancy of the instance"
+    },
+    "placement_group": {
+      "name": "placement_group",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Placement group for the instance"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the instance"
+    }
+  }
+}

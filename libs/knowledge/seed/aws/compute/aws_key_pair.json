@@ -1,0 +1,46 @@
+{
+  "name": "aws_key_pair",
+  "description": "SSH key pair for EC2 instance access",
+  "attributes": {
+    "key_name": {
+      "name": "key_name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name for the key pair"
+    },
+    "key_name_prefix": {
+      "name": "key_name_prefix",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Creates a unique name beginning with the specified prefix"
+    },
+    "public_key": {
+      "name": "public_key",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Public key material (OpenSSH format)"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the key pair"
+    }
+  }
+}

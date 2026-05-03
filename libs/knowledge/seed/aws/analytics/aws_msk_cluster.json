@@ -1,0 +1,56 @@
+{
+  "name": "aws_msk_cluster",
+  "description": "Creates an Amazon Managed Streaming for Apache Kafka (MSK) cluster for building real-time streaming data pipelines and applications.",
+  "attributes": {
+    "cluster_name": {
+      "name": "cluster_name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the MSK cluster."
+    },
+    "kafka_version": {
+      "name": "kafka_version",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Specify the desired Kafka software version. E.g., 3.5.1."
+    },
+    "number_of_broker_nodes": {
+      "name": "number_of_broker_nodes",
+      "attribute_type": "number",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The desired total number of broker nodes in the kafka cluster. Must be a multiple of the number of Availability Zones."
+    },
+    "enhanced_monitoring": {
+      "name": "enhanced_monitoring",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Specify the desired enhanced MSK CloudWatch monitoring level."
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Key-value map of resource tags."
+    }
+  }
+}

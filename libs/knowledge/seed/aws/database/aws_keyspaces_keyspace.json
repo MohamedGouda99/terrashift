@@ -1,0 +1,26 @@
+{
+  "name": "aws_keyspaces_keyspace",
+  "description": "Serverless, scalable, highly available Apache Cassandra-compatible database service",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the keyspace (forces new resource)"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the keyspace"
+    }
+  }
+}

@@ -1,0 +1,156 @@
+{
+  "name": "aws_dynamodb_table",
+  "description": "Fully managed NoSQL database table with single-digit millisecond performance at any scale",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The name of the table (must be unique within a region)"
+    },
+    "hash_key": {
+      "name": "hash_key",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The attribute to use as the partition key (must be defined as an attribute)"
+    },
+    "range_key": {
+      "name": "range_key",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The attribute to use as the sort key (must be defined as an attribute)"
+    },
+    "billing_mode": {
+      "name": "billing_mode",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Billing mode for the table"
+    },
+    "read_capacity": {
+      "name": "read_capacity",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Number of read capacity units (required for PROVISIONED billing mode)"
+    },
+    "write_capacity": {
+      "name": "write_capacity",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Number of write capacity units (required for PROVISIONED billing mode)"
+    },
+    "table_class": {
+      "name": "table_class",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Storage class of the table"
+    },
+    "deletion_protection_enabled": {
+      "name": "deletion_protection_enabled",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable deletion protection for the table"
+    },
+    "stream_enabled": {
+      "name": "stream_enabled",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable DynamoDB Streams for the table"
+    },
+    "stream_view_type": {
+      "name": "stream_view_type",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Type of information written to the stream when an item is modified"
+    },
+    "restore_source_name": {
+      "name": "restore_source_name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the source table to restore from"
+    },
+    "restore_source_table_arn": {
+      "name": "restore_source_table_arn",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "ARN of the source table for cross-region restore"
+    },
+    "restore_date_time": {
+      "name": "restore_date_time",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Point-in-time recovery timestamp (ISO 8601 format)"
+    },
+    "restore_to_latest_time": {
+      "name": "restore_to_latest_time",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Restore to the most recent recovery point"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the table"
+    }
+  }
+}

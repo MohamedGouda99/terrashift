@@ -1,0 +1,286 @@
+{
+  "name": "aws_elasticache_cluster",
+  "description": "Managed in-memory data store supporting Redis, Valkey, and Memcached",
+  "attributes": {
+    "cluster_id": {
+      "name": "cluster_id",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Group identifier for the cluster (ElastiCache converts to lowercase)"
+    },
+    "engine": {
+      "name": "engine",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Cache engine to use (required if not using replication_group_id)"
+    },
+    "engine_version": {
+      "name": "engine_version",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Version of the cache engine"
+    },
+    "node_type": {
+      "name": "node_type",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Instance class for cache nodes"
+    },
+    "num_cache_nodes": {
+      "name": "num_cache_nodes",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Number of cache nodes (Redis: must be 1, Memcached: 1-40)"
+    },
+    "parameter_group_name": {
+      "name": "parameter_group_name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the parameter group to associate with this cluster"
+    },
+    "subnet_group_name": {
+      "name": "subnet_group_name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the subnet group to associate (for VPC deployment)"
+    },
+    "security_group_ids": {
+      "name": "security_group_ids",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Security group IDs to associate (VPC only)"
+    },
+    "replication_group_id": {
+      "name": "replication_group_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Replication group ID for Redis read replicas"
+    },
+    "availability_zone": {
+      "name": "availability_zone",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Availability Zone for the cache cluster"
+    },
+    "az_mode": {
+      "name": "az_mode",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "AZ mode for Memcached clusters"
+    },
+    "preferred_availability_zones": {
+      "name": "preferred_availability_zones",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Preferred AZs for Memcached nodes"
+    },
+    "port": {
+      "name": "port",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Port number for cache connections"
+    },
+    "maintenance_window": {
+      "name": "maintenance_window",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Weekly maintenance window (UTC)"
+    },
+    "notification_topic_arn": {
+      "name": "notification_topic_arn",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "SNS topic ARN for cache cluster notifications"
+    },
+    "snapshot_window": {
+      "name": "snapshot_window",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Daily snapshot window for Redis (UTC)"
+    },
+    "snapshot_retention_limit": {
+      "name": "snapshot_retention_limit",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Days to retain automatic snapshots (Redis only)"
+    },
+    "snapshot_name": {
+      "name": "snapshot_name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Snapshot name for data restoration (Redis only)"
+    },
+    "snapshot_arns": {
+      "name": "snapshot_arns",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "S3 RDB snapshot ARNs for restoration (Redis only)"
+    },
+    "final_snapshot_identifier": {
+      "name": "final_snapshot_identifier",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Final snapshot name when cluster is deleted (Redis only)"
+    },
+    "apply_immediately": {
+      "name": "apply_immediately",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Apply modifications immediately instead of during maintenance window"
+    },
+    "auto_minor_version_upgrade": {
+      "name": "auto_minor_version_upgrade",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable automatic minor version upgrades (Redis 6+ only)"
+    },
+    "transit_encryption_enabled": {
+      "name": "transit_encryption_enabled",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable encryption in-transit"
+    },
+    "network_type": {
+      "name": "network_type",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IP version for network connections"
+    },
+    "ip_discovery": {
+      "name": "ip_discovery",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IP version to advertise in the discovery protocol"
+    },
+    "outpost_mode": {
+      "name": "outpost_mode",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Outpost deployment mode"
+    },
+    "preferred_outpost_arn": {
+      "name": "preferred_outpost_arn",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Outpost ARN for cluster creation"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the cluster"
+    }
+  }
+}

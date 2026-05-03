@@ -1,0 +1,196 @@
+{
+  "name": "aws_fsx_lustre_file_system",
+  "description": "High-performance parallel file system for compute-intensive workloads and HPC",
+  "attributes": {
+    "subnet_ids": {
+      "name": "subnet_ids",
+      "attribute_type": "list(string)",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "List of subnet IDs (currently only one subnet is supported)"
+    },
+    "storage_capacity": {
+      "name": "storage_capacity",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Storage capacity in GiB (min 1200 for SCRATCH_1/PERSISTENT_1, 1200 or multiples of 2400 for SCRATCH_2/PERSISTENT_2)"
+    },
+    "deployment_type": {
+      "name": "deployment_type",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Deployment type (SCRATCH_1 for temporary, PERSISTENT_1/2 for longer-term, PERSISTENT_2 recommended)"
+    },
+    "per_unit_storage_throughput": {
+      "name": "per_unit_storage_throughput",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Throughput in MB/s per TiB (PERSISTENT_1: 50/100/200, PERSISTENT_2: 125/250/500/1000)"
+    },
+    "storage_type": {
+      "name": "storage_type",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Storage media type"
+    },
+    "security_group_ids": {
+      "name": "security_group_ids",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Security group IDs for the file system network interfaces"
+    },
+    "kms_key_id": {
+      "name": "kms_key_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "ARN of KMS key for encryption (PERSISTENT_1/2 only, defaults to AWS managed key)"
+    },
+    "data_compression_type": {
+      "name": "data_compression_type",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Data compression type"
+    },
+    "file_system_type_version": {
+      "name": "file_system_type_version",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Lustre software version"
+    },
+    "import_path": {
+      "name": "import_path",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "S3 URI as the data repository source (PERSISTENT_1 only, e.g., s3://bucket/prefix/)"
+    },
+    "export_path": {
+      "name": "export_path",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "S3 URI for export destination (PERSISTENT_1 only, auto-generated if not set)"
+    },
+    "auto_import_policy": {
+      "name": "auto_import_policy",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "How FSx keeps file/directory listings up to date (PERSISTENT_1 only)"
+    },
+    "automatic_backup_retention_days": {
+      "name": "automatic_backup_retention_days",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Days to retain automatic backups (0-90, PERSISTENT_1/2 only)"
+    },
+    "copy_tags_to_backups": {
+      "name": "copy_tags_to_backups",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Copy file system tags to backups"
+    },
+    "daily_automatic_backup_start_time": {
+      "name": "daily_automatic_backup_start_time",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Daily backup start time in HH:MM UTC format"
+    },
+    "drive_cache_type": {
+      "name": "drive_cache_type",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Drive cache type (HDD storage only)"
+    },
+    "skip_final_backup": {
+      "name": "skip_final_backup",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Skip final backup on file system deletion"
+    },
+    "weekly_maintenance_start_time": {
+      "name": "weekly_maintenance_start_time",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Weekly maintenance window start time (d:HH:MM, d=1-7 Mon-Sun)"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the file system"
+    }
+  }
+}

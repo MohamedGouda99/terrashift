@@ -1,0 +1,126 @@
+{
+  "name": "aws_sns_topic_subscription",
+  "description": "Subscription to an SNS topic for delivering messages",
+  "attributes": {
+    "topic_arn": {
+      "name": "topic_arn",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "ARN of the SNS topic to subscribe to"
+    },
+    "protocol": {
+      "name": "protocol",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Protocol to use for the subscription"
+    },
+    "endpoint": {
+      "name": "endpoint",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Endpoint for the subscription"
+    },
+    "confirmation_timeout_in_minutes": {
+      "name": "confirmation_timeout_in_minutes",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Timeout for confirmation (HTTP/HTTPS/Email)"
+    },
+    "endpoint_auto_confirms": {
+      "name": "endpoint_auto_confirms",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Endpoint can auto-confirm the subscription"
+    },
+    "filter_policy": {
+      "name": "filter_policy",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "JSON filter policy for message filtering"
+    },
+    "filter_policy_scope": {
+      "name": "filter_policy_scope",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Scope of the filter policy"
+    },
+    "raw_message_delivery": {
+      "name": "raw_message_delivery",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable raw message delivery (SQS/HTTP/HTTPS)"
+    },
+    "redrive_policy": {
+      "name": "redrive_policy",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "JSON redrive policy for dead-letter queue"
+    },
+    "delivery_policy": {
+      "name": "delivery_policy",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "JSON delivery retry policy"
+    },
+    "subscription_role_arn": {
+      "name": "subscription_role_arn",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IAM role ARN for Kinesis Data Firehose subscriptions"
+    },
+    "replay_policy": {
+      "name": "replay_policy",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "JSON replay policy for archived messages"
+    }
+  }
+}

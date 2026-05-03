@@ -1,0 +1,146 @@
+{
+  "name": "aws_eks_node_group",
+  "description": "Managed node group for Amazon EKS cluster",
+  "attributes": {
+    "cluster_name": {
+      "name": "cluster_name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the EKS cluster"
+    },
+    "node_group_name": {
+      "name": "node_group_name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the node group"
+    },
+    "node_role_arn": {
+      "name": "node_role_arn",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "ARN of the IAM role for the nodes"
+    },
+    "subnet_ids": {
+      "name": "subnet_ids",
+      "attribute_type": "set(string)",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Subnet IDs for the nodes"
+    },
+    "node_group_name_prefix": {
+      "name": "node_group_name_prefix",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Prefix for auto-generated node group name"
+    },
+    "instance_types": {
+      "name": "instance_types",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Instance types for the nodes"
+    },
+    "disk_size": {
+      "name": "disk_size",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Disk size in GiB for nodes"
+    },
+    "ami_type": {
+      "name": "ami_type",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "AMI type for the nodes"
+    },
+    "release_version": {
+      "name": "release_version",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "AMI release version"
+    },
+    "version": {
+      "name": "version",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Kubernetes version for the nodes"
+    },
+    "capacity_type": {
+      "name": "capacity_type",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Capacity type for the nodes"
+    },
+    "labels": {
+      "name": "labels",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Kubernetes labels to apply to nodes"
+    },
+    "force_update_version": {
+      "name": "force_update_version",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Force version update if pods cannot be drained"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the node group"
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "name": "azurerm_storage_container",
+  "description": "Manages a Container within an Azure Storage Account",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The name of the Container which should be created within the Storage Account"
+    },
+    "storage_account_name": {
+      "name": "storage_account_name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The name of the Storage Account where the Container should be created"
+    },
+    "container_access_type": {
+      "name": "container_access_type",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The Access Level configured for this Container"
+    },
+    "metadata": {
+      "name": "metadata",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "A mapping of MetaData for this Container"
+    }
+  }
+}

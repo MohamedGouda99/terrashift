@@ -1,0 +1,56 @@
+{
+  "name": "aws_transcribe_vocabulary",
+  "description": "Creates an Amazon Transcribe custom vocabulary for improving speech-to-text accuracy for domain-specific words and phrases.",
+  "attributes": {
+    "vocabulary_name": {
+      "name": "vocabulary_name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The name of the vocabulary."
+    },
+    "language_code": {
+      "name": "language_code",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The language code for the vocabulary."
+    },
+    "phrases": {
+      "name": "phrases",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "A list of terms to include in the vocabulary."
+    },
+    "vocabulary_file_uri": {
+      "name": "vocabulary_file_uri",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The S3 location of the vocabulary text file."
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Key-value map of resource tags."
+    }
+  }
+}

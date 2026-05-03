@@ -1,0 +1,116 @@
+{
+  "name": "aws_cloudfront_distribution",
+  "description": "Global CDN that delivers content with low latency and high transfer speeds via edge locations",
+  "attributes": {
+    "enabled": {
+      "name": "enabled",
+      "attribute_type": "bool",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Whether the distribution is enabled to accept end-user requests"
+    },
+    "aliases": {
+      "name": "aliases",
+      "attribute_type": "set(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Extra CNAMEs (alternate domain names) for the distribution (e.g., www.example.com)"
+    },
+    "comment": {
+      "name": "comment",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Human-readable description for the distribution"
+    },
+    "default_root_object": {
+      "name": "default_root_object",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Object to return when the root URL is requested (e.g., index.html)"
+    },
+    "http_version": {
+      "name": "http_version",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Maximum HTTP version to support"
+    },
+    "is_ipv6_enabled": {
+      "name": "is_ipv6_enabled",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable IPv6 support for the distribution"
+    },
+    "price_class": {
+      "name": "price_class",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Price class for the distribution (controls which edge locations serve content)"
+    },
+    "web_acl_id": {
+      "name": "web_acl_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "WAF Web ACL ARN to associate with the distribution"
+    },
+    "retain_on_delete": {
+      "name": "retain_on_delete",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Disable the distribution instead of deleting it when running terraform destroy"
+    },
+    "wait_for_deployment": {
+      "name": "wait_for_deployment",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Wait for distribution to reach Deployed state after create/update"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the distribution"
+    }
+  }
+}

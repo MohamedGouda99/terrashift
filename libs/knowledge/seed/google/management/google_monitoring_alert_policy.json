@@ -1,0 +1,66 @@
+{
+  "name": "google_monitoring_alert_policy",
+  "description": "A set of conditions that determine when to trigger an alert and who to notify",
+  "attributes": {
+    "display_name": {
+      "name": "display_name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "A short name or phrase used to identify the policy in dashboards"
+    },
+    "combiner": {
+      "name": "combiner",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "How to combine the results of multiple conditions"
+    },
+    "project": {
+      "name": "project",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The ID of the project in which the resource belongs"
+    },
+    "enabled": {
+      "name": "enabled",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Whether or not the policy is enabled"
+    },
+    "notification_channels": {
+      "name": "notification_channels",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Identifies the notification channels to which notifications should be sent"
+    },
+    "user_labels": {
+      "name": "user_labels",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "User-supplied key/value data to be used for organizing AlertPolicy objects"
+    }
+  }
+}

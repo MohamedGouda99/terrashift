@@ -1,0 +1,276 @@
+{
+  "name": "aws_redshift_cluster",
+  "description": "Petabyte-scale data warehouse for analytics with columnar storage and massively parallel processing",
+  "attributes": {
+    "cluster_identifier": {
+      "name": "cluster_identifier",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Unique identifier for the cluster (forces new resource)"
+    },
+    "node_type": {
+      "name": "node_type",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Node type for the Redshift cluster"
+    },
+    "master_username": {
+      "name": "master_username",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Username for the master DB user (required unless restoring from snapshot)"
+    },
+    "master_password": {
+      "name": "master_password",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Password for the master DB user (sensitive, required unless managing via Secrets Manager)"
+    },
+    "manage_master_password": {
+      "name": "manage_master_password",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Allow Redshift to manage the master password in Secrets Manager"
+    },
+    "database_name": {
+      "name": "database_name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the first database to create"
+    },
+    "cluster_type": {
+      "name": "cluster_type",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Cluster type (single-node or multi-node)"
+    },
+    "number_of_nodes": {
+      "name": "number_of_nodes",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Number of compute nodes (required for multi-node cluster type)"
+    },
+    "cluster_version": {
+      "name": "cluster_version",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Redshift engine version"
+    },
+    "allow_version_upgrade": {
+      "name": "allow_version_upgrade",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Allow automatic major version upgrades during maintenance"
+    },
+    "cluster_subnet_group_name": {
+      "name": "cluster_subnet_group_name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the subnet group for the cluster"
+    },
+    "vpc_security_group_ids": {
+      "name": "vpc_security_group_ids",
+      "attribute_type": "set(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "VPC security group IDs to associate with the cluster"
+    },
+    "publicly_accessible": {
+      "name": "publicly_accessible",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Whether the cluster is publicly accessible"
+    },
+    "port": {
+      "name": "port",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Port on which the cluster accepts connections"
+    },
+    "availability_zone": {
+      "name": "availability_zone",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Availability zone for the cluster"
+    },
+    "enhanced_vpc_routing": {
+      "name": "enhanced_vpc_routing",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable enhanced VPC routing (forces COPY and UNLOAD traffic through VPC)"
+    },
+    "encrypted": {
+      "name": "encrypted",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable encryption at rest"
+    },
+    "kms_key_id": {
+      "name": "kms_key_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "ARN of the KMS key for encryption (requires encrypted=true)"
+    },
+    "iam_roles": {
+      "name": "iam_roles",
+      "attribute_type": "set(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IAM role ARNs for the cluster to access other AWS services"
+    },
+    "cluster_parameter_group_name": {
+      "name": "cluster_parameter_group_name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the parameter group to associate"
+    },
+    "automated_snapshot_retention_period": {
+      "name": "automated_snapshot_retention_period",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Days to retain automated snapshots (0-35, 0 disables)"
+    },
+    "preferred_maintenance_window": {
+      "name": "preferred_maintenance_window",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Weekly maintenance window (ddd:hh24:mi-ddd:hh24:mi)"
+    },
+    "skip_final_snapshot": {
+      "name": "skip_final_snapshot",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Skip final snapshot before cluster deletion"
+    },
+    "final_snapshot_identifier": {
+      "name": "final_snapshot_identifier",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the final snapshot when deleting the cluster"
+    },
+    "snapshot_identifier": {
+      "name": "snapshot_identifier",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Snapshot ID to restore the cluster from (forces new resource)"
+    },
+    "elastic_ip": {
+      "name": "elastic_ip",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Elastic IP address for the cluster (for single-node clusters in VPC)"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the cluster"
+    }
+  }
+}

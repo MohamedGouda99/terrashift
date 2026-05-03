@@ -1,0 +1,246 @@
+{
+  "name": "aws_neptune_cluster",
+  "description": "Fully managed graph database supporting Property Graph and RDF/SPARQL for highly connected data",
+  "attributes": {
+    "cluster_identifier": {
+      "name": "cluster_identifier",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Unique identifier for the cluster (auto-generated if omitted)"
+    },
+    "cluster_identifier_prefix": {
+      "name": "cluster_identifier_prefix",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Prefix for a randomly generated cluster identifier (conflicts with cluster_identifier)"
+    },
+    "engine": {
+      "name": "engine",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Database engine (always neptune)"
+    },
+    "engine_version": {
+      "name": "engine_version",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Neptune engine version"
+    },
+    "neptune_subnet_group_name": {
+      "name": "neptune_subnet_group_name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Neptune subnet group to associate with the cluster"
+    },
+    "vpc_security_group_ids": {
+      "name": "vpc_security_group_ids",
+      "attribute_type": "set(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "VPC security group IDs to associate with the cluster"
+    },
+    "availability_zones": {
+      "name": "availability_zones",
+      "attribute_type": "set(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "List of AZs for cluster instances"
+    },
+    "port": {
+      "name": "port",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Port on which the cluster accepts connections"
+    },
+    "storage_encrypted": {
+      "name": "storage_encrypted",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable storage encryption at rest"
+    },
+    "kms_key_arn": {
+      "name": "kms_key_arn",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "ARN of the KMS key for encryption (requires storage_encrypted=true)"
+    },
+    "iam_database_authentication_enabled": {
+      "name": "iam_database_authentication_enabled",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable IAM authentication for database connections"
+    },
+    "iam_roles": {
+      "name": "iam_roles",
+      "attribute_type": "set(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IAM role ARNs for Neptune to access other AWS services"
+    },
+    "neptune_cluster_parameter_group_name": {
+      "name": "neptune_cluster_parameter_group_name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Neptune cluster parameter group to associate"
+    },
+    "backup_retention_period": {
+      "name": "backup_retention_period",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Days to retain automated backups (1-35)"
+    },
+    "preferred_backup_window": {
+      "name": "preferred_backup_window",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Daily time range for automated backups (hh24:mi-hh24:mi UTC)"
+    },
+    "preferred_maintenance_window": {
+      "name": "preferred_maintenance_window",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Weekly maintenance window (ddd:hh24:mi-ddd:hh24:mi UTC)"
+    },
+    "deletion_protection": {
+      "name": "deletion_protection",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Protect cluster from accidental deletion"
+    },
+    "skip_final_snapshot": {
+      "name": "skip_final_snapshot",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Skip final snapshot before cluster deletion"
+    },
+    "final_snapshot_identifier": {
+      "name": "final_snapshot_identifier",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the final snapshot when deleting the cluster"
+    },
+    "snapshot_identifier": {
+      "name": "snapshot_identifier",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Snapshot ID to restore from (forces new resource)"
+    },
+    "apply_immediately": {
+      "name": "apply_immediately",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Apply changes immediately instead of during next maintenance window"
+    },
+    "enable_cloudwatch_logs_exports": {
+      "name": "enable_cloudwatch_logs_exports",
+      "attribute_type": "set(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Log types to export to CloudWatch"
+    },
+    "replication_source_identifier": {
+      "name": "replication_source_identifier",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "ARN of source Neptune cluster for read replica"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the cluster"
+    }
+  }
+}

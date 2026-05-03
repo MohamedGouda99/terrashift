@@ -1,0 +1,116 @@
+{
+  "name": "aws_cognito_user_pool",
+  "description": "User directory for authentication, user management, and social identity providers",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the user pool"
+    },
+    "alias_attributes": {
+      "name": "alias_attributes",
+      "attribute_type": "set(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Attributes supported as aliases (conflicts with username_attributes)"
+    },
+    "username_attributes": {
+      "name": "username_attributes",
+      "attribute_type": "set(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Attributes for username (conflicts with alias_attributes)"
+    },
+    "auto_verified_attributes": {
+      "name": "auto_verified_attributes",
+      "attribute_type": "set(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Attributes to auto-verify"
+    },
+    "mfa_configuration": {
+      "name": "mfa_configuration",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Multi-Factor Authentication configuration"
+    },
+    "sms_authentication_message": {
+      "name": "sms_authentication_message",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "SMS message for MFA code (must contain {####})"
+    },
+    "email_verification_subject": {
+      "name": "email_verification_subject",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Subject of the email verification message"
+    },
+    "email_verification_message": {
+      "name": "email_verification_message",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Email verification message (must contain {####})"
+    },
+    "sms_verification_message": {
+      "name": "sms_verification_message",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "SMS verification message (must contain {####})"
+    },
+    "deletion_protection": {
+      "name": "deletion_protection",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Delete protection setting"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the user pool"
+    }
+  }
+}

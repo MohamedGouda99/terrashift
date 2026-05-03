@@ -229,52 +229,77 @@ impl KnowledgeService {
         Ok(resource_count)
     }
 
-    /// Walk a directory of `*.json` files, parse each as `ProviderSchema`,
-    /// and seed the knowledge layer. Idempotent — `cache_schema` uses
-    /// `INSERT OR IGNORE`, so re-running is a no-op when versions match.
+    /// Walk a seed bundle laid out as `<dir>/<provider>/<category>/<resource>.json`
+    /// and seed the knowledge layer. Each leaf JSON file is one
+    /// `ResourceSchema`. Files are grouped by their parent provider
+    /// directory and emitted as one `ProviderSchema` per provider, so
+    /// downstream lookups by `(provider, version)` work uniformly.
     ///
-    /// Returns total resource count across all loaded schemas.
+    /// Idempotent: `cache_schema` uses `INSERT OR IGNORE`, so re-running
+    /// is a no-op when versions match. Misformatted JSON files are
+    /// warn-skipped, never fatal.
+    ///
+    /// Layout example:
+    /// ```text
+    /// seed/
+    /// ├── aws/
+    /// │   └── networking/
+    /// │       ├── aws_vpc.json
+    /// │       └── aws_subnet.json
+    /// └── azurerm/
+    ///     ├── networking/
+    ///     │   └── azurerm_virtual_network.json
+    ///     └── security/
+    ///         └── azurerm_resource_group.json
+    /// ```
+    ///
+    /// Returns the total resource count across all loaded providers.
     pub async fn seed_from_bundle(&self, dir: &std::path::Path) -> Result<usize, KnowledgeError> {
-        let mut total = 0_usize;
         if !dir.exists() {
             warn!("seed bundle dir does not exist: {}", dir.display());
             return Ok(0);
         }
-        let entries = std::fs::read_dir(dir).map_err(|e| {
+
+        let provider_entries = std::fs::read_dir(dir).map_err(|e| {
             KnowledgeError::Schema(crate::errors::SchemaError::Storage(
                 sqlx::Error::Configuration(format!("read seed dir: {e}").into()),
             ))
         })?;
-        for entry_result in entries {
-            let entry = match entry_result {
-                Ok(e) => e,
-                Err(e) => {
-                    warn!("seed: skipping unreadable dir entry: {e}");
-                    continue;
-                }
-            };
-            let path = entry.path();
-            if path.extension().and_then(|s| s.to_str()) != Some("json") {
+
+        let mut total = 0_usize;
+        for provider_entry in provider_entries.flatten() {
+            let provider_path = provider_entry.path();
+            if !provider_path.is_dir() {
                 continue;
             }
-            let json = match std::fs::read_to_string(&path) {
-                Ok(s) => s,
-                Err(e) => {
-                    warn!("seed: skipping {} (read error: {e})", path.display());
-                    continue;
-                }
+            let provider_name = match provider_path.file_name().and_then(|s| s.to_str()) {
+                Some(n) => n.to_string(),
+                None => continue,
             };
-            let schema: ProviderSchema = match serde_json::from_str(&json) {
-                Ok(s) => s,
-                Err(e) => {
-                    warn!("seed: skipping {} (parse error: {e})", path.display());
-                    continue;
-                }
+
+            let mut resources: BTreeMap<String, crate::types::ResourceSchema> = BTreeMap::new();
+            walk_resource_jsons(&provider_path, &mut resources);
+
+            if resources.is_empty() {
+                continue;
+            }
+
+            let schema = ProviderSchema {
+                provider: provider_name.clone(),
+                version: SEED_VERSION.to_string(),
+                resources,
+                data_sources: BTreeMap::new(),
+                fetched_at: chrono::Utc::now(),
             };
+
             let n = self.seed_provider(schema).await?;
-            info!("seed: loaded {} resources from {}", n, path.display());
+            info!(
+                "seed: loaded {} resources for provider '{}'",
+                n, provider_name
+            );
             total += n;
         }
+
         Ok(total)
     }
 
@@ -374,5 +399,58 @@ impl KnowledgeService {
             .schema_store
             .fetch_provider_schema(provider, version)
             .await?)
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Seed bundle helpers
+// ─────────────────────────────────────────────────────────────────────
+
+/// Version label stamped on bundled-seed `ProviderSchema` rows.
+/// Distinct from real Terraform provider versions (e.g., `5.30.0`)
+/// because the seed is a curated subset, not a 1:1 registry dump.
+/// Operators can still pin against real versions via
+/// `terrashift schemas refresh --provider aws --version 5.30.0`,
+/// which fetches from the live registry and supersedes the seed.
+const SEED_VERSION: &str = "terrashift-seed-2025.01";
+
+/// Recursively walk a provider directory, parse every leaf `*.json`
+/// as a `ResourceSchema`, and accumulate into the resources map keyed
+/// by `resource.name`. Misformatted files are warn-skipped.
+fn walk_resource_jsons(
+    dir: &std::path::Path,
+    resources: &mut BTreeMap<String, crate::types::ResourceSchema>,
+) {
+    let entries = match std::fs::read_dir(dir) {
+        Ok(e) => e,
+        Err(err) => {
+            warn!("seed: cannot read {}: {err}", dir.display());
+            return;
+        }
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_dir() {
+            walk_resource_jsons(&path, resources);
+            continue;
+        }
+        if path.extension().and_then(|s| s.to_str()) != Some("json") {
+            continue;
+        }
+        let json = match std::fs::read_to_string(&path) {
+            Ok(s) => s,
+            Err(e) => {
+                warn!("seed: skip {} (read error: {e})", path.display());
+                continue;
+            }
+        };
+        let resource: crate::types::ResourceSchema = match serde_json::from_str(&json) {
+            Ok(r) => r,
+            Err(e) => {
+                warn!("seed: skip {} (parse error: {e})", path.display());
+                continue;
+            }
+        };
+        resources.insert(resource.name.clone(), resource);
     }
 }

@@ -1,0 +1,56 @@
+{
+  "name": "aws_globalaccelerator_accelerator",
+  "description": "Networking service that improves availability and performance by routing traffic through AWS global network edge locations",
+  "attributes": {
+    "name": {
+      "name": "name",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the accelerator"
+    },
+    "ip_address_type": {
+      "name": "ip_address_type",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IP address type for the accelerator"
+    },
+    "ip_addresses": {
+      "name": "ip_addresses",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Specific IP addresses to use for the accelerator (BYOIP only)"
+    },
+    "enabled": {
+      "name": "enabled",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Whether the accelerator is enabled"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the accelerator"
+    }
+  }
+}

@@ -1,0 +1,516 @@
+{
+  "name": "aws_db_instance",
+  "description": "Managed relational database instance supporting MySQL, PostgreSQL, MariaDB, Oracle, and SQL Server",
+  "attributes": {
+    "identifier": {
+      "name": "identifier",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The name of the RDS instance. If omitted, Terraform will assign a random unique identifier"
+    },
+    "instance_class": {
+      "name": "instance_class",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The instance type of the RDS instance (e.g., db.t3.micro)"
+    },
+    "engine": {
+      "name": "engine",
+      "attribute_type": "string",
+      "required": true,
+      "optional": false,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The database engine to use"
+    },
+    "engine_version": {
+      "name": "engine_version",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The engine version to use. If not specified, the latest version is used"
+    },
+    "allocated_storage": {
+      "name": "allocated_storage",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The allocated storage in gibibytes"
+    },
+    "max_allocated_storage": {
+      "name": "max_allocated_storage",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Maximum storage threshold for autoscaling. Set to 0 to disable"
+    },
+    "storage_type": {
+      "name": "storage_type",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The storage type for the DB instance"
+    },
+    "storage_throughput": {
+      "name": "storage_throughput",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Storage throughput in MiBps (for gp3 only)"
+    },
+    "iops": {
+      "name": "iops",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The amount of provisioned IOPS (for io1, io2, gp3)"
+    },
+    "username": {
+      "name": "username",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Username for the master DB user"
+    },
+    "password": {
+      "name": "password",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Password for the master DB user"
+    },
+    "manage_master_user_password": {
+      "name": "manage_master_user_password",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Allow RDS to manage the master user password in Secrets Manager"
+    },
+    "master_user_secret_kms_key_id": {
+      "name": "master_user_secret_kms_key_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "KMS key ID to encrypt the master user secret"
+    },
+    "db_name": {
+      "name": "db_name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The name of the database to create when the instance is created"
+    },
+    "db_subnet_group_name": {
+      "name": "db_subnet_group_name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "DB subnet group to associate with this instance"
+    },
+    "vpc_security_group_ids": {
+      "name": "vpc_security_group_ids",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "List of VPC security group IDs to associate"
+    },
+    "availability_zone": {
+      "name": "availability_zone",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The AZ for the RDS instance"
+    },
+    "multi_az": {
+      "name": "multi_az",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable Multi-AZ deployment for high availability"
+    },
+    "publicly_accessible": {
+      "name": "publicly_accessible",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Whether the instance is publicly accessible"
+    },
+    "port": {
+      "name": "port",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The port on which the DB accepts connections"
+    },
+    "parameter_group_name": {
+      "name": "parameter_group_name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the DB parameter group to associate"
+    },
+    "option_group_name": {
+      "name": "option_group_name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of the DB option group to associate"
+    },
+    "storage_encrypted": {
+      "name": "storage_encrypted",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable storage encryption"
+    },
+    "kms_key_id": {
+      "name": "kms_key_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The ARN for the KMS encryption key"
+    },
+    "backup_retention_period": {
+      "name": "backup_retention_period",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Days to retain backups (0-35)"
+    },
+    "backup_window": {
+      "name": "backup_window",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Daily time range for automated backups (UTC)"
+    },
+    "maintenance_window": {
+      "name": "maintenance_window",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "The window for system maintenance (UTC)"
+    },
+    "auto_minor_version_upgrade": {
+      "name": "auto_minor_version_upgrade",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable automatic minor version upgrades"
+    },
+    "allow_major_version_upgrade": {
+      "name": "allow_major_version_upgrade",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Allow major engine version upgrades"
+    },
+    "apply_immediately": {
+      "name": "apply_immediately",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Apply changes immediately instead of during maintenance window"
+    },
+    "deletion_protection": {
+      "name": "deletion_protection",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Prevent database from being deleted"
+    },
+    "skip_final_snapshot": {
+      "name": "skip_final_snapshot",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Skip creating a final snapshot before deletion"
+    },
+    "final_snapshot_identifier": {
+      "name": "final_snapshot_identifier",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Name of final snapshot when instance is deleted"
+    },
+    "copy_tags_to_snapshot": {
+      "name": "copy_tags_to_snapshot",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Copy tags to snapshots"
+    },
+    "snapshot_identifier": {
+      "name": "snapshot_identifier",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Snapshot ID to create the instance from"
+    },
+    "replicate_source_db": {
+      "name": "replicate_source_db",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Source DB instance ARN for read replica"
+    },
+    "performance_insights_enabled": {
+      "name": "performance_insights_enabled",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable Performance Insights"
+    },
+    "performance_insights_retention_period": {
+      "name": "performance_insights_retention_period",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Days to retain Performance Insights data (7, 31, or 731)"
+    },
+    "performance_insights_kms_key_id": {
+      "name": "performance_insights_kms_key_id",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "KMS key ID for Performance Insights encryption"
+    },
+    "monitoring_interval": {
+      "name": "monitoring_interval",
+      "attribute_type": "number",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enhanced Monitoring interval in seconds (0, 1, 5, 10, 15, 30, 60)"
+    },
+    "monitoring_role_arn": {
+      "name": "monitoring_role_arn",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "IAM role ARN for Enhanced Monitoring"
+    },
+    "enabled_cloudwatch_logs_exports": {
+      "name": "enabled_cloudwatch_logs_exports",
+      "attribute_type": "list(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Log types to export to CloudWatch"
+    },
+    "iam_database_authentication_enabled": {
+      "name": "iam_database_authentication_enabled",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Enable IAM database authentication"
+    },
+    "license_model": {
+      "name": "license_model",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "License model (varies by engine)"
+    },
+    "network_type": {
+      "name": "network_type",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Network type for the DB instance"
+    },
+    "ca_cert_identifier": {
+      "name": "ca_cert_identifier",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "CA certificate identifier for the DB instance"
+    },
+    "character_set_name": {
+      "name": "character_set_name",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Character set for Oracle and SQL Server"
+    },
+    "timezone": {
+      "name": "timezone",
+      "attribute_type": "string",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Time zone (SQL Server only)"
+    },
+    "delete_automated_backups": {
+      "name": "delete_automated_backups",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Delete automated backups after instance deletion"
+    },
+    "dedicated_log_volume": {
+      "name": "dedicated_log_volume",
+      "attribute_type": "bool",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Use dedicated log volume"
+    },
+    "tags": {
+      "name": "tags",
+      "attribute_type": "map(string)",
+      "required": false,
+      "optional": true,
+      "computed": false,
+      "sensitive": false,
+      "deprecated": null,
+      "description": "Tags to apply to the instance"
+    }
+  }
+}
