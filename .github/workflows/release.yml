@@ -131,7 +131,11 @@ jobs:
         uses: actions/download-artifact@v4
 
       - name: Install git-cliff
-        run: cargo install git-cliff --version 2.0 --locked
+        # cargo install --version requires either an exact version
+        # (2.0.0) or a semver qualifier (^2.0). Bare "2.0" was rejected
+        # in newer cargo: "unexpected end of input while parsing minor
+        # version number".
+        run: cargo install git-cliff --version "^2.0" --locked
 
       - name: Generate release notes
         shell: bash
