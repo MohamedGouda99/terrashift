@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! `CompletionMetadata` — fields that S5 wires into `AuditPayload::LlmCall`.
 //!
 //! Pattern: terrashift_plan.md §6.X audit-records-the-model invariant.

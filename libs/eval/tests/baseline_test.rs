@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! R6 — Article XII rule 4 baseline + CI regression gate tests.
 //!
 //! All offline. The baseline file at `terrashift-evals/eval-baseline.json`

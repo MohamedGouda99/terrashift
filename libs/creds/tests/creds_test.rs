@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! Credential broker integration tests — Article V cornerstone.
 //!
 //! All tests offline. The cloud brokers' real STS / ADC / managed-

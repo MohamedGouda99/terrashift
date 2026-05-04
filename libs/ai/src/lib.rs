@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! Terrashift AI client — wraps `stakai` with BYOK + tier routing.
 //!
 //! Pattern: terrashift_plan.md §6.3 (LLM Router design) + the architecture reference §10.

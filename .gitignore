@@ -68,3 +68,6 @@ specs/*/output/
 
 # Stakpak session files — per-user runtime state.
 .stakpak/session*
+
+# Stakpak session DB + working state
+.stakpak/

@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! Core agent types: run context, proposed tool calls, decisions, approval
 //! policy, retry config, agent commands, and loop result.
 //!

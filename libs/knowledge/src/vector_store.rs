@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! In-memory vector store with cosine similarity for RAG retrieval.
 //!
 //! Pattern: terrashift_plan.md §7 (Knowledge service multi-tier; Stage 1 uses

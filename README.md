@@ -14,7 +14,7 @@ code where it counts and LLMs only where they earn their place.
 
 <br>
 
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-CE422B?style=flat-square)](LICENSE)
+[![License: Source-Available](https://img.shields.io/badge/License-Source--Available-CE422B?style=flat-square)](LICENSE)
 [![Rust](https://img.shields.io/badge/Rust-1.94%2B-CE422B?style=flat-square&logo=rust&logoColor=white)](https://www.rust-lang.org/)
 [![Single binary](https://img.shields.io/badge/Distribution-single--binary-1F2937?style=flat-square)](#install)
 [![Status: Stage 2](https://img.shields.io/badge/Status-Stage_2_(MVP%2B)-F7931E?style=flat-square)](#roadmap)
@@ -245,9 +245,24 @@ For security issues, do **not** open a public GitHub issue. Use
 
 ## License
 
-Licensed under [**Apache License 2.0**](LICENSE).
-See [`ATTRIBUTIONS.md`](ATTRIBUTIONS.md) for upstream credits — Terrashift
-mirrors patterns from Stakpak (Apache 2.0) and the Claude Code source.
+Copyright © 2026 Mohamed Gouda. All Rights Reserved.
+
+Terrashift is licensed under the
+[**Terrashift Source-Available License v1.0**](LICENSE) — a custom
+proprietary, source-available license. The source code is published on
+GitHub for transparency, learning, and review. Personal non-commercial
+use is permitted; commercial use, redistribution, derivative
+distribution, and hosted-service deployment require a separate written
+agreement with the copyright holder.
+
+For commercial licensing inquiries, open an issue or contact the
+maintainer via the GitHub repository.
+
+See [`ATTRIBUTIONS.md`](ATTRIBUTIONS.md) for upstream credits —
+Terrashift adapts conceptual patterns from Stakpak (Apache 2.0) and
+the Claude Code source. Adapted patterns are original Terrashift code
+and fall under the proprietary license; verbatim third-party code (where
+any) retains its original license.
 
 ---
 

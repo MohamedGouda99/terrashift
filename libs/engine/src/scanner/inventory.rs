@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! Typed estate inventory — Scanner output, Mapper input.
 //!
 //! Pattern: terrashift_plan.md §5 (HLD-2 box 1 → box 2 contract).

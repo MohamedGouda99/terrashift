@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! Integration tests for the P-14 slash-command registry.
 //!
 //! Pattern: per-file commands from refs/claude-code/src/commands/.

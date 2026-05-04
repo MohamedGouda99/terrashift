@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! `MultiNotifier` — fan-out to multiple notifiers.
 //!
 //! Strategy: try every child in registration order. Errors on individual

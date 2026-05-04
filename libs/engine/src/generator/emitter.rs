@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! HCL emit + file write — composes blocks into `Body`, serializes, writes.
 //!
 //! Pattern: the architecture reference §28 (file ops via the backup wrapper).

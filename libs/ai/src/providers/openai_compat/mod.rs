@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! `openai_compat` provider — covers Groq, OpenAI, and any
 //! OpenAI-shape gateway (Vodafone-internal, Together, Anyscale,
 //! Fireworks, DeepInfra, etc.).

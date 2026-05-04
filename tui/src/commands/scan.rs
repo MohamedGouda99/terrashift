@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! `/scan <dir>` — read .tf files, return inventory as a Text outcome.
 //!
 //! Real lib call (no LLM, no network). Useful as the first interactive

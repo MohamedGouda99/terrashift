@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! 5-layer model resolver — implements terrashift_plan.md §6.X priority chain.
 //!
 //! Priority (lowest → highest): operator default ← profile selection ←

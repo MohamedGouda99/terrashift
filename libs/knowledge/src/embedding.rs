@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! Embedding service — converts text to dense vectors for RAG retrieval.
 //!
 //! Pattern: terrashift_plan.md §6.10 + §7 (RAG over the Terraform Registry —

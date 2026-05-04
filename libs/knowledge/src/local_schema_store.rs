@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! `LocalSchemaStore` — sqlx + SQLite implementation of `SchemaStore`.
 //!
 //! Pattern: the architecture reference §9 (analogous to the reference's local libsql backend).

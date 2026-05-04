@@ -29,7 +29,8 @@ docs/
 ├── governance/                      ← the rules
 │   ├── CONSTITUTION.md               13 articles. Cite in every PR.
 │   ├── pre-flight.md                 Environment-specific decisions (paths, OS)
-│   └── SESSION_PLAN.md               Multi-session path-to-production roadmap
+│   ├── SESSION_PLAN.md               Multi-session path-to-production roadmap
+│   └── copyright-registration.md     How to register the copyright (Egypt + US)
 │
 ├── architecture/                    ← what we're building
 │   ├── terrashift_plan.md            High-level architecture document

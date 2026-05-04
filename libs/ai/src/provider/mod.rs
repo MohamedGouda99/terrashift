@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! `Provider` trait — single seam every concrete provider implements.
 //!
 //! Pattern: the architecture reference §39 row 1 / TERRASHIFT_MAPPING.md §A row 1

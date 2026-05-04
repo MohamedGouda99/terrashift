@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! Integration tests for P-09a — shell-tool-approvals.
 //!
 //! Article XIII rule 6 verification: every test asserts that *something

@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! Terraform Registry API client + provider schema fetcher.
 //!
 //! Pattern: terrashift_plan.md §7.4 (sync worker), §6.10 (provider schemas).

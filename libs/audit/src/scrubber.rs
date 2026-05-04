@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! Pre-write secret scrubber — the LAST line of defence (Article XIII rule 5).
 //!
 //! Pattern: terrashift_plan.md §6.X ("the writer is the LAST line of defence —

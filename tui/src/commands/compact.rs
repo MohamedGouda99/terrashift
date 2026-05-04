@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! `/compact` — compress conversation context (Stage 2+ stub).
 //!
 //! Pattern: refs/claude-code/src/commands/compact/. Per

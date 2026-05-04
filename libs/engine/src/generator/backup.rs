@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! Reversible file operations — move-to-backup with EXDEV fallback.
 //!
 //! Pattern: the architecture reference §28 (reversible file operations).

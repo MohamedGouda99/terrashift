@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 #![allow(clippy::expect_used, clippy::unwrap_used)]
 //! Seed bundle integrity tests — ensure every JSON file in
 //! `libs/knowledge/seed/<provider>/<category>/<resource>.json` parses

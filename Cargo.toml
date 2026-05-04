@@ -27,9 +27,13 @@ members = [
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.94.1"
-authors = ["Terrashift Team"]
-license = "Apache-2.0"
-repository = "https://github.com/terrashift/cli"
+authors = ["Mohamed Gouda"]
+# Proprietary, source-available — see /LICENSE for full terms.
+# SPDX has no canonical id for our license, so we use a LicenseRef
+# expression and pair it with `license-file` to point at the file.
+license = "LicenseRef-Terrashift-Source-Available-1.0"
+license-file = "LICENSE"
+repository = "https://github.com/MohamedGouda99/terrashift"
 description = "Cross-cloud Terraform migration CLI"
 
 [workspace.dependencies]

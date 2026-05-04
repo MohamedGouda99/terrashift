@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! Stage 1 resource template registry.
 //!
 //! Each template is a pure function: `MappedResource → Result<hcl::Block>`.

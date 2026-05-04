@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! Provider schema types for the Terrashift knowledge layer.
 //!
 //! Pattern: the architecture reference §9 (typed substrate; analogous to the reference's Session/Checkpoint).

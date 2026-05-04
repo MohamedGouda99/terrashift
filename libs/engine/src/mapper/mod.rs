@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! Mapper — LLM with structured output (single call, then deterministic).
 //!
 //! P-05 (S4b structural) ships the full Mapper machinery:

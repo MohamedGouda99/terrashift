@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! Terrashift notifications — Stage-2 detached-mode surface.
 //!
 //! Pattern: terrashift_plan.md §13 (S13 — detached mode + notifications).

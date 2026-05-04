@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! End-to-end CLI smoke tests — drive the actual `terrashift` binary as a
 //! subprocess and assert exit codes + output. These run in CI on every push.
 //!

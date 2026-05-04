@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! Cross-cutting types and utilities used by every Terrashift crate.
 //!
 //! This is a **leaf crate** — no runtime dependencies on other workspace

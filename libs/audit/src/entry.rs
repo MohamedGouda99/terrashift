@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mohamed Gouda. All rights reserved.
+// SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
+// See LICENSE file in the project root for full license information.
+
 //! Audit entry types — the on-disk schema that compliance reviewers will read.
 //!
 //! Pattern: terrashift_plan.md §6.X (full AuditPayload variants).
