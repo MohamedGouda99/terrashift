@@ -1,0 +1,542 @@
+================================================================================
+  TERRASHIFT — SPEC KIT EXECUTION RUNBOOK
+================================================================================
+
+  Generated:        2026-05-02
+  Project:          Terrashift (cross-cloud Terraform migration CLI, Rust)
+  Source artifacts: terrashift_v5/{CONSTITUTION.md, terrashift_plan.md,
+                                   terrashift_prompts.md, terrashift_opus_setup.md,
+                                   terrashift_diagrams.html}
+  Spec Kit:         v0.8.5.dev0, integration=claude, script=PowerShell
+  Reference:        stakpak_arch.md (canonical architectural document)
+
+--------------------------------------------------------------------------------
+  LEGEND
+--------------------------------------------------------------------------------
+
+  /speckit-<cmd>  = slash command invoked via Claude Code
+  $               = shell prompt (PowerShell)
+  #               = comment
+  P-NN            = prompt template from terrashift_v5/terrashift_prompts.md
+  Article N       = constitution article from terrashift_v5/CONSTITUTION.md
+
+--------------------------------------------------------------------------------
+  CONVENTIONS (enforce on every feature)
+--------------------------------------------------------------------------------
+
+  - Branch naming:      feature/TS-NNN-<slug>     (per Article VII)
+  - Spec directory:     specs/NNN-<slug>/
+  - Commit format:      Conventional Commits (feat/fix/chore/docs/refactor/...)
+  - PR title:           Conventional Commits format
+  - PR body must cite:  Constitution articles + stakpak_arch.md sectionN
+  - Deny lints:         unwrap_used, expect_used, string_slice (Article XIII rule 3)
+  - One P-NN            = one Spec Kit feature
+  - Test discipline:    superpowers:test-driven-development applies
+
+--------------------------------------------------------------------------------
+  THE INNER LOOP (run once per P-NN)
+--------------------------------------------------------------------------------
+
+  1. /speckit-git-feature   — create branch
+  2. /speckit-specify       — write spec from P-NN body + cited stakpak_arch.md
+  3. /speckit-clarify       — surface ambiguities; resolve before code
+  4. /speckit-plan          — implementation plan (cites P-NN, sectionN, articles)
+  5. /speckit-tasks         — atomic dependency-ordered tasks (5-15 line steps)
+  6. /speckit-implement     — execute task by task with tests
+  7. /speckit-analyze       — cross-artifact consistency (spec ↔ plan ↔ code)
+  8. /speckit-checklist     — per-feature acceptance checklist
+  9. /speckit-git-validate  — confirm branch + commits match Article VII
+ 10. /speckit-git-commit    — commit + open PR
+
+
+================================================================================
+  PHASE 0 — ONE-TIME SETUP                                       (~30-60 min)
+================================================================================
+
+# -----------------------------------------------------------------------------
+# 0.1  Initialize git (skip if already a repo)
+# -----------------------------------------------------------------------------
+/speckit-git-initialize
+
+# -----------------------------------------------------------------------------
+# 0.2  Detect git remote (records GitHub origin for PR auto-creation)
+# -----------------------------------------------------------------------------
+/speckit-git-remote
+
+# -----------------------------------------------------------------------------
+# 0.3  Port v5 constitution into Spec Kit's expected location
+# -----------------------------------------------------------------------------
+# Manual step: copy terrashift_v5/CONSTITUTION.md content into
+# .specify/memory/constitution.md, reformatted as Spec Kit's principle schema.
+# Mapping:
+#   Article I    → Principle I  (Architectural restraint)
+#   Article II   → Principle II (Reference codebase discipline)
+#   ...
+#   Article XII  → Principle XII (Token economy)
+#   Article XIII → Section "Source-derived anti-patterns"
+#
+# After porting, validate:
+/speckit-constitution
+
+# -----------------------------------------------------------------------------
+# 0.4  Configure branch naming pattern to match Article VII
+# -----------------------------------------------------------------------------
+# Edit .specify/extensions/git/git-config.yml:
+#   feature_branch_pattern: feature/TS-{NNN}-{slug}
+
+# -----------------------------------------------------------------------------
+# 0.5  Add stakpak_arch.md citation block to spec template
+# -----------------------------------------------------------------------------
+# Edit .specify/templates/spec-template.md, add sections:
+#   ## stakpak_arch.md References
+#   ## Constitution Articles in Scope
+#   ## Article XIII Rules in Play
+
+# -----------------------------------------------------------------------------
+# 0.6  Confirm pre-flight reconciliation decisions are recorded
+# -----------------------------------------------------------------------------
+# Manual step: write pre-flight.md at repo root documenting:
+#   - Path mapping (~/refs/stakpak/ → C:\Users\goda\Desktop\agent\)
+#   - Workspace location
+#   - Toolchain choice (Rust 1.75 vs 1.94.1)
+#   - Naming choice (TERRASHIFT_MAPPING.md, not REFERENCES.md)
+#   - Stack (all-Rust, single-binary; .docx microservices content is stale)
+#   - Host (Windows + Git Bash for hooks)
+
+
+================================================================================
+  PHASE 1 — STAGE 1 EXECUTION (P-00 → P-16)                     (10 weeks)
+================================================================================
+
+# -----------------------------------------------------------------------------
+# P-00 — Reference walkthrough and Terrashift mapping
+# Output:           TERRASHIFT_MAPPING.md
+# References:       stakpak_arch.md sections 1-13, 18-25, 26-30, 39-42;
+#                   Claude Code Tool.ts, QueryEngine.ts, commands/, compact/
+# Articles:         II, XI, XIII
+# -----------------------------------------------------------------------------
+/speckit-git-feature 000-reference-walkthrough
+/speckit-specify Reference walkthrough per terrashift_v5/terrashift_prompts.md P-00. Produce TERRASHIFT_MAPPING.md containing the 11 seams table, the 13 things to replace, the 6-phase mirror sequence, and the 10 anti-patterns relevance to Terrashift's first three months.
+/speckit-clarify
+/speckit-plan
+/speckit-tasks
+/speckit-implement
+/speckit-analyze
+/speckit-checklist
+/speckit-git-validate
+/speckit-git-commit
+
+# -----------------------------------------------------------------------------
+# P-01 — Workspace bootstrap
+# Output:           Cargo workspace skeleton (12 crates), CI green
+# References:       stakpak_arch.md sections 5, 6, 31, 32
+# Articles:         II, VII, XIII rule 3
+# -----------------------------------------------------------------------------
+/speckit-git-feature 001-workspace-bootstrap
+/speckit-specify Cargo workspace per terrashift_v5/terrashift_prompts.md P-01. Mirror stakpak_arch.md section 5. Crates: cli, tui, libs/{shared, agent-core, ai, knowledge, engine, creds, mcp/{client,server,proxy,config}, audit, eval, shell-tool-approvals}. Workspace lints deny unwrap/expect/string_slice. CI runs fmt + clippy + test on every PR.
+/speckit-clarify
+/speckit-plan
+/speckit-tasks
+/speckit-implement
+/speckit-analyze
+/speckit-checklist
+/speckit-git-validate
+/speckit-git-commit
+
+# -----------------------------------------------------------------------------
+# P-02 — Tool trait + ToolExecutor
+# Output:           libs/agent-core/src/{tool,executor,registry,errors}.rs
+# References:       stakpak_arch.md section 8 (kernel), section 20 (tool lifecycle)
+# Articles:         I, IV, XIII rule 3
+# -----------------------------------------------------------------------------
+/speckit-git-feature 002-tool-trait-and-executor
+/speckit-specify Tool trait and ToolExecutor in libs/agent-core per terrashift_v5/terrashift_prompts.md P-02. Match stakpak_arch.md section 8 trait shape: ToolExecutor::execute_tool_call returns ToolExecutionResult { Completed{result, is_error} | Cancelled }. Include EchoTool integration test.
+/speckit-clarify
+/speckit-plan
+/speckit-tasks
+/speckit-implement
+/speckit-analyze
+/speckit-checklist
+/speckit-git-validate
+/speckit-git-commit
+
+# -----------------------------------------------------------------------------
+# P-03 — First LLM call via stakai (BYOK + 5-layer model resolution)
+# Output:           libs/ai/src/{lib,resolver,client}.rs
+# References:       stakpak_arch.md sections 10, 11, 15
+# Articles:         V, X, XII rule 3, XIII rules 5, 10
+# -----------------------------------------------------------------------------
+/speckit-git-feature 003-llm-byok-resolution
+/speckit-specify First end-to-end LLM call per terrashift_v5/terrashift_prompts.md P-03. Wrap stakai's Inference. Implement 5-layer model resolution chain (operator default > profile > CLI flag > /model switch > per-call override). Tier-aware API: complete(Tier::Eco|Smart, prompt). Policy vs preference split per Article V. Provider auto-registration silent omission.
+/speckit-clarify
+/speckit-plan
+/speckit-tasks
+/speckit-implement
+/speckit-analyze
+/speckit-checklist
+/speckit-git-validate
+/speckit-git-commit
+
+# -----------------------------------------------------------------------------
+# P-04 — Scanner (deterministic HCL parser)
+# Output:           libs/engine/src/scanner/
+# References:       stakpak_arch.md section 28 (reversible file ops, read side)
+# Articles:         I, IV, XIII rule 3
+# -----------------------------------------------------------------------------
+/speckit-git-feature 004-scanner
+/speckit-specify Scanner per terrashift_v5/terrashift_prompts.md P-04. Pure deterministic Rust using hcl-rs. Walks .tf file tree, extracts resources/modules/variables/outputs/providers, produces typed EstateInventory. Stage 1 unsupported features (dynamic blocks, complex modules) error out cleanly per Article IV.
+/speckit-clarify
+/speckit-plan
+/speckit-tasks
+/speckit-implement
+/speckit-analyze
+/speckit-checklist
+/speckit-git-validate
+/speckit-git-commit
+
+# -----------------------------------------------------------------------------
+# P-05 — Mapper (LLM with structured output, single call)
+# Output:           libs/engine/src/mapper/
+# References:       stakpak_arch.md sections 8, 10, 20, 23
+# Articles:         I, III, XII, XIII rule 1
+# -----------------------------------------------------------------------------
+/speckit-git-feature 005-mapper
+/speckit-specify Mapper per terrashift_v5/terrashift_prompts.md P-05. NOT an agent — single LLM call producing structured JSON conforming to schemars-derived schema, then deterministic dispatch. Cache by input hash per Article XII rule 2. Fail loudly per Article IV on schema non-conformance. Cache-stability invariant per Article XIII rule 2.
+/speckit-clarify
+/speckit-plan
+/speckit-tasks
+/speckit-implement
+/speckit-analyze
+/speckit-checklist
+/speckit-git-validate
+/speckit-git-commit
+
+# -----------------------------------------------------------------------------
+# P-06 — Validator (live schema check, Article III gate)
+# Output:           libs/engine/src/validator/
+# References:       (no direct stakpak_arch.md section — Terrashift-specific)
+# Articles:         III (heart of it), IV, XIII rule 3
+# -----------------------------------------------------------------------------
+/speckit-git-feature 006-validator
+/speckit-specify Validator per terrashift_v5/terrashift_prompts.md P-06. Pure deterministic schema check between Mapper output and live target-provider schema from libs/knowledge. Single Article III enforcement point. ValidationReport with passed/warnings/errors. Hallucinated attributes are loud failures.
+/speckit-clarify
+/speckit-plan
+/speckit-tasks
+/speckit-implement
+/speckit-analyze
+/speckit-checklist
+/speckit-git-validate
+/speckit-git-commit
+
+# -----------------------------------------------------------------------------
+# P-07 — Knowledge service (Stage 1: schema cache only, no RAG)
+# Output:           libs/knowledge/src/{schema_store,registry_client}.rs
+# References:       stakpak_arch.md section 9 (SessionStorage trait shape)
+# Articles:         VI, X
+# -----------------------------------------------------------------------------
+/speckit-git-feature 007-knowledge-schema-cache
+/speckit-specify Knowledge service Stage 1 per terrashift_v5/terrashift_prompts.md P-07. Schema cache only (no RAG until Stage 3 — search_mappings stub returning Vec::new). SchemaStore trait, LocalSchemaStore impl backed by SQLite via sqlx. Schema PK on (provider, version), pinned versions never expire (Article VI), "latest" lookups TTL 24h.
+/speckit-clarify
+/speckit-plan
+/speckit-tasks
+/speckit-implement
+/speckit-analyze
+/speckit-checklist
+/speckit-git-validate
+/speckit-git-commit
+
+# -----------------------------------------------------------------------------
+# P-08 — Generator (deterministic HCL emit + backup-first wrapper)
+# Output:           libs/engine/src/generator/
+# References:       stakpak_arch.md section 28 (reversible file operations)
+# Articles:         I, V, XIII rule 5
+# -----------------------------------------------------------------------------
+/speckit-git-feature 008-generator
+/speckit-specify Generator per terrashift_v5/terrashift_prompts.md P-08. Deterministic templates + hcl-rs serialization. NO LLM in happy path. Backup-first wrapper per stakpak_arch.md section 28: existing files moved to .backup/{run_id}/ before write. Round-trip emit → re-parse must be valid HCL.
+/speckit-clarify
+/speckit-plan
+/speckit-tasks
+/speckit-implement
+/speckit-analyze
+/speckit-checklist
+/speckit-git-validate
+/speckit-git-commit
+
+# -----------------------------------------------------------------------------
+# P-09 — Executor (sandboxed terraform apply with command-level approval)
+# Output:           libs/engine/src/executor/
+# References:       stakpak_arch.md section 29 (Warden), section 30 (shell approval)
+# Articles:         V, X, XIII rules 6, 7
+# -----------------------------------------------------------------------------
+/speckit-git-feature 009-executor-sandbox
+/speckit-specify Executor per terrashift_v5/terrashift_prompts.md P-09. Sandboxed terraform plan + apply in /tmp/terrashift-exec-{uuid}. Tree-sitter-bash command-level approval per Article XIII rule 6 — never approve terraform apply wholesale. STS-token-based AWS credentials only. Container UID handoff (gosu pattern) per Article XIII rule 7.
+/speckit-clarify
+/speckit-plan
+/speckit-tasks
+/speckit-implement
+/speckit-analyze
+/speckit-checklist
+/speckit-git-validate
+/speckit-git-commit
+
+# -----------------------------------------------------------------------------
+# P-10 — Credential broker
+# Output:           libs/creds/src/
+# References:       stakpak_arch.md section 27 (secret detection / redaction)
+# Articles:         V (heart of it), XIII rules 5, 7, 10
+# -----------------------------------------------------------------------------
+/speckit-git-feature 010-credential-broker
+/speckit-specify Credential broker per terrashift_v5/terrashift_prompts.md P-10. CredentialBroker trait with fetch_aws/gcp/azure returning short-lived federated tokens. Secret substitution: LLM works with {{secret:name}} references, broker resolves at tool-execution boundary. Pre-prompt scrubber (gitleaks + entropy filter). zeroize crate for in-memory clearing. Same broker handles LLM provider API keys.
+/speckit-clarify
+/speckit-plan
+/speckit-tasks
+/speckit-implement
+/speckit-analyze
+/speckit-checklist
+/speckit-git-validate
+/speckit-git-commit
+
+# -----------------------------------------------------------------------------
+# P-11 — Audit log (signed, hash-chained, append-only)
+# Output:           libs/audit/src/{entry,store,verify,export}.rs
+# References:       stakpak_arch.md section 22 (checkpoint and resume)
+# Articles:         V (audit), IX (data governance), XIII rules 3, 5
+# -----------------------------------------------------------------------------
+/speckit-git-feature 011-audit-log
+/speckit-specify Audit log per terrashift_v5/terrashift_prompts.md P-11. AuditEntry with prev_hash + content_hash + Ed25519 signature. AuditPayload enum: LlmCall {provider, model_id, provider_endpoint, tier, tokens, cost_usd_micros}, ToolExecution, PhaseTransition, CredentialResolution, FileOperation. SQLite append-only store. Redaction invariant: writer rejects raw secrets via gitleaks scan.
+/speckit-clarify
+/speckit-plan
+/speckit-tasks
+/speckit-implement
+/speckit-analyze
+/speckit-checklist
+/speckit-git-validate
+/speckit-git-commit
+
+# -----------------------------------------------------------------------------
+# P-12 — Eval framework
+# Output:           libs/eval/src/
+# References:       stakpak_arch.md section 32 (CI matrix)
+# Articles:         III, XII rules 1, 4
+# -----------------------------------------------------------------------------
+/speckit-git-feature 012-eval-framework
+/speckit-specify Eval framework per terrashift_v5/terrashift_prompts.md P-12. GoldenMigration { source_tf, expected_target_tf, expected_audit_summary }. EvalResult includes pass/fail, diff, token cost, wall-clock time. CI integration: >30% token cost regression OR <100% pass rate blocks merge (Article XII rule 4). Stage 1 starts with 5 hand-curated golden migrations.
+/speckit-clarify
+/speckit-plan
+/speckit-tasks
+/speckit-implement
+/speckit-analyze
+/speckit-checklist
+/speckit-git-validate
+/speckit-git-commit
+
+# -----------------------------------------------------------------------------
+# P-13 — Single-binary release pipeline
+# Output:           .github/workflows/release.yml + cliff.toml + release.sh
+# References:       stakpak_arch.md sections 33, 34, 35, 36
+# Articles:         VII, VIII
+# -----------------------------------------------------------------------------
+/speckit-git-feature 013-release-pipeline
+/speckit-specify Release pipeline per terrashift_v5/terrashift_prompts.md P-13. Tag-triggered. Matrix: Linux x86_64 (musl static), macOS arm64. rustls-tls everywhere. Strip + SHA256 sums + GitHub Release with cliff-generated changelog. Adapt from ~/refs/stakpak/.github/workflows/build-and-release.yml.
+/speckit-clarify
+/speckit-plan
+/speckit-tasks
+/speckit-implement
+/speckit-analyze
+/speckit-checklist
+/speckit-git-validate
+/speckit-git-commit
+
+# -----------------------------------------------------------------------------
+# P-14 — Slash commands in TUI
+# Output:           tui/src/commands/{help,plan,cost,migrate,rollback,audit,compact,checkpoint}.rs
+# References:       stakpak_arch.md sections 16 (TUI), 22 (checkpoint)
+# Articles:         II, XIII rule 8
+# -----------------------------------------------------------------------------
+/speckit-git-feature 014-tui-slash-commands
+/speckit-specify Slash commands per terrashift_v5/terrashift_prompts.md P-14. SlashCommand trait with name, description, handler. Per-command-file pattern from Claude Code commands/. Commands: /help, /plan, /cost, /migrate, /rollback, /audit, /compact, /checkpoint. /compact maps to stakpak_arch.md section 8 compaction engine. /checkpoint maps to section 22.
+/speckit-clarify
+/speckit-plan
+/speckit-tasks
+/speckit-implement
+/speckit-analyze
+/speckit-checklist
+/speckit-git-validate
+/speckit-git-commit
+
+# -----------------------------------------------------------------------------
+# P-15 — Eval suite expansion to 10 golden migrations
+# Output:           terrashift-evals/ entries + libs/eval test fixtures
+# References:       stakpak_arch.md section 32
+# Articles:         III, XII rule 4, XIII rule 2
+# -----------------------------------------------------------------------------
+/speckit-git-feature 015-eval-suite-expansion
+/speckit-specify Eval suite expansion per terrashift_v5/terrashift_prompts.md P-15. Grow golden migrations from 5 to 10 covering Stage 1 GCP→AWS scope. Each entry documents: source TF, expected target TF, expected audit summary, expected token cost ceiling, which constitution articles validated. Sources: PratikMahajan/AWS-to-AZURE-Infrastructure-Migration, Ben Foster's GCP write-up, terraformer for paired examples.
+/speckit-clarify
+/speckit-plan
+/speckit-tasks
+/speckit-implement
+/speckit-analyze
+/speckit-checklist
+/speckit-git-validate
+/speckit-git-commit
+
+
+================================================================================
+  PHASE 2 — STAGE 1 EXIT GATE                                   (1 week)
+================================================================================
+
+# -----------------------------------------------------------------------------
+# P-16 — Stage 1 exit gate review
+# Output:           Stage 1 retrospective document OR remediation plan
+# References:       terrashift_plan.md section 17 + CONSTITUTION Article VIII
+# Articles:         all (review pass)
+# -----------------------------------------------------------------------------
+/speckit-git-feature 016-stage1-exit-gate
+/speckit-specify Stage 1 exit gate review per terrashift_v5/terrashift_prompts.md P-16. Verify each gate criterion: (1) demo passes for 15-resource sample end-to-end, (2) audit log signed (chain integrity), (3) re-running produces identical output, (4) token cost <$15 for sample migration, (5) all 13 constitution articles cited in at least one PR, (6) single-binary distribution works. Each: PASS/FAIL/PARTIAL with evidence. Go/no-go recommendation.
+/speckit-clarify
+/speckit-plan
+/speckit-tasks
+/speckit-implement
+/speckit-analyze
+/speckit-checklist
+/speckit-git-validate
+/speckit-git-commit
+
+
+================================================================================
+  ON-DEMAND COMMANDS (run as needed, not in sequence)
+================================================================================
+
+# -----------------------------------------------------------------------------
+# Adding a custom LLM provider (P-22) — runs in Stage 2+ when a customer needs
+# a provider stakai doesn't ship. Pattern: feat/add-minimax-provider branch.
+# -----------------------------------------------------------------------------
+/speckit-git-feature 022-add-custom-provider-<provider-name>
+/speckit-specify Add <provider-name> as custom LLM provider per terrashift_v5/terrashift_prompts.md P-22. Files to add: libs/ai/src/providers/<name>/{convert,mod,provider,stream,types}.rs. Implement Provider trait's 4 methods (generate, stream, list_models, provider_key). Touch builder/config/dispatcher/registry. Auto-omit when [providers.<name>] absent.
+/speckit-clarify
+/speckit-plan
+/speckit-tasks
+/speckit-implement
+/speckit-analyze
+/speckit-checklist
+/speckit-git-validate
+/speckit-git-commit
+
+# -----------------------------------------------------------------------------
+# Adding a new tool (P-17) — generic per-tool template
+# -----------------------------------------------------------------------------
+/speckit-git-feature NNN-tool-<tool-name>
+/speckit-specify New tool <tool-name> per terrashift_v5/terrashift_prompts.md P-17. Implements Tool trait in libs/agent-core. schemars input/output. Tests for happy + error paths. Cite stakpak_arch.md section 8.
+/speckit-clarify
+/speckit-plan
+/speckit-tasks
+/speckit-implement
+/speckit-analyze
+/speckit-checklist
+/speckit-git-validate
+/speckit-git-commit
+
+# -----------------------------------------------------------------------------
+# Adding a new resource type to mapping corpus (P-18)
+# -----------------------------------------------------------------------------
+/speckit-git-feature NNN-mapping-<source>-to-<target>
+/speckit-specify Add <source-resource> ↔ <target-resource> mapping per terrashift_v5/terrashift_prompts.md P-18. Update terrashift-mappings repo. Add golden migration. Update Validator's known-types list.
+/speckit-clarify
+/speckit-plan
+/speckit-tasks
+/speckit-implement
+/speckit-analyze
+/speckit-checklist
+/speckit-git-validate
+/speckit-git-commit
+
+# -----------------------------------------------------------------------------
+# Token cost regression investigation (P-19)
+# -----------------------------------------------------------------------------
+/speckit-git-feature NNN-token-cost-regression-<pr-number>
+/speckit-specify Investigate token cost regression on PR <pr-number> per terrashift_v5/terrashift_prompts.md P-19. Apply Article XII rules in priority: (1) cache hit rate + Article XIII rule 2 monotonic trim, (2) tier routing decisions, (3) context window sizes, (4) bypassed pure-code path.
+/speckit-clarify
+/speckit-plan
+/speckit-tasks
+/speckit-implement
+/speckit-analyze
+/speckit-checklist
+/speckit-git-validate
+/speckit-git-commit
+
+# -----------------------------------------------------------------------------
+# Translating a Claude Code pattern to Rust (P-20)
+# -----------------------------------------------------------------------------
+/speckit-git-feature NNN-translate-claude-code-<pattern>
+/speckit-specify Translate Claude Code <pattern> to Rust per terrashift_v5/terrashift_prompts.md P-20. Read ~/refs/claude-code/<file>.ts. Use stakai types where they exist; build minimal types in libs/agent-core otherwise. Cite Article II.
+/speckit-clarify
+/speckit-plan
+/speckit-tasks
+/speckit-implement
+/speckit-analyze
+/speckit-checklist
+/speckit-git-validate
+/speckit-git-commit
+
+# -----------------------------------------------------------------------------
+# Translating a Stakpak pattern via the architecture document (P-21)
+# -----------------------------------------------------------------------------
+/speckit-git-feature NNN-mirror-stakpak-section-<N>
+/speckit-specify Mirror stakpak_arch.md section <N> per terrashift_v5/terrashift_prompts.md P-21. Implement equivalent in libs/<crate>. Document deviations in code comments. If doc references file:line, descend to verify; if doc and code disagree, follow code and note disagreement.
+/speckit-clarify
+/speckit-plan
+/speckit-tasks
+/speckit-implement
+/speckit-analyze
+/speckit-checklist
+/speckit-git-validate
+/speckit-git-commit
+
+
+================================================================================
+  COMMAND COUNT SUMMARY
+================================================================================
+
+  Phase 0 (one-time setup):        3 slash commands + 3 manual edits
+  Phase 1 (P-00 → P-15, 16 prompts): 16 × 9 = 144 slash commands
+  Phase 2 (P-16 stage gate):       9 slash commands
+  ──────────────────────────────────────────────────────────────
+  Total Stage 1:                   156 slash commands
+
+  On-demand templates available for: P-17, P-18, P-19, P-20, P-21, P-22.
+
+
+================================================================================
+  EXECUTION PRINCIPLES
+================================================================================
+
+  1. NEVER skip /speckit-clarify. It's where v5's ambiguities surface.
+     Resolving them before code is 10× cheaper than resolving them after.
+
+  2. NEVER skip /speckit-analyze. Drift between spec/plan/tasks/code is silent
+     and compounding. The check is non-destructive and fast.
+
+  3. ONE P-NN per branch. Don't bundle. Article VII (PRs ≤500 lines preferred).
+
+  4. EVERY PR description must include three sections:
+     ## Constitution           — articles touched (e.g., I, III, XIII rule 5)
+     ## stakpak_arch.md         — sections referenced (e.g., section 8, 27)
+     ## Eval impact             — token cost delta vs baseline
+
+  5. Constitution articles 1-12 govern decisions; Article XIII enumerates
+     concrete anti-patterns. Article XIII rule N is always cited alongside
+     the parent article (e.g., "Article V + Article XIII rule 5").
+
+  6. The Validator (libs/engine/validator) MUST be on the path between
+     Mapper and Generator. Bypassing it is a CI failure (Article III).
+
+  7. Failures are loud. No silent fallbacks. No swallowed errors. No unwrap()
+     in production code (Article IV + Article XIII rule 3).
+
+  8. Adding a new agent requires explicit RFC + stage-gate approval (Article I).
+     Stage 1 has zero agents. Stage 2 introduces Recovery + Cost Optimizer.
+
+================================================================================
+  END OF RUNBOOK
+================================================================================

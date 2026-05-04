@@ -52,29 +52,19 @@ specs/*/output/
 /precommit-scan-*.html
 
 # ────────────────────────────────────────────────────────────────────
-# Internal-only documentation (kept on disk, not pushed to GitHub)
-# These artifacts drive how the project is built, but they're not
-# useful to outside contributors / users. Keep them local.
+# Project governance + Claude Code workspace — TRACKED for collaboration.
+#
+# Reversed the previous "internal only" policy on 2026-05-04: contributors
+# (human + Claude) joining the project need access to the constitution,
+# the architecture plan, the seam-mapping, the Spec Kit history, and the
+# `/docs/` onboarding material. None of these contain credentials —
+# settings.local.json is the only Claude artefact that does, and it
+# stays excluded below.
 # ────────────────────────────────────────────────────────────────────
 
-# Internal governance + architecture docs
-/CLAUDE.md
-/CONSTITUTION.md
-/SESSION_PLAN.md
-/TERRASHIFT_MAPPING.md
-/pre-flight.md
-/terrashift_plan.md
-/terrashift_prompts.md
-
-# Internal Spec Kit infrastructure + feature specs
-/.specify/
-/specs/
-
-# Internal docs folder (decisions, drafts, internal references)
-/docs/
-
-# Claude Code session-local config
+# Claude Code session-local config — DOES contain user-specific paths and
+# session state. Never push.
 /.claude/settings.local.json
 
-# Stakpak session files
+# Stakpak session files — per-user runtime state.
 .stakpak/session*
