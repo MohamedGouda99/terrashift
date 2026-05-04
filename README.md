@@ -45,6 +45,31 @@ cost or surface why a migration failed. Terrashift is opinionated about both.
 > contract is stable for the seams below; surface area is still growing.
 > See the [roadmap](#roadmap) for what's shippable today vs planned.
 
+### Install (one-liner)
+
+**Linux / macOS** — pre-built binary, latest release:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/MohamedGouda99/terrashift/main/install.sh | sh
+```
+
+The installer detects your platform (Linux x86_64 or macOS aarch64),
+downloads the matching tarball from GitHub Releases, verifies the
+SHA256 checksum, and installs to `~/.local/bin/terrashift`. Pin a
+specific version with `--version v0.1.0` or change the install
+prefix with `--prefix /usr/local/bin` (see `install.sh --help`).
+
+**Windows** — PowerShell:
+
+```powershell
+iwr -useb https://raw.githubusercontent.com/MohamedGouda99/terrashift/main/install.ps1 | iex
+```
+
+> Today's release matrix ships Linux + macOS binaries only. Windows
+> users currently need to build from source — `install.ps1` will
+> detect this and guide you. Windows binary support is on the
+> roadmap.
+
 ### Install (from source)
 
 ```bash
