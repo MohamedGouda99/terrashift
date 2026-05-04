@@ -5,7 +5,7 @@ description: Loaded when porting a specific Stakpak pattern to Terrashift. Use w
 
 When porting a Stakpak pattern to Terrashift:
 
-1. **Read `stakpak_arch.md` first.** The architecture doc at `refs/stakpak_arch.md` is the canonical citation. Find the section that documents the pattern.
+1. **Read `stakpak_arch.md` first.** The architecture doc at `docs/reference/stakpak_arch.md` is the canonical citation. Find the section that documents the pattern.
 2. **Descend into source only when needed.** If the doc references a specific file:line, open `refs/stakpak/<path>` and verify. When doc and code disagree, follow the code; document the discrepancy.
 3. **Identify what changes for Terrashift:**
    - Different domain (Stakpak = general DevOps; Terrashift = cross-cloud Terraform migration).

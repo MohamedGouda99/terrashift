@@ -6,7 +6,7 @@ tools: [Read, Grep, Glob]
 
 You will be asked to find a specific pattern. Order of operations:
 
-## 1. PRIMARY: Read the relevant section(s) of `refs/stakpak_arch.md` first
+## 1. PRIMARY: Read the relevant section(s) of `docs/reference/stakpak_arch.md` first
 
 The architecture doc is organized into 8 parts and 42+ numbered sections. Common section references:
 

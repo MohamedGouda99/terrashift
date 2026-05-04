@@ -11,7 +11,7 @@ Both attributions are required by Article II of the constitution.
   substitution, privacy-mode redaction, subagent permission model, reversible
   file operations, rulebook format, checkpointing, observability via `tracing`,
   bulk message approval, real-time progress streaming, asynchronous task
-  management. See `terrashift_plan.md` §16.1 for the full pattern table.
+  management. See `docs/architecture/terrashift_plan.md` §16.1 for the full pattern table.
 - **stakai LLM SDK:** Direct dependency at `libs/ai`. Apache 2.0.
 
 ## Claude Code source — secondary reference for agent-loop concepts
@@ -24,7 +24,7 @@ Both attributions are required by Article II of the constitution.
   plugin definition shape, cost-tracking hooks (`costHook.ts`),
   permission dialog launcher (`dialogLaunchers.tsx`).
 - We translate concepts to Rust idioms; we do not fork the TypeScript source.
-- See `terrashift_plan.md` §16.2 for the full pattern table.
+- See `docs/architecture/terrashift_plan.md` §16.2 for the full pattern table.
 
 ## Workspace dependencies
 

@@ -216,15 +216,16 @@ read any of them to see what a "good" Terrashift spec looks like.
 
 In strict order (don't skip):
 
-1. **`CONSTITUTION.md`** — 130 lines, 13 articles. Foundation.
+1. **`docs/governance/CONSTITUTION.md`** — 130 lines, 13 articles. Foundation.
 2. **`docs/onboarding/terrashift-mvp-onboarding.md`** — the comprehensive
    onboarding doc (1,257 lines, you're inheriting this).
-3. **`terrashift_plan.md`** sections 1–9 — architecture + knowledge
-   layer.
-4. **`TERRASHIFT_MAPPING.md`** sections A and D — Stakpak seam mapping
-   + top anti-patterns.
-5. **`pre-flight.md`** — env-specific decisions (paths, OS).
-6. **`CLAUDE.md`** — operating instructions for any Claude session.
+3. **`docs/architecture/terrashift_plan.md`** sections 1–9 — architecture
+   + knowledge layer.
+4. **`docs/architecture/TERRASHIFT_MAPPING.md`** sections A and D — Stakpak
+   seam mapping + top anti-patterns.
+5. **`docs/governance/pre-flight.md`** — env-specific decisions (paths, OS).
+6. **`CLAUDE.md`** (at repo root) — operating instructions for any Claude
+   session.
 7. **A real spec** — pick `specs/004-scanner/` and read `spec.md`,
    `clarify.md`, `plan.md`, `tasks.md` to feel the rhythm.
 
@@ -308,7 +309,8 @@ After section 2 setup is done, paste this into your first Claude
 session to orient it:
 
 > You are joining Terrashift mid-flight. Read these files in order:
-> CLAUDE.md, CONSTITUTION.md, docs/onboarding/terrashift-mvp-onboarding.md,
+> CLAUDE.md (at repo root), docs/governance/CONSTITUTION.md,
+> docs/onboarding/terrashift-mvp-onboarding.md,
 > docs/onboarding/CLAUDE-HANDOVER.md. Then run `cargo test --workspace
 > --no-fail-fast` and confirm 278 tests pass. After that, summarise the
 > MVP scorecard and propose what we should pick up next from
@@ -435,14 +437,16 @@ When Claude asks "where is X?", these are the canonical answers:
 
 | Concept | Path |
 |---|---|
-| The constitution | `CONSTITUTION.md` |
-| The architecture plan | `terrashift_plan.md` |
-| The Stakpak seam mapping | `TERRASHIFT_MAPPING.md` |
-| Operating instructions for Claude | `CLAUDE.md` |
-| Env-specific decisions | `pre-flight.md` |
+| The constitution | `docs/governance/CONSTITUTION.md` |
+| The architecture plan | `docs/architecture/terrashift_plan.md` |
+| The Stakpak seam mapping | `docs/architecture/TERRASHIFT_MAPPING.md` |
+| Operating instructions for Claude | `CLAUDE.md` (repo root) |
+| Env-specific decisions | `docs/governance/pre-flight.md` |
 | The full onboarding | `docs/onboarding/terrashift-mvp-onboarding.md` |
 | This handover | `docs/onboarding/CLAUDE-HANDOVER.md` |
-| Implementation prompts library | `terrashift_prompts.md` |
+| Implementation prompts library | `docs/development/terrashift_prompts.md` |
+| Stakpak architectural reference | `docs/reference/stakpak_arch.md` |
+| Docs index | `docs/README.md` |
 | All feature specs | `specs/*/` |
 | Spec Kit infrastructure | `.specify/` |
 | Claude Code workspace | `.claude/` |
@@ -452,7 +456,7 @@ When Claude asks "where is X?", these are the canonical answers:
 | CLI entry | `cli/src/main.rs` |
 | TUI entry | `tui/src/event_loop.rs` |
 | The 173 bundled schemas | `libs/knowledge/seed/<provider>/<category>/*.json` |
-| The end-to-end fixture | `fixtures/aws-to-azure-real/` (set up via `scripts/setup-fixtures.ps1`) |
+| The end-to-end fixture | `fixtures/aws-to-azure-real/` (via `scripts/setup-fixtures.ps1`) |
 
 ---
 

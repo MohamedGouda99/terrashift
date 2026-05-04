@@ -133,7 +133,7 @@ actually works before adding agentic complexity. (Constitution Article I.)
 
 ## 4. The constitution at a glance
 
-The full text lives at `CONSTITUTION.md`. Read it once, end to end. It's
+The full text lives at `docs/governance/CONSTITUTION.md`. Read it once, end to end. It's
 short (130 lines) and dense. The thirteen articles:
 
 | # | Article | One-line summary |
@@ -278,11 +278,25 @@ terrashift/
 │
 ├── .specify/                      # Spec Kit templates & state
 ├── .claude/                       # Claude Code agents, skills, slash commands
-├── CONSTITUTION.md                # ← read this end-to-end
-├── terrashift_plan.md             # ← skim this for context
-├── TERRASHIFT_MAPPING.md          # Stakpak seam ↔ Terrashift mapping (P-00 output)
-├── pre-flight.md                  # Environment-specific decisions (paths, OS)
-└── CLAUDE.md                      # Operating instructions for Claude Code
+├── CLAUDE.md                      # Operating instructions for Claude Code
+└── docs/                          # All written material
+    ├── README.md                  # ← start here for the docs index
+    ├── governance/                # The rules
+    │   ├── CONSTITUTION.md        # ← read this end-to-end
+    │   ├── pre-flight.md          # Environment-specific decisions (paths, OS)
+    │   └── SESSION_PLAN.md        # Multi-session roadmap
+    ├── architecture/              # What we're building
+    │   ├── terrashift_plan.md     # ← skim for context
+    │   └── TERRASHIFT_MAPPING.md  # Stakpak seam ↔ Terrashift mapping (P-00)
+    ├── development/               # How we build it
+    │   ├── terrashift_prompts.md  # Implementation prompts library
+    │   └── speckit_commands.txt   # Spec Kit slash-command cheat sheet
+    ├── onboarding/                # ← this folder
+    │   ├── terrashift-mvp-onboarding.md
+    │   ├── CLAUDE-HANDOVER.md
+    │   └── terrashift_opus_setup.md
+    └── reference/
+        └── stakpak_arch.md        # ~2,840-line architectural analysis
 ```
 
 **Crate dependency rule:** `cli` and `tui` depend on `libs/*`; libs/* don't
@@ -1072,13 +1086,13 @@ build cleanly with stable Rust 1.94+.
 
 In this order:
 
-1. `CONSTITUTION.md` — 130 lines, 13 articles. Read end-to-end.
-2. `terrashift_plan.md` — sections 1–9 (architecture + knowledge layer).
-   Skim everything else.
-3. `TERRASHIFT_MAPPING.md` — section A (the 11 seams) + section D (top
-   anti-patterns).
-4. `pre-flight.md` — Decision 2 (refs/ layout) + Decision 10 (PratikMahajan
-   fixture).
+1. `docs/governance/CONSTITUTION.md` — 130 lines, 13 articles. Read end-to-end.
+2. `docs/architecture/terrashift_plan.md` — sections 1–9 (architecture +
+   knowledge layer). Skim everything else.
+3. `docs/architecture/TERRASHIFT_MAPPING.md` — section A (the 11 seams) +
+   section D (top anti-patterns).
+4. `docs/governance/pre-flight.md` — Decision 2 (refs/ layout) + Decision 10
+   (PratikMahajan fixture).
 5. This doc, sections 7 and 8 (pipeline + RAG).
 
 ### Day 3 — Trace one full request
@@ -1158,14 +1172,17 @@ Every PR description has three sections:
 
 ### In-repo (read these)
 
-- `CONSTITUTION.md` — the rules
-- `terrashift_plan.md` — what we're building
-- `TERRASHIFT_MAPPING.md` — Stakpak seam mapping
-- `pre-flight.md` — environment-specific decisions
+- `docs/README.md` — full docs index
+- `docs/governance/CONSTITUTION.md` — the rules
+- `docs/architecture/terrashift_plan.md` — what we're building
+- `docs/architecture/TERRASHIFT_MAPPING.md` — Stakpak seam mapping
+- `docs/governance/pre-flight.md` — environment-specific decisions
 - `CLAUDE.md` — operating instructions for AI assistants
-- `refs/stakpak_arch.md` — ~2,840-line architectural reference (PRIMARY)
-- `refs/stakpak/` — Stakpak source code (Apache 2.0); ground truth
-- `refs/claude-code/` — Claude Code source (TypeScript); secondary
+- `docs/reference/stakpak_arch.md` — ~2,840-line architectural reference (PRIMARY)
+- `refs/stakpak/` — Stakpak source code (Apache 2.0); ground truth (per-developer
+  via `scripts/setup-refs.ps1`, gitignored)
+- `refs/claude-code/` — Claude Code source (per-developer junction; not
+  redistributable)
 
 ### External (skim these)
 
@@ -1251,7 +1268,7 @@ even if you don't change anything.
 
 ---
 
-**Welcome to the team. Open `CONSTITUTION.md`, then this doc's section 7,
-then `cargo test --workspace`. By the end of Day 1, you should have all
-278 tests green and a TUI session open. Ping the team channel when you
-hit anything unexpected.**
+**Welcome to the team. Open `docs/governance/CONSTITUTION.md`, then this
+doc's section 7, then `cargo test --workspace`. By the end of Day 1, you
+should have all 278 tests green and a TUI session open. Ping the team
+channel when you hit anything unexpected.**

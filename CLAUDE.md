@@ -3,12 +3,20 @@
 You are Opus 4.7 (or successor) working on Terrashift. Read these files in
 order before acting on any prompt:
 
-1. **CONSTITUTION.md** — the rules. 13 articles. Cite articles in PR descriptions.
-   Article XIII enumerates 10 source-derived anti-patterns from Stakpak's history.
-2. **TERRASHIFT_MAPPING.md** — Stakpak seam → Terrashift mapping (output of P-00).
-   Tells you where each Stakpak pattern lands in this workspace.
-3. **terrashift_plan.md** — what we're building.
-4. **pre-flight.md** — environment-specific decisions (paths, toolchain, host).
+1. **`docs/governance/CONSTITUTION.md`** — the rules. 13 articles. Cite articles
+   in PR descriptions. Article XIII enumerates 10 source-derived anti-patterns
+   from Stakpak's history.
+2. **`docs/architecture/TERRASHIFT_MAPPING.md`** — Stakpak seam → Terrashift
+   mapping (output of P-00). Tells you where each Stakpak pattern lands.
+3. **`docs/architecture/terrashift_plan.md`** — what we're building.
+4. **`docs/governance/pre-flight.md`** — environment-specific decisions
+   (paths, toolchain, host).
+
+For onboarding (skim once when joining the project):
+
+- `docs/onboarding/terrashift-mvp-onboarding.md` — comprehensive deep-dive.
+- `docs/onboarding/CLAUDE-HANDOVER.md` — Claude-Code-specific handover.
+- `docs/README.md` — full docs index.
 
 ## Stack
 
@@ -18,14 +26,17 @@ stack.** No LangChain, no LangGraph, no LiteLLM.
 
 ## Reference codebases
 
-- `refs/stakpak_arch.md` (~2,840 lines) — **PRIMARY** architectural reference
-- `refs/stakpak/` — Stakpak source code (Apache 2.0); ground truth
-- `refs/claude-code/` — Claude Code TypeScript (secondary, agent-loop concepts)
+- **`docs/reference/stakpak_arch.md`** (~2,840 lines) — **PRIMARY** architectural
+  reference. Tracked in-repo so every contributor reads the same canonical
+  version.
+- `refs/stakpak/` — Stakpak source code (Apache 2.0); ground truth. Per-developer
+  via `scripts/setup-refs.ps1` (gitignored — fresh clone of the public repo).
+- `refs/claude-code/` — Claude Code source. Per-developer junction; not
+  redistributable.
 
-All paths are **workspace-relative** — `refs/` lives at the workspace root.
-On a fresh checkout, run `scripts/setup-refs.ps1` to recreate the junctions
-and copy `stakpak_arch.md`. See `pre-flight.md` decision 2 for the rationale
-and the source-path defaults.
+On a fresh checkout, run `scripts/setup-refs.ps1` to recreate the junctions.
+See `docs/governance/pre-flight.md` decision 2 for the rationale and the
+source-path defaults.
 
 ## Citation discipline
 
@@ -63,7 +74,7 @@ Stage 1 has zero agents. Stage 2 introduces Recovery + Cost Optimizer.
 
 ## Workflow
 
-Use Spec Kit for the inner loop per `docs/speckit_commands.txt`:
+Use Spec Kit for the inner loop per `docs/development/speckit_commands.txt`:
 
 ```
 /speckit-git-feature → /speckit-specify → /speckit-clarify

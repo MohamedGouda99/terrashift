@@ -221,6 +221,17 @@ and any token-cost delta against the eval baseline.
 
 ---
 
+## Documentation
+
+- [`docs/README.md`](docs/README.md) — full docs index (governance,
+  architecture, development, onboarding, reference)
+- [`docs/onboarding/terrashift-mvp-onboarding.md`](docs/onboarding/terrashift-mvp-onboarding.md)
+  — comprehensive deep-dive for new contributors
+- [`docs/governance/CONSTITUTION.md`](docs/governance/CONSTITUTION.md) —
+  the 13 articles (cite in every PR)
+- [`docs/architecture/terrashift_plan.md`](docs/architecture/terrashift_plan.md)
+  — the architecture document
+
 ## Contributing
 
 Pull requests welcome — see [`CONTRIBUTING.md`](CONTRIBUTING.md) for the

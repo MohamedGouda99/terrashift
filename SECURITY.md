@@ -42,7 +42,7 @@ active exploitation.
 
 ## Secret handling
 
-Per [Constitution Article V](CONSTITUTION.md#article-v):
+Per [Constitution Article V](docs/governance/CONSTITUTION.md#article-v):
 
 - API keys and cloud creds are read from environment variables at request
   time and never persisted to disk or logs.
