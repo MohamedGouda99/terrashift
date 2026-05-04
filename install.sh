@@ -255,23 +255,31 @@ chmod +x "$INSTALL_PATH"
 INSTALLED_VERSION="$("$INSTALL_PATH" version 2>/dev/null | head -n 1 || true)"
 ok "installed: $INSTALLED_VERSION"
 
+# Track whether the user's CURRENT shell needs activation. Even after we
+# write to .bashrc, the active shell can't pick it up without sourcing or
+# restarting — a subprocess can't modify its parent shell's environment.
+# Same constraint as rustup/nvm/ollama. The fix is loud messaging, not
+# magic.
+NEEDS_ACTIVATION=0
+ACTIVATION_CMD=""
+
 case ":$PATH:" in
     *":$PREFIX:"*)
-        ok "$PREFIX is on your PATH — run \`terrashift\` to launch the TUI."
+        ok "$PREFIX is on your PATH."
         ;;
     *)
-        # Auto-configure PATH so a fresh terminal Just Works. Pattern
-        # matches rustup / nvm / ollama: append once to the user's
-        # shell rc file, idempotent on re-runs (we look for the exact
-        # export line). Skip auto-add for fish (different syntax).
+        NEEDS_ACTIVATION=1
         SHELL_NAME="$(basename "${SHELL:-/bin/sh}")"
         case "$SHELL_NAME" in
             fish)
-                warn "$PREFIX is NOT on your PATH."
-                printf '\n        Fish-shell users — add it manually:\n\n'
-                printf '            fish_add_path "%s"\n\n' "$PREFIX"
+                warn "$PREFIX is not on your PATH (fish-shell — auto-add skipped)."
+                ACTIVATION_CMD="fish_add_path \"$PREFIX\""
                 ;;
             *)
+                # Append once to the right shell rc file, idempotent on
+                # re-runs (we look for the exact export line, not just a
+                # marker — so changing --prefix between runs writes a
+                # fresh entry rather than silently no-op'ing).
                 case "$SHELL_NAME" in
                     zsh)  RC_FILE="$HOME/.zshrc"   ;;
                     bash) RC_FILE="$HOME/.bashrc"  ;;
@@ -279,18 +287,28 @@ case ":$PATH:" in
                 esac
                 EXPORT_LINE="export PATH=\"$PREFIX:\$PATH\""
                 if [ -f "$RC_FILE" ] && grep -Fxq "$EXPORT_LINE" "$RC_FILE"; then
-                    ok "$PREFIX already configured in $RC_FILE — open a new terminal."
+                    ok "$PREFIX already configured in $RC_FILE."
                 else
                     {
                         printf '\n# Added by terrashift installer\n'
                         printf '%s\n' "$EXPORT_LINE"
                     } >> "$RC_FILE"
                     ok "added $PREFIX to PATH in $RC_FILE."
-                    say "Open a new terminal, or run: source $RC_FILE"
                 fi
+                ACTIVATION_CMD="export PATH=\"$PREFIX:\$PATH\""
                 ;;
         esac
         ;;
 esac
 
-ok "done. Try: terrashift --help"
+# Loud final block — when the current shell can't see the binary yet,
+# give the user a single copy-paste command that activates AND runs
+# terrashift in one go, plus the new-terminal fallback.
+if [ "$NEEDS_ACTIVATION" = "1" ]; then
+    printf '\n%sActivate terrashift in your current shell:%s\n\n' "$BOLD" "$RESET"
+    printf '    %s%s && terrashift --help%s\n\n' "$GREEN" "$ACTIVATION_CMD" "$RESET"
+    printf '%s(or open a new terminal — terrashift will be on PATH automatically)%s\n\n' "$BOLD" "$RESET"
+    ok "done."
+else
+    ok "done. Try: terrashift --help"
+fi
