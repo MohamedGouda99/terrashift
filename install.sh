@@ -173,7 +173,13 @@ if [ "$VERSION" = "latest" ]; then
     # fetch the JSON and extract the tag_name with grep + sed (no jq
     # dependency).
     LATEST_JSON_URL="https://api.github.com/repos/${REPO}/releases/latest"
-    TAG="$(fetch_to_stdout "$LATEST_JSON_URL" \
+    # Buffer the JSON into a variable first. If we piped curl directly
+    # into `grep -m 1`, grep would close stdin after the first match,
+    # SIGPIPE'ing curl, which then prints "curl: (23) Failure writing
+    # output to destination" — confusing for users even though TAG
+    # extraction succeeds.
+    LATEST_JSON="$(fetch_to_stdout "$LATEST_JSON_URL" || true)"
+    TAG="$(printf '%s' "$LATEST_JSON" \
         | grep -m 1 '"tag_name":' \
         | sed -E 's/.*"tag_name": *"([^"]+)".*/\1/')"
     if [ -z "$TAG" ]; then
@@ -254,10 +260,36 @@ case ":$PATH:" in
         ok "$PREFIX is on your PATH — run \`terrashift\` to launch the TUI."
         ;;
     *)
-        warn "$PREFIX is NOT on your PATH."
-        printf '\n        Add this to your shell config (~/.bashrc, ~/.zshrc, ~/.profile):\n\n'
-        printf '            export PATH="%s:$PATH"\n\n' "$PREFIX"
-        printf '        Then run: source ~/.bashrc (or your shell config), or open a new terminal.\n\n'
+        # Auto-configure PATH so a fresh terminal Just Works. Pattern
+        # matches rustup / nvm / ollama: append once to the user's
+        # shell rc file, idempotent on re-runs (we look for the exact
+        # export line). Skip auto-add for fish (different syntax).
+        SHELL_NAME="$(basename "${SHELL:-/bin/sh}")"
+        case "$SHELL_NAME" in
+            fish)
+                warn "$PREFIX is NOT on your PATH."
+                printf '\n        Fish-shell users — add it manually:\n\n'
+                printf '            fish_add_path "%s"\n\n' "$PREFIX"
+                ;;
+            *)
+                case "$SHELL_NAME" in
+                    zsh)  RC_FILE="$HOME/.zshrc"   ;;
+                    bash) RC_FILE="$HOME/.bashrc"  ;;
+                    *)    RC_FILE="$HOME/.profile" ;;
+                esac
+                EXPORT_LINE="export PATH=\"$PREFIX:\$PATH\""
+                if [ -f "$RC_FILE" ] && grep -Fxq "$EXPORT_LINE" "$RC_FILE"; then
+                    ok "$PREFIX already configured in $RC_FILE — open a new terminal."
+                else
+                    {
+                        printf '\n# Added by terrashift installer\n'
+                        printf '%s\n' "$EXPORT_LINE"
+                    } >> "$RC_FILE"
+                    ok "added $PREFIX to PATH in $RC_FILE."
+                    say "Open a new terminal, or run: source $RC_FILE"
+                fi
+                ;;
+        esac
         ;;
 esac
 
