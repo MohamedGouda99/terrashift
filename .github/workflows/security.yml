@@ -17,15 +17,42 @@ permissions:
   contents: read
 
 jobs:
+  # Run `cargo audit` directly rather than via rustsec/audit-check@v2,
+  # which (a) needs `checks: write` to post a Check Run, (b) flunks the
+  # job when warnings (unmaintained / unsound) are present even though
+  # those are not security vulnerabilities, and (c) hides the audit.toml
+  # ignore-with-rationale flow we want documented in-repo.
+  #
+  # The ignored-advisory list lives in `.cargo/audit.toml` with a written
+  # justification for every entry. cargo-audit picks it up automatically.
   cargo-audit:
     name: cargo audit (RUSTSEC advisories)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: dtolnay/rust-toolchain@stable
-      - uses: rustsec/audit-check@v2.0.0
+
+      - uses: Swatinem/rust-cache@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          shared-key: audit
+          # cargo-audit doesn't change with workspace edits, so the cache
+          # key only needs to track audit-tool installation.
+          cache-targets: false
+
+      - name: Install cargo-audit
+        # --locked pins the cargo-audit dep tree to its own Cargo.lock —
+        # avoids "audit tool itself depends on something flaky" risk.
+        run: cargo install --locked cargo-audit
+
+      - name: cargo audit
+        # Default behaviour: exit non-zero on unignored vulnerabilities,
+        # exit 0 on unignored warnings (unmaintained / unsound).
+        # `--deny warnings` would conflate the two; we deliberately keep
+        # warnings non-blocking so a transitively-unmaintained crate
+        # doesn't tank merges, but every `ignore` MUST be justified in
+        # .cargo/audit.toml.
+        run: cargo audit
 
   gitleaks:
     name: gitleaks (secret scanning)

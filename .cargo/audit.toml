@@ -1,0 +1,63 @@
+# cargo-audit configuration.
+#
+# Pattern: stakpak_arch.md section 32 (CI matrix).
+# Constitution: Article V (credentials & security), Article XIII rule 5
+# (no raw secrets in committed code or logs — adjacent concern).
+#
+# Each `ignore` entry below MUST cite:
+#   1. Why the crate is in our Cargo.lock
+#   2. Whether the vulnerable code path is actually compiled / reachable
+#   3. The trigger to remove the ignore (upstream release, feature flag, etc.)
+#
+# This file is read by `cargo audit` automatically. Update it when:
+#   - A new advisory is filed against a transitive dep we don't reach
+#   - A patched version of a currently-ignored dep is released → REMOVE the ignore
+#   - A dep moves from "phantom in lockfile" to "actually compiled" → REMOVE the
+#     ignore and ship the patch instead
+
+[advisories]
+ignore = [
+    # ────────────────────────────────────────────────────────────────
+    # RUSTSEC-2023-0071 — rsa@0.9.10 Marvin Attack (timing sidechannel)
+    # ────────────────────────────────────────────────────────────────
+    # Why in lockfile: phantom entry via `sqlx-mysql`. We enable only
+    # sqlx's `sqlite` feature in libs/knowledge; `cargo tree -i rsa`
+    # returns "nothing to print" — `rsa` is never compiled into any
+    # terrashift binary.
+    # No upstream patch exists yet (work underway on a constant-time
+    # impl). Re-evaluate when:
+    #   - sqlx ships a default-features-off variant that excludes rsa
+    #     entirely from the lockfile, OR
+    #   - rsa publishes the constant-time fix (track the issue at
+    #     https://github.com/RustCrypto/RSA/issues/19).
+    "RUSTSEC-2023-0071",
+
+    # ────────────────────────────────────────────────────────────────
+    # RUSTSEC-2024-0436 — paste@1.0.15 unmaintained
+    # ────────────────────────────────────────────────────────────────
+    # Why in lockfile: proc-macro dependency of ratatui v0.29.0
+    # (compile-time only — paste is not present in the runtime binary).
+    # Not a vulnerability, just unmaintained. Ratatui upstream is
+    # tracking the migration to `pastey`. Re-evaluate when ratatui
+    # bumps off paste.
+    "RUSTSEC-2024-0436",
+
+    # ────────────────────────────────────────────────────────────────
+    # RUSTSEC-2025-0134 — rustls-pemfile@2.2.0 unmaintained
+    # ────────────────────────────────────────────────────────────────
+    # Why in lockfile: transitive via reqwest@0.12.x for TLS cert
+    # parsing. The crate is a thin wrapper around the actively
+    # maintained rustls-pki-types::PemObject API; no exploitable code
+    # path. Re-evaluate when reqwest migrates to the new pemfile API.
+    "RUSTSEC-2025-0134",
+
+    # ────────────────────────────────────────────────────────────────
+    # RUSTSEC-2026-0002 — lru@0.12.5 IterMut Stacked-Borrows soundness
+    # ────────────────────────────────────────────────────────────────
+    # Why in lockfile: ratatui v0.29.0 uses lru internally for cell
+    # caching. The unsound path is `IterMut::next` / `next_back` —
+    # neither terrashift code nor ratatui's public API exposes
+    # IterMut on this cache to us. Patched in lru >= 0.16.3.
+    # Re-evaluate when ratatui bumps lru to >= 0.16.3.
+    "RUSTSEC-2026-0002",
+]
