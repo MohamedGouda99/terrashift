@@ -127,6 +127,98 @@ resource "aws_subnet" "b" { vpc_id = aws_vpc.main.id }
 }
 
 #[test]
+fn empty_directory_yields_empty_inventory() {
+    let tmp = TempDir::new().unwrap_or_else(|e| panic!("tempdir: {e}"));
+    let inv = Scanner::scan(tmp.path()).unwrap_or_else(|e| panic!("scan empty: {e}"));
+    assert_eq!(inv.files.len(), 0);
+    assert_eq!(inv.resource_count(), 0);
+}
+
+#[test]
+fn directory_with_only_non_tf_files_yields_empty_inventory() {
+    let tmp = TempDir::new().unwrap_or_else(|e| panic!("tempdir: {e}"));
+    std::fs::write(tmp.path().join("readme.md"), "# notes").unwrap();
+    std::fs::write(tmp.path().join("config.yaml"), "key: value").unwrap();
+    let inv = Scanner::scan(tmp.path()).unwrap_or_else(|e| panic!("scan: {e}"));
+    assert_eq!(inv.files.len(), 0, "should ignore non-.tf files");
+}
+
+#[test]
+fn broken_hcl_returns_parse_error_not_panic() {
+    let content = r#"
+resource "aws_vpc" "broken" {
+  cidr_block = "10.0.0.0/16
+  this_is_unterminated_string
+"#;
+    let err = Scanner::parse_file(Path::new("broken.tf"), content)
+        .err()
+        .unwrap_or_else(|| panic!("expected parse failure, got Ok"));
+    match err {
+        ScannerError::Parse { message, .. } => {
+            assert!(
+                !message.is_empty(),
+                "parse error should carry a message, got empty"
+            );
+        }
+        other => panic!("expected Parse error, got {other:?}"),
+    }
+}
+
+#[test]
+fn skips_dot_terraform_and_hidden_dirs() {
+    let tmp = TempDir::new().unwrap_or_else(|e| panic!("tempdir: {e}"));
+    // Real tf file at root
+    write_tf(
+        tmp.path(),
+        "main.tf",
+        r#"resource "aws_vpc" "real" { cidr_block = "10.0.0.0/16" }"#,
+    );
+    // Should be skipped: .terraform/
+    std::fs::create_dir_all(tmp.path().join(".terraform")).unwrap();
+    write_tf(
+        &tmp.path().join(".terraform"),
+        "stale.tf",
+        r#"resource "aws_vpc" "stale" { cidr_block = "9.9.9.9/32" }"#,
+    );
+    // Should be skipped: .git/
+    std::fs::create_dir_all(tmp.path().join(".git")).unwrap();
+    write_tf(
+        &tmp.path().join(".git"),
+        "weird.tf",
+        r#"resource "aws_vpc" "weird" {}"#,
+    );
+
+    let inv = Scanner::scan(tmp.path()).unwrap_or_else(|e| panic!("scan: {e}"));
+    assert_eq!(
+        inv.resource_count(),
+        1,
+        "only main.tf::real should be found"
+    );
+    let names: Vec<&str> = inv
+        .files
+        .iter()
+        .flat_map(|f| f.resources.iter().map(|r| r.name.as_str()))
+        .collect();
+    assert!(names.contains(&"real"));
+    assert!(!names.contains(&"stale"));
+    assert!(!names.contains(&"weird"));
+}
+
+#[test]
+fn nonexistent_root_returns_io_error() {
+    let bogus = std::path::PathBuf::from("C:/this/path/does/not/exist/anywhere");
+    let err = Scanner::scan(&bogus)
+        .err()
+        .unwrap_or_else(|| panic!("expected error for nonexistent root"));
+    match err {
+        ScannerError::Io { source, .. } => {
+            assert_eq!(source.kind(), std::io::ErrorKind::NotFound);
+        }
+        other => panic!("expected Io NotFound, got {other:?}"),
+    }
+}
+
+#[test]
 fn data_source_block_is_parsed() {
     let content = r#"
 data "aws_caller_identity" "current" {}

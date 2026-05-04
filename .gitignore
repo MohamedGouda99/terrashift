@@ -75,3 +75,6 @@ specs/*/output/
 
 # Claude Code session-local config
 /.claude/settings.local.json
+
+# Stakpak session files
+.stakpak/session*

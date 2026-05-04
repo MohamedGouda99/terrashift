@@ -194,6 +194,63 @@ fn compact_emits_action() {
 // ─────────────────────────────────────────────────────────────────────────
 // Test 9 — Stub commands return Text (Stage 2+ "not implemented" notice)
 // ─────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────
+// Test — /scan with no arg → Error; with valid path → Text containing
+// resource type lines. Mirrors the CLI's `terrashift scan` UX.
+// ─────────────────────────────────────────────────────────────────────────
+#[test]
+fn scan_without_arg_errors() {
+    let r = Registry::stage1();
+    match r.dispatch("/scan") {
+        CommandOutcome::Error(msg) => assert!(
+            msg.contains("requires a directory") || msg.contains("path"),
+            "scan error should mention directory: {msg}"
+        ),
+        other => panic!("expected Error for no-arg /scan, got {:?}", other),
+    }
+}
+
+#[test]
+fn scan_with_nonexistent_path_errors() {
+    let r = Registry::stage1();
+    match r.dispatch("/scan C:/this/path/does/not/exist/anywhere") {
+        CommandOutcome::Error(msg) => assert!(
+            msg.contains("does not exist") || msg.contains("scan failed"),
+            "scan error should explain why: {msg}"
+        ),
+        other => panic!("expected Error for bad path, got {:?}", other),
+    }
+}
+
+#[test]
+fn scan_against_inline_fixture_returns_text() {
+    use std::io::Write;
+    let r = Registry::stage1();
+    let tmp = tempfile::TempDir::new().expect("tempdir");
+    let mut f = std::fs::File::create(tmp.path().join("inline.tf")).expect("create");
+    writeln!(
+        f,
+        r#"resource "aws_vpc" "main" {{ cidr_block = "10.0.0.0/16" }}"#
+    )
+    .expect("write");
+    drop(f);
+
+    let cmd = format!("/scan {}", tmp.path().display());
+    match r.dispatch(&cmd) {
+        CommandOutcome::Text(txt) => {
+            assert!(
+                txt.contains("aws_vpc"),
+                "scan output should list aws_vpc: {txt}"
+            );
+            assert!(
+                txt.contains("1 resource") || txt.contains("1 file"),
+                "scan output should report counts: {txt}"
+            );
+        }
+        other => panic!("expected Text from /scan, got {:?}", other),
+    }
+}
+
 #[test]
 fn plan_and_cost_stubs_return_text() {
     let r = Registry::stage1();

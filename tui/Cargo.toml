@@ -22,3 +22,6 @@ serde = { workspace = true }
 terrashift-shared = { workspace = true }
 terrashift-agent-core = { workspace = true }
 terrashift-engine = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

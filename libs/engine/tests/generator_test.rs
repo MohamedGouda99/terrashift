@@ -385,6 +385,219 @@ fn empty_reference_is_loud_error() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
+// Test — every registered template renders with minimal-valid input.
+// Catches the "registered but required-keys list disagrees with template
+// body" class of bug. Runs all 17 templates in one go.
+// ─────────────────────────────────────────────────────────────────────────
+
+/// Minimal-required attribute keys per template, mirroring `templates.rs`.
+/// Stays in sync by intent: a template change without updating this table
+/// here OR adding a sibling case fails the test, surfacing the drift.
+fn minimal_required_attrs(target_type: &str) -> Vec<(&'static str, AttributeValue)> {
+    use AttributeValue::String as S;
+    match target_type {
+        "aws_vpc" => vec![("cidr_block", S("10.0.0.0/16".into()))],
+        "aws_subnet" => vec![("cidr_block", S("10.0.1.0/24".into()))],
+        "aws_security_group" => vec![("name", S("sg-test".into()))],
+        "aws_instance" => vec![("instance_type", S("t3.micro".into()))],
+        "aws_s3_bucket" => vec![("bucket", S("my-bucket-name".into()))],
+        "azurerm_virtual_network" => vec![
+            ("name", S("vnet-1".into())),
+            ("resource_group_name", S("rg-1".into())),
+            ("location", S("eastus".into())),
+        ],
+        "azurerm_subnet" => vec![
+            ("name", S("snet-1".into())),
+            ("resource_group_name", S("rg-1".into())),
+            ("virtual_network_name", S("vnet-1".into())),
+        ],
+        "azurerm_network_security_group" => vec![
+            ("name", S("nsg-1".into())),
+            ("location", S("eastus".into())),
+            ("resource_group_name", S("rg-1".into())),
+        ],
+        "azurerm_linux_virtual_machine" => vec![
+            ("name", S("vm-1".into())),
+            ("resource_group_name", S("rg-1".into())),
+            ("location", S("eastus".into())),
+            ("size", S("Standard_F2".into())),
+        ],
+        "azurerm_storage_account" => vec![
+            ("name", S("sa1234".into())),
+            ("resource_group_name", S("rg-1".into())),
+            ("location", S("eastus".into())),
+            ("account_tier", S("Standard".into())),
+            ("account_replication_type", S("LRS".into())),
+        ],
+        "aws_iam_role" => vec![("assume_role_policy", S("{}".into()))],
+        "google_storage_bucket" => vec![("name", S("gcs-1".into())), ("location", S("US".into()))],
+        "azurerm_route_table" => vec![
+            ("name", S("rt-1".into())),
+            ("location", S("eastus".into())),
+            ("resource_group_name", S("rg-1".into())),
+        ],
+        "azurerm_public_ip" => vec![
+            ("name", S("pip-1".into())),
+            ("location", S("eastus".into())),
+            ("resource_group_name", S("rg-1".into())),
+            ("allocation_method", S("Static".into())),
+        ],
+        "azurerm_subnet_network_security_group_association" => vec![
+            (
+                "subnet_id",
+                AttributeValue::Reference("azurerm_subnet.s1.id".into()),
+            ),
+            (
+                "network_security_group_id",
+                AttributeValue::Reference("azurerm_network_security_group.nsg1.id".into()),
+            ),
+        ],
+        "azurerm_subnet_route_table_association" => vec![
+            (
+                "subnet_id",
+                AttributeValue::Reference("azurerm_subnet.s1.id".into()),
+            ),
+            (
+                "route_table_id",
+                AttributeValue::Reference("azurerm_route_table.rt1.id".into()),
+            ),
+        ],
+        "azurerm_resource_group" => {
+            vec![("name", S("rg-1".into())), ("location", S("eastus".into()))]
+        }
+        other => {
+            panic!("no minimal_required_attrs entry for `{other}` — add one alongside the template")
+        }
+    }
+}
+
+/// Hard-coded list of all 17 registered templates. The `template_count_is_17`
+/// test catches drift in the registry size; this test catches drift in
+/// per-template wiring.
+const ALL_TEMPLATES: &[&str] = &[
+    "aws_vpc",
+    "aws_subnet",
+    "aws_security_group",
+    "aws_instance",
+    "aws_s3_bucket",
+    "azurerm_virtual_network",
+    "azurerm_subnet",
+    "azurerm_network_security_group",
+    "azurerm_linux_virtual_machine",
+    "azurerm_storage_account",
+    "aws_iam_role",
+    "google_storage_bucket",
+    "azurerm_route_table",
+    "azurerm_public_ip",
+    "azurerm_subnet_network_security_group_association",
+    "azurerm_subnet_route_table_association",
+    "azurerm_resource_group",
+];
+
+#[test]
+fn every_registered_template_renders_with_minimal_required_attrs() {
+    let g = Generator::new();
+    assert_eq!(
+        ALL_TEMPLATES.len(),
+        g.template_count(),
+        "ALL_TEMPLATES list ({}) drifted from registry size ({}). \
+         Update both when adding/removing a template.",
+        ALL_TEMPLATES.len(),
+        g.template_count()
+    );
+
+    for target_type in ALL_TEMPLATES {
+        let cwd = TempDir::new().unwrap();
+        let output = TempDir::new().unwrap();
+
+        let mut attrs = BTreeMap::new();
+        for (k, v) in minimal_required_attrs(target_type) {
+            attrs.insert(k.to_string(), v);
+        }
+
+        let resource = MappedResource {
+            source_addr: format!("{target_type}.test"),
+            target_addr: format!("{target_type}.test"),
+            target_type: (*target_type).to_string(),
+            target_name: "test".to_string(),
+            attributes: attrs,
+            dependencies: vec![],
+        };
+
+        let plan = plan_with(vec![resource]);
+        let result = g.generate(cwd.path(), output.path(), &plan);
+        assert!(
+            result.is_ok(),
+            "template `{target_type}` failed with minimal required attrs: {:?}",
+            result.err()
+        );
+
+        let artifacts = result.unwrap();
+        assert_eq!(
+            artifacts.files.len(),
+            1,
+            "`{target_type}` should emit one file"
+        );
+
+        let content = std::fs::read_to_string(&artifacts.files[0]).unwrap();
+        assert!(
+            content.contains(target_type),
+            "`{target_type}.tf` should contain the resource type:\n{content}"
+        );
+        assert!(
+            content.contains("\"test\""),
+            "`{target_type}.tf` should contain the resource name `test`:\n{content}"
+        );
+    }
+}
+
+/// Negative complement to the above — every template surfaces
+/// `MapperLookupError::Missing` (wrapped as `GeneratorError::TemplateRender`)
+/// when its first required attribute is omitted. Catches "template registered
+/// with wrong required-keys list" and "template silently emits empty fields".
+#[test]
+fn every_template_loud_errors_on_missing_required_attr() {
+    let g = Generator::new();
+    for target_type in ALL_TEMPLATES {
+        let mut required = minimal_required_attrs(target_type);
+        if required.is_empty() {
+            // Defensive: every template currently has at least one required
+            // attr. If a future change introduces one with zero, skip it
+            // here intentionally rather than fail the test.
+            continue;
+        }
+        let dropped_key = required.remove(0).0;
+
+        let mut attrs = BTreeMap::new();
+        for (k, v) in required {
+            attrs.insert(k.to_string(), v);
+        }
+        let resource = MappedResource {
+            source_addr: format!("{target_type}.test"),
+            target_addr: format!("{target_type}.test"),
+            target_type: (*target_type).to_string(),
+            target_name: "test".to_string(),
+            attributes: attrs,
+            dependencies: vec![],
+        };
+        let plan = plan_with(vec![resource]);
+
+        let cwd = TempDir::new().unwrap();
+        let output = TempDir::new().unwrap();
+        let result = g.generate(cwd.path(), output.path(), &plan);
+        assert!(
+            result.is_err(),
+            "`{target_type}` accepted a plan missing required attr `{dropped_key}` (Article IV: must loud-fail)"
+        );
+        let msg = format!("{}", result.unwrap_err());
+        assert!(
+            msg.contains(dropped_key) || msg.to_lowercase().contains("missing"),
+            "error for `{target_type}` should mention missing key `{dropped_key}`. Got: {msg}"
+        );
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 // Test 12 — `Generator::rollback` on a fresh greenfield artifact removes
 // the freshly-created file (no backup exists). Verifies M1 fix's "delete
 // greenfield" branch works in isolation.

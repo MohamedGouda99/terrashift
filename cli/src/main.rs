@@ -47,7 +47,19 @@ enum Command {
 }
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() {
+    if let Err(e) = run().await {
+        // Print the error chain via Display, no Rust backtrace —
+        // backtraces belong in a panic, not in a recoverable CLI error.
+        eprintln!("error: {e}");
+        for cause in e.chain().skip(1) {
+            eprintln!("  caused by: {cause}");
+        }
+        std::process::exit(1);
+    }
+}
+
+async fn run() -> Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
