@@ -134,7 +134,9 @@ ARCH="$(uname -m 2>/dev/null || echo Unknown)"
 case "$OS" in
     Linux*)   PLATFORM="linux"  ;;
     Darwin*)  PLATFORM="darwin" ;;
-    *)        die "unsupported OS: $OS. Terrashift ships Linux and macOS binaries today; Windows users should use install.ps1." ;;
+    *)        die "unsupported OS: $OS. Terrashift ships Linux and macOS binaries today.
+       Windows users: run this installer inside WSL2, or build from source:
+           git clone https://github.com/${REPO}.git && cd terrashift && cargo build --release" ;;
 esac
 
 case "$ARCH" in
@@ -175,9 +177,14 @@ if [ "$VERSION" = "latest" ]; then
         | grep -m 1 '"tag_name":' \
         | sed -E 's/.*"tag_name": *"([^"]+)".*/\1/')"
     if [ -z "$TAG" ]; then
-        die "could not resolve latest release tag from $LATEST_JSON_URL.
-       The repository may not have any published releases yet.
-       Try a specific version: --version v0.1.0"
+        die "no published releases found at https://github.com/${REPO}/releases.
+       This usually means either no version has been tagged yet, or
+       the repository is private (release assets require auth).
+
+       To install once a release is published, re-run this script.
+       To build from source now:
+           git clone https://github.com/${REPO}.git
+           cd terrashift && cargo build --release --bin terrashift"
     fi
     VERSION="$TAG"
 fi

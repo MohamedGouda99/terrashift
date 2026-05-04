@@ -59,16 +59,15 @@ SHA256 checksum, and installs to `~/.local/bin/terrashift`. Pin a
 specific version with `--version v0.1.0` or change the install
 prefix with `--prefix /usr/local/bin` (see `install.sh --help`).
 
-**Windows** — PowerShell:
+**Windows** — native binaries are not yet shipped. Two paths:
 
-```powershell
-iwr -useb https://raw.githubusercontent.com/MohamedGouda99/terrashift/main/install.ps1 | iex
-```
+- **WSL2 (recommended).** Install Ubuntu via `wsl --install`, then run the
+  Linux one-liner above inside WSL.
+- **Build from source.** Use the steps below — Terrashift compiles on
+  Windows with a recent Rust toolchain.
 
-> Today's release matrix ships Linux + macOS binaries only. Windows
-> users currently need to build from source — `install.ps1` will
-> detect this and guide you. Windows binary support is on the
-> roadmap.
+> Windows binary support is on the roadmap. When `windows-msvc` is added
+> to the release matrix, this section will get its own one-liner.
 
 ### Install (from source)
 
