@@ -351,5 +351,24 @@ fn scrub_or_panic(entry: &AuditEntry) {
                 check("payload.backup_path", &bp.display().to_string());
             }
         }
+        AuditPayload::SchemaCapture {
+            provider,
+            source,
+            version_constraint,
+            resolved_version,
+            terraform_version,
+            sha256,
+            ..
+        } => {
+            check("payload.provider", provider);
+            check("payload.source", source);
+            check("payload.version_constraint", version_constraint);
+            check("payload.resolved_version", resolved_version);
+            check("payload.terraform_version", terraform_version);
+            // sha256 is 64-char lowercase hex by construction; the scrubber's
+            // hex exemption suppresses the high-entropy heuristic for it,
+            // but we still scan in case a malformed sha256 carries something else.
+            check("payload.sha256", sha256);
+        }
     }
 }

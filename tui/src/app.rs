@@ -49,6 +49,12 @@ pub struct StatusInfo {
     pub profile_path: Option<PathBuf>,
     pub seed_resources: Option<usize>,
     pub tier: String,
+    /// How many `(provider, version)` pairs are present in the runtime
+    /// schema manifest at `~/.terrashift/schemas/manifest.json`. `None`
+    /// when the manifest can't be read at startup (no installation yet,
+    /// or first run before bundled extraction). The footer renders
+    /// `"not loaded"` in that case.
+    pub cached_schema_count: Option<usize>,
 }
 
 impl AppState {

@@ -141,6 +141,52 @@ async fn pinned_version_is_immutable() {
 }
 
 #[tokio::test]
+async fn list_providers_returns_distinct_alphabetical() {
+    let store = LocalSchemaStore::in_memory()
+        .await
+        .unwrap_or_else(|e| panic!("open: {e}"));
+
+    // Empty cache yields empty list — Article IV: not an error, just zero rows.
+    let providers = store
+        .list_providers()
+        .await
+        .unwrap_or_else(|e| panic!("list empty: {e}"));
+    assert!(providers.is_empty());
+
+    // Cache three providers, with aws appearing twice (two versions). DISTINCT
+    // must collapse those rows; ASC order must surface aws < azurerm < google.
+    let mut azure = aws_vpc_schema("3.110.0");
+    azure.provider = "azurerm".to_string();
+    let mut google = aws_vpc_schema("5.40.2");
+    google.provider = "google".to_string();
+    for s in [
+        aws_vpc_schema("5.20.0"),
+        aws_vpc_schema("5.30.0"),
+        google,
+        azure,
+    ] {
+        store
+            .cache_schema(&s)
+            .await
+            .unwrap_or_else(|e| panic!("cache {}: {e}", s.provider));
+    }
+
+    let providers = store
+        .list_providers()
+        .await
+        .unwrap_or_else(|e| panic!("list: {e}"));
+    assert_eq!(
+        providers,
+        vec![
+            "aws".to_string(),
+            "azurerm".to_string(),
+            "google".to_string()
+        ],
+        "list_providers must DISTINCT and sort ASC (Surprise S-4)"
+    );
+}
+
+#[tokio::test]
 async fn search_mappings_returns_empty_stage1_stub() {
     let store = LocalSchemaStore::in_memory()
         .await

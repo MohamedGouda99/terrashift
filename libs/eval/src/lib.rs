@@ -44,6 +44,6 @@ pub use baseline::{
     FixtureDelta, RegressionReport, RegressionVerdict, REGRESSION_THRESHOLD_PCT,
 };
 pub use errors::EvalError;
-pub use golden::{discover_suite, load_golden, GoldenManifest, GoldenMigration};
+pub use golden::{discover_suite, load_golden, GoldenManifest, GoldenMigration, RequiredSchema};
 pub use runner::{EvalResult, EvalRunner, SuiteReport};
 pub use scorer::{compare_directories, ComparisonResult};

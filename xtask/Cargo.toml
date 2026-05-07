@@ -1,0 +1,40 @@
+[package]
+name = "xtask"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Terrashift workspace task runner — schema capture, eval cache management, release prep"
+
+[[bin]]
+name = "xtask"
+path = "src/main.rs"
+
+# Binary orchestration code uses anyhow throughout; the workspace
+# unwrap/expect lints are still desirable for the rest of the workspace
+# but acknowledged as situational here. We keep them on by default and
+# rely on `?` propagation rather than expect().
+[lints]
+workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+clap = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+toml = { workspace = true }
+chrono = { workspace = true }
+sha2 = { workspace = true }
+tempfile = { workspace = true }
+zstd = { workspace = true }
+semver = { workspace = true }
+
+# Internal — xtask drives schema capture via the existing fetcher,
+# and reads eval requirements via the existing discovery code.
+terrashift-knowledge = { workspace = true }
+terrashift-eval = { workspace = true }

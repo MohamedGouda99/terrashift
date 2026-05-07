@@ -423,38 +423,47 @@ CONSTITUTION CHECKS:
 
 ---
 
-## P-07 — Knowledge service (Stage 1: schema cache only)
+## P-07 — Knowledge service (Stage 1: schema cache + capture)
 
 **When to use:** Together with or just before P-06.
 
-**Reference sections:** `stakpak_arch.md section 9` (api crate's SessionStorage trait — we adapt for our schema cache).
+**Reference sections:** `stakpak_arch.md section 9` (api crate's `SessionStorage` trait — we adapt for our schema cache); RFC `docs/RFC-schema-source-migration.md` §4 (full architecture).
 
 **Prompt:**
 
 ```
 >>>
-Implement the Knowledge service in libs/knowledge. Stage 1 scope: schema cache only (no RAG yet — Stage 3).
+Implement the Knowledge service in libs/knowledge. Stage 1 scope: schema cache + capture (no RAG yet — Stage 3 lands LanceDB + FastEmbed).
 
-PRIMARY REFERENCE: stakpak_arch.md section 9 covers stakpak-api's SessionStorage trait pattern. We adapt the same shape for schema cache: trait with sync/async methods, libsql/sqlite default impl, optional remote impl later.
+PRIMARY REFERENCE: stakpak_arch.md section 9 covers stakpak-api's SessionStorage trait pattern. We adapt the same shape for schema cache: trait with async methods, sqlx-backed default impl, optional remote impl later.
+
+CRITICAL: the Terraform Registry API does NOT expose provider schemas. Schemas live inside the provider binary, accessible only via `terraform providers schema -json` after `terraform init`. This is the same path Pulumi tf2pulumi, Terraformer, and HashiCorp's own terraform-ls use. The Registry HTTP client is retained for METADATA ONLY — version listings so `terrashift schema update` can expand `~> 5.30` against the registry's published version list.
 
 IMPLEMENT:
 
-1. `pub trait SchemaStore` — trait with `fetch_schema(provider, version)`, `cache_schema(...)`, `list_versions(...)`. Mirror SessionStorage's shape from section 9.
+1. `pub trait SchemaStore` — async trait with `fetch_provider_schema(provider, version)`, `cache_schema(...)`, `list_versions(...)`, `list_providers()`. Mirror SessionStorage's shape from section 9.
 2. `LocalSchemaStore` — sqlx-backed default impl using SQLite. Schema: `(provider, version, schema_json, fetched_at)` PK on (provider, version).
-3. `pub async fn fetch_provider_schema(provider, version) -> Result<ProviderSchema>` — public API. Hits cache first; on miss, calls registry.terraform.io and populates cache.
-4. Cache TTL: schemas pinned by version don't expire (Article VI); "latest" lookups expire after 24h.
-5. `ProviderSchema` typed Rust struct: resources → attributes → type/required/description.
+3. `pub trait SchemaFetcher` + `TerraformCliSchemaFetcher` — runs `tempdir → versions.tf → terraform init → terraform providers schema -json → ProviderSchema` per (namespace, name, version). The CLI fetcher is the canonical schema source.
+4. `pub trait SchemaFetcher` also includes `StubSchemaFetcher` for tests (in-memory map of pre-built ProviderSchemas).
+5. `RuntimeManifest` + `RuntimeSchemaCache` — manifest at `~/.terrashift/schemas/manifest.json` indexes captured schemas; cache holds `Arc<ProviderSchema>` per (provider, version) with lazy first-touch parse. Hot-path reads via `Arc::clone` are zero-copy across worker threads.
+6. `KnowledgeService` — the Mapper/Validator-facing facade. Wires Store + VectorStore + EmbeddingService + SchemaFetcher.
+7. `ProviderSchema` typed Rust struct: resources → attributes → type/required/computed/sensitive/deprecated/description.
 
 DESCEND INTO SOURCE: For SessionStorage pattern, read `refs/stakpak/libs/api/src/storage.rs`. Our trait is structurally the same but covers schemas instead of agent sessions.
 
 TESTS:
-- First fetch hits registry, populates cache
-- Second fetch returns from cache (no network)
-- Version-pinned fetch never expires
+- First fetch via CLI fetcher returns a populated ProviderSchema (gated `#[ignore]` on terraform-on-PATH)
+- Second fetch on the same (provider, version) returns from store cache, no subprocess invocation
+- Version-pinned fetch never expires (Article VI)
+- RuntimeManifest atomic-write round-trip
+- RuntimeSchemaCache: first load reads disk; second load is `Arc::ptr_eq` to the first (Article XII rule 2)
+- list_providers() returns DISTINCT alphabetical (closes RFC Surprise S-4)
+- SchemaCapture audit emission on every successful capture (Article V)
 
 CONSTITUTION CHECKS:
-- Article VI (schemas version-pinned per migration; no "latest" in production paths)
-- Article X (every fetch logged via tracing)
+- Article V (every capture writes an AuditPayload::SchemaCapture entry; provider, source, resolved_version, terraform_version, captured_via, sha256, duration_ms all present)
+- Article VI (schemas version-pinned per migration; capture flow records version_constraint AND resolved_version so reviewers can audit constraint expansion)
+- Article X (every fetch + cache read + manifest mutation has a tracing span)
 <<<
 ```
 

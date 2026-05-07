@@ -3,218 +3,239 @@
 // See LICENSE file in the project root for full license information.
 
 #![allow(clippy::expect_used, clippy::unwrap_used)]
-//! Seed bundle integrity tests — ensure every JSON file in
-//! `libs/knowledge/seed/<provider>/<category>/<resource>.json` parses
-//! and round-trips through the full RAG pipeline.
+//! Seed bundle integrity tests — verify the FLAT-PER-VERSION layout
+//! introduced by RFC schema-source-migration §4.6.
 //!
-//! These tests catch:
-//!   1. A new seed file with a typo in its JSON envelope
-//!   2. A schema-shape change in `ResourceSchema` that breaks past seeds
-//!   3. A break in `seed_from_bundle()` that silently drops resources
-//!   4. A break in similarity retrieval against real seed content
+//! Each test builds a synthetic seed in a fresh tempdir
+//! (`seed/<provider>/<version>/schema.json`), runs `seed_from_bundle`,
+//! and asserts the loader's contract:
+//!
+//! 1. Every well-formed `schema.json` parses and round-trips into the
+//!    SchemaStore + VectorStore.
+//! 2. Misformatted files are warn-skipped, never fatal.
+//! 3. Idempotency: re-running on a populated cache is a no-op (vector
+//!    store size unchanged; SchemaStore returns Ok(false) on duplicate
+//!    `(provider, version)`).
+//! 4. Provider-filter retrieval surfaces only the requested provider.
+//! 5. Multi-version coexistence: two different versions of the same
+//!    provider are independently cached.
+//!
+//! The categorised `seed/<provider>/<category>/<resource>.json` layout
+//! and its CloudForge-derived contents were retired in this migration —
+//! these tests no longer depend on real seed contents shipping in the
+//! tree, only on the loader's behaviour against synthetic fixtures.
 
-use std::path::{Path, PathBuf};
+use std::collections::BTreeMap;
+use std::path::Path;
 use std::sync::Arc;
+
+use chrono::Utc;
+use tempfile::TempDir;
 use terrashift_knowledge::{
-    InMemoryVectorStore, KnowledgeService, LocalSchemaStore, ResourceSchema, StubEmbeddingService,
-    StubSchemaFetcher, VectorStore, DEFAULT_EMBEDDING_DIM,
+    AttributeSchema, InMemoryVectorStore, KnowledgeService, LocalSchemaStore, ProviderSchema,
+    ResourceSchema, StubEmbeddingService, StubSchemaFetcher, VectorStore, DEFAULT_EMBEDDING_DIM,
 };
 
-/// Resolve the seed directory relative to this crate's manifest, regardless
-/// of where `cargo test` is invoked. Workspace layout: `libs/knowledge/seed`.
-fn seed_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("seed")
+/// Build a `ProviderSchema` with `n` synthetic resources. Used by every
+/// test below to populate a fixture without depending on real schema content.
+fn synthetic_schema(provider: &str, version: &str, n: usize) -> ProviderSchema {
+    let mut resources = BTreeMap::new();
+    for i in 0..n {
+        let name = format!("{provider}_resource_{i}");
+        let mut attrs = BTreeMap::new();
+        attrs.insert(
+            "id".to_string(),
+            AttributeSchema {
+                name: "id".to_string(),
+                attribute_type: "string".to_string(),
+                required: false,
+                optional: false,
+                computed: true,
+                sensitive: false,
+                deprecated: None,
+                description: Some("identifier".to_string()),
+            },
+        );
+        resources.insert(
+            name.clone(),
+            ResourceSchema {
+                name: name.clone(),
+                description: Some(format!("synthetic {i}")),
+                attributes: attrs,
+            },
+        );
+    }
+    ProviderSchema {
+        provider: provider.to_string(),
+        version: version.to_string(),
+        resources,
+        data_sources: BTreeMap::new(),
+        fetched_at: Utc::now(),
+    }
 }
 
-/// Walk the seed dir and return every leaf `.json` path under `<provider>/`.
-/// (Excludes `seed/scripts/`, `seed/README.md`, and any non-provider dirs.)
-fn collect_seed_jsons(root: &Path) -> Vec<PathBuf> {
-    let mut out = Vec::new();
-    fn walk(dir: &Path, out: &mut Vec<PathBuf>) {
-        let entries = match std::fs::read_dir(dir) {
-            Ok(e) => e,
-            Err(_) => return,
-        };
-        for entry in entries.flatten() {
-            let path = entry.path();
-            if path.is_dir() {
-                // Skip scripts/ helper dir at any depth.
-                let name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
-                if name == "scripts" {
-                    continue;
-                }
-                walk(&path, out);
-            } else if path.extension().and_then(|s| s.to_str()) == Some("json") {
-                out.push(path);
-            }
-        }
-    }
-    // Only descend into provider directories.
-    for provider in &["aws", "azurerm", "google"] {
-        let p = root.join(provider);
-        if p.is_dir() {
-            walk(&p, &mut out);
-        }
-    }
-    out
+/// Lay out `seed/<provider>/<version>/schema.json` under `root` containing
+/// the given `ProviderSchema`. Mirrors what `cargo xtask capture-schemas`
+/// produces for the production build.
+fn write_seed_entry(root: &Path, schema: &ProviderSchema) {
+    let dir = root.join(&schema.provider).join(&schema.version);
+    std::fs::create_dir_all(&dir).expect("mkdir seed entry");
+    let json = serde_json::to_string_pretty(schema).expect("serialize");
+    std::fs::write(dir.join("schema.json"), json).expect("write schema.json");
 }
 
-#[test]
-fn every_seed_json_parses_as_resource_schema() {
-    let dir = seed_dir();
-    assert!(
-        dir.is_dir(),
-        "seed directory missing: {} (run from workspace root)",
-        dir.display()
-    );
-
-    let jsons = collect_seed_jsons(&dir);
-    assert!(
-        jsons.len() >= 100,
-        "expected at least 100 seed files, found {} — bundle truncated?",
-        jsons.len()
-    );
-
-    let mut bad: Vec<(PathBuf, String)> = Vec::new();
-    for path in &jsons {
-        let content = match std::fs::read_to_string(path) {
-            Ok(c) => c,
-            Err(e) => {
-                bad.push((path.clone(), format!("read: {e}")));
-                continue;
-            }
-        };
-        match serde_json::from_str::<ResourceSchema>(&content) {
-            Ok(rs) => {
-                // Light shape check: name must match the file stem.
-                let stem = path
-                    .file_stem()
-                    .and_then(|s| s.to_str())
-                    .unwrap_or("(no stem)");
-                if rs.name != stem {
-                    bad.push((
-                        path.clone(),
-                        format!("name `{}` != file stem `{}`", rs.name, stem),
-                    ));
-                }
-            }
-            Err(e) => bad.push((path.clone(), format!("parse: {e}"))),
-        }
-    }
-    assert!(
-        bad.is_empty(),
-        "{} seed file(s) failed integrity check:\n{}",
-        bad.len(),
-        bad.iter()
-            .map(|(p, e)| format!("  {} — {}", p.display(), e))
-            .collect::<Vec<_>>()
-            .join("\n")
-    );
-}
-
-#[test]
-fn seed_counts_per_provider_match_filesystem() {
-    let dir = seed_dir();
-    let jsons = collect_seed_jsons(&dir);
-    let mut per_provider: std::collections::BTreeMap<String, usize> =
-        std::collections::BTreeMap::new();
-    for p in &jsons {
-        // `seed/<provider>/<category>/<resource>.json` — provider is the
-        // first segment after `seed/`.
-        let rel = p.strip_prefix(&dir).unwrap();
-        let provider = rel
-            .components()
-            .next()
-            .and_then(|c| c.as_os_str().to_str())
-            .unwrap_or("(unknown)")
-            .to_string();
-        *per_provider.entry(provider).or_insert(0) += 1;
-    }
-    // Sanity: each of the three providers should be present.
-    for p in &["aws", "azurerm", "google"] {
-        let count = per_provider.get(*p).copied().unwrap_or(0);
-        assert!(count > 0, "no seed entries for provider `{p}`");
-    }
-    eprintln!("seed counts: {per_provider:?}");
-}
-
-#[tokio::test]
-async fn seed_from_bundle_loads_all_files_into_knowledge_service() {
+async fn build_service() -> (KnowledgeService, Arc<InMemoryVectorStore>) {
     let store = Arc::new(LocalSchemaStore::in_memory().await.expect("schema store"));
     let vector = Arc::new(InMemoryVectorStore::new(DEFAULT_EMBEDDING_DIM));
     let embedder = Arc::new(StubEmbeddingService::with_dimension(DEFAULT_EMBEDDING_DIM));
     let fetcher = Arc::new(StubSchemaFetcher::new());
     let svc = KnowledgeService::new(store, vector.clone(), embedder, fetcher);
+    (svc, vector)
+}
 
-    let dir = seed_dir();
-    let total = svc.seed_from_bundle(&dir).await.expect("seed_from_bundle");
+#[tokio::test]
+async fn empty_seed_dir_loads_zero_resources() {
+    let dir = TempDir::new().expect("tempdir");
+    let (svc, vector) = build_service().await;
 
-    let fs_count = collect_seed_jsons(&dir).len();
-    assert_eq!(
-        total, fs_count,
-        "loaded {total} resources but seed dir has {fs_count} files. \
-         Difference indicates silently-skipped files (parse fail, name mismatch, etc.)"
-    );
+    let total = svc
+        .seed_from_bundle(dir.path())
+        .await
+        .expect("empty seed dir is not an error");
+
+    assert_eq!(total, 0, "no schema.json files = 0 resources loaded");
+    assert_eq!(vector.len().await, 0);
+}
+
+#[tokio::test]
+async fn missing_seed_dir_is_warn_only_not_error() {
+    let (svc, _vector) = build_service().await;
+    let nowhere = TempDir::new().expect("tempdir");
+    let nonexistent = nowhere.path().join("does-not-exist");
+
+    let total = svc
+        .seed_from_bundle(&nonexistent)
+        .await
+        .expect("missing dir must not be a hard error (warn-and-continue)");
+
+    assert_eq!(total, 0);
+}
+
+#[tokio::test]
+async fn flat_per_version_layout_loads_all_resources() {
+    let dir = TempDir::new().expect("tempdir");
+    write_seed_entry(dir.path(), &synthetic_schema("aws", "5.30.0", 7));
+    write_seed_entry(dir.path(), &synthetic_schema("azurerm", "3.110.0", 5));
+    write_seed_entry(dir.path(), &synthetic_schema("google", "5.40.2", 3));
+
+    let (svc, vector) = build_service().await;
+    let total = svc.seed_from_bundle(dir.path()).await.expect("seed");
+
+    assert_eq!(total, 7 + 5 + 3, "every (provider, version) should load");
     assert_eq!(
         vector.len().await,
-        fs_count,
+        15,
         "vector store should have one entry per loaded resource"
     );
 }
 
 #[tokio::test]
-async fn find_similar_in_provider_returns_provider_filtered_results() {
-    let store = Arc::new(LocalSchemaStore::in_memory().await.expect("schema store"));
-    let vector = Arc::new(InMemoryVectorStore::new(DEFAULT_EMBEDDING_DIM));
-    let embedder = Arc::new(StubEmbeddingService::with_dimension(DEFAULT_EMBEDDING_DIM));
-    let fetcher = Arc::new(StubSchemaFetcher::new());
-    let svc = KnowledgeService::new(store, vector, embedder, fetcher);
-    svc.seed_from_bundle(&seed_dir()).await.expect("seed");
+async fn malformed_schema_json_is_warn_skipped_not_fatal() {
+    let dir = TempDir::new().expect("tempdir");
+    // Valid neighbour
+    write_seed_entry(dir.path(), &synthetic_schema("aws", "5.30.0", 4));
+    // Malformed peer in a different version directory
+    let bad_dir = dir.path().join("aws").join("99.99.99");
+    std::fs::create_dir_all(&bad_dir).expect("mkdir bad");
+    std::fs::write(bad_dir.join("schema.json"), b"{ this is not valid json }").expect("write bad");
 
-    // Stub embedding is deterministic but content-agnostic, so we can't
-    // assert *which* resource ranks #1 — only that the filter excludes
-    // foreign providers from the results.
+    let (svc, vector) = build_service().await;
+    let total = svc
+        .seed_from_bundle(dir.path())
+        .await
+        .expect("malformed file must not abort the whole load");
+
+    // Only the well-formed entry's resources surface.
+    assert_eq!(total, 4);
+    assert_eq!(vector.len().await, 4);
+}
+
+#[tokio::test]
+async fn idempotent_on_rerun() {
+    let dir = TempDir::new().expect("tempdir");
+    write_seed_entry(dir.path(), &synthetic_schema("aws", "5.30.0", 6));
+
+    let (svc, vector) = build_service().await;
+    let n1 = svc.seed_from_bundle(dir.path()).await.expect("first seed");
+    let after_first = vector.len().await;
+
+    let _n2 = svc
+        .seed_from_bundle(dir.path())
+        .await
+        .expect("second seed must not error");
+    let after_second = vector.len().await;
+
+    assert_eq!(after_first, n1, "vector count matches first-seed count");
+    assert_eq!(
+        after_first, after_second,
+        "vector store is idempotent under re-seeding (upsert by id)"
+    );
+}
+
+#[tokio::test]
+async fn multiple_versions_of_same_provider_coexist() {
+    let dir = TempDir::new().expect("tempdir");
+    write_seed_entry(dir.path(), &synthetic_schema("aws", "5.20.0", 3));
+    write_seed_entry(dir.path(), &synthetic_schema("aws", "5.30.0", 5));
+
+    let (svc, _vector) = build_service().await;
+    let total = svc.seed_from_bundle(dir.path()).await.expect("seed");
+
+    assert_eq!(
+        total,
+        3 + 5,
+        "both versions should load independently into the SchemaStore"
+    );
+}
+
+#[tokio::test]
+async fn find_similar_in_provider_after_seed_returns_provider_filtered_results() {
+    let dir = TempDir::new().expect("tempdir");
+    write_seed_entry(dir.path(), &synthetic_schema("aws", "5.30.0", 4));
+    write_seed_entry(dir.path(), &synthetic_schema("azurerm", "3.110.0", 4));
+
+    let (svc, _vector) = build_service().await;
+    svc.seed_from_bundle(dir.path()).await.expect("seed");
+
     let hits = svc
-        .find_similar_in_provider("storage account blob bucket", "azurerm", 5)
+        .find_similar_in_provider("any synthetic resource", "azurerm", 5)
         .await
         .expect("retrieve");
 
-    assert!(
-        !hits.is_empty(),
-        "expected at least one azurerm hit; the seed has azurerm/storage/* entries"
-    );
+    assert!(!hits.is_empty(), "azurerm has 4 resources; expected hits");
     for h in &hits {
-        assert_eq!(
-            h.provider, "azurerm",
-            "find_similar_in_provider must filter by provider; got {h:?}"
-        );
-        assert!(!h.schema.attributes.is_empty(), "resource schema is hollow");
+        assert_eq!(h.provider, "azurerm", "filter must exclude aws hits");
+        assert!(!h.schema.attributes.is_empty(), "schema is hollow");
     }
 }
 
 #[tokio::test]
-async fn seed_from_bundle_is_idempotent_on_rerun() {
-    let store = Arc::new(LocalSchemaStore::in_memory().await.expect("schema store"));
-    let vector = Arc::new(InMemoryVectorStore::new(DEFAULT_EMBEDDING_DIM));
-    let embedder = Arc::new(StubEmbeddingService::with_dimension(DEFAULT_EMBEDDING_DIM));
-    let fetcher = Arc::new(StubSchemaFetcher::new());
-    let svc = KnowledgeService::new(store, vector.clone(), embedder, fetcher);
+async fn non_provider_dirs_are_skipped_without_panic() {
+    let dir = TempDir::new().expect("tempdir");
+    // The new layout requires <provider>/<version>/schema.json. A bare file
+    // at the root, a `scripts/` subdir, and a depth-1 directory without a
+    // version subdir should all be ignored without erroring.
+    std::fs::write(dir.path().join("manifest.toml"), b"# build pins").expect("manifest stub");
+    std::fs::create_dir_all(dir.path().join("scripts")).expect("scripts");
+    std::fs::create_dir_all(dir.path().join("aws").join("5.30.0")).expect("empty version dir");
 
-    let n1 = svc.seed_from_bundle(&seed_dir()).await.expect("first seed");
-    let after_first = vector.len().await;
+    write_seed_entry(dir.path(), &synthetic_schema("google", "5.40.2", 2));
 
-    let _n2 = svc
-        .seed_from_bundle(&seed_dir())
+    let (svc, _vector) = build_service().await;
+    let total = svc
+        .seed_from_bundle(dir.path())
         .await
-        .expect("second seed");
-    let after_second = vector.len().await;
+        .expect("non-conforming dirs must be ignored cleanly");
 
-    assert_eq!(
-        after_first, after_second,
-        "vector store should be idempotent under re-seeding (upsert by id)"
-    );
-    assert_eq!(
-        after_first, n1,
-        "vector count should match first-seed count"
-    );
+    assert_eq!(total, 2, "only the well-formed google entry should load");
 }

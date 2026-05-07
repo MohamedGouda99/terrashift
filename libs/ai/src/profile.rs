@@ -47,6 +47,12 @@ pub struct Profile {
     pub model: Option<String>,
     pub tiers: Tiers,
     pub providers: BTreeMap<String, ProviderConfig>,
+    /// Schema management config — what to pin, when to auto-update.
+    /// Defaults to empty pins + `auto_update = "off"`. Pre-existing profiles
+    /// (no `[profiles.<name>.schemas]` section) load unchanged.
+    /// RFC schema-source-migration §4.3.
+    #[serde(default)]
+    pub schemas: SchemasConfig,
 }
 
 /// Per-tier model assignments. Stage 1 supports `eco` (required) and
@@ -70,6 +76,70 @@ pub struct ProviderConfig {
     /// the variable exists at request time; `Profile` carries only the
     /// reference. Article V invariant.
     pub api_key_env: String,
+}
+
+/// Schema management config block — `[profiles.<name>.schemas]` in TOML.
+///
+/// Three concerns split the way `terrashift_plan.md` §6.X model resolution
+/// is structured:
+/// - **Preference** — `pinned`: user-overridable list of versions to keep.
+/// - **Policy** — `auto_update`, `auto_update_window`: operator-locked
+///   per profile. Defaults to `"off"` for the MVP per RFC §4.3.
+/// - **Locked** — cache_root, manifest format, signing — NOT exposed in
+///   config; the codebase decides.
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct SchemasConfig {
+    /// User-overridable list of schema pins. Each entry maps a provider to
+    /// a version constraint (semver-style). Empty = use only what's bundled
+    /// with the binary.
+    #[serde(default)]
+    pub pinned: Vec<PinnedSchema>,
+    /// How often the background auto-update flow should check for newer
+    /// versions matching the user's constraints. `Off` (the default) means
+    /// the user is in full control — `terrashift schema update` is the only
+    /// path that mutates the cache.
+    #[serde(default)]
+    pub auto_update: AutoUpdateCadence,
+    /// Time-of-day window the auto-update background task is allowed to fire.
+    /// Honoured only when `auto_update != Off`. Default `OffHours` keeps
+    /// long-running registry calls out of business hours.
+    #[serde(default)]
+    pub auto_update_window: AutoUpdateWindow,
+}
+
+/// One schema pin: provider key + version constraint.
+#[derive(Debug, Clone, Deserialize)]
+pub struct PinnedSchema {
+    pub provider: String,
+    /// Version constraint. Accepts pinned (`"5.30.0"`), tilde range
+    /// (`"~> 5.30"`), or any valid semver requirement. Resolved against
+    /// the registry's published version list at `terrashift schema update`
+    /// time.
+    pub version: String,
+}
+
+/// Auto-update cadence. `Off` is the explicit default — the MVP requires
+/// the user to authorise every cache mutation. RFC §4.3 + §4.8.
+#[derive(Debug, Clone, Default, Deserialize, PartialEq)]
+#[serde(rename_all = "snake_case")]
+pub enum AutoUpdateCadence {
+    #[default]
+    Off,
+    Weekly,
+    Monthly,
+}
+
+/// Time-of-day window the auto-update background check is allowed to run.
+/// Cosmetic in Stage 1 (the check is non-blocking and short); becomes
+/// load-bearing once Recovery agent (S2) needs to fetch on the same path.
+#[derive(Debug, Clone, Default, Deserialize, PartialEq)]
+#[serde(rename_all = "kebab-case")]
+pub enum AutoUpdateWindow {
+    /// 22:00 to 06:00 local time.
+    #[default]
+    OffHours,
+    /// Any time of day.
+    Anytime,
 }
 
 impl Profile {

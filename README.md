@@ -104,6 +104,39 @@ EOF
 export GROQ_API_KEY=...
 ```
 
+### Manage cached provider schemas
+
+Terrashift validates every emitted resource against the target provider's
+**actual schema** — not a remote registry summary. Schemas live on disk at
+`~/.terrashift/schemas/`, captured once via `terraform providers schema -json`
+and reused on every migration. Pinned by version (Article VI), audited end
+to end (Article V).
+
+```bash
+# What's cached?
+terrashift schema list
+
+# Pin a specific provider/version (requires `terraform >= 1.0` on PATH)
+terrashift schema update --provider aws --version 5.30.0
+
+# Inspect a cached schema (alphabetical resource list, prefix-filterable)
+terrashift schema show aws@5.30.0 --filter aws_iam
+
+# Audit cached schemas via SHA-256 against the manifest (used by CI)
+terrashift schema verify
+
+# Drop old versions; default keeps current + previous
+terrashift schema gc
+```
+
+Operators can declare default pins in their profile under
+`[profiles.<name>.schemas]` (see `assets/profile.example.toml`); without a
+profile, the binary uses bundled schemas extracted at `cargo build --release`
+time. The Registry HTTP API is queried only for **version-metadata listing**
+(answering "what versions can I pin to?") — schemas themselves come from the
+Terraform CLI, the same path Pulumi tf2pulumi, Terraformer, and HashiCorp's
+own terraform-ls use.
+
 ### Run a migration
 
 ```bash

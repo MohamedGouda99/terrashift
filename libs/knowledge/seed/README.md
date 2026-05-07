@@ -1,116 +1,114 @@
 # Knowledge seed bundle
 
-Pre-built per-resource schema JSON files that
-`KnowledgeService::seed_from_bundle()` loads at startup, so the cache is
-**populated on first install** rather than empty. Avoids cold-start
-latency hitting `registry.terraform.io` for every provider/version pair
+Pre-built provider schemas that the release binary embeds via
+`include_bytes!` and `KnowledgeService::seed_from_bundle` loads at startup,
+so the cache is populated on first install rather than empty. Avoids
+cold-start latency hitting `terraform init` + `terraform providers schema -json`
 on the first migration run.
 
-## Layout
+## Layout (post RFC schema-source-migration)
+
+One full `ProviderSchema` per `(provider, version)` pair, encoded as a
+single JSON file. Versions live as concrete directory names — no `latest`,
+no `terrashift-seed-XXXX` placeholder. Article VI compliant by construction.
 
 ```
 seed/
+├── manifest.toml                ← build-time pins (this file is the input
+│                                  to `cargo xtask capture-schemas`)
 ├── aws/
-│   ├── networking/
-│   │   ├── aws_vpc.json
-│   │   ├── aws_subnet.json
-│   │   └── ...
-│   ├── compute/
-│   ├── storage/
-│   └── ...
+│   └── 5.30.0/
+│       └── schema.json
 ├── azurerm/
-│   ├── networking/
-│   ├── security/
-│   ├── storage/
-│   └── ...
-├── google/
-│   ├── networking/
-│   ├── compute/
-│   └── ...
-└── scripts/
-    └── import-resource-catalog.mjs
+│   └── 3.110.0/
+│       └── schema.json
+└── google/
+    └── 5.40.2/
+        └── schema.json
 ```
 
 - **Top-level dirs** = provider keys (`aws`, `azurerm`, `google`). The
   loader infers provider from this directory name.
-- **Subdirectories** = categories (free-form; the loader walks
-  recursively so any depth works).
-- **Leaf `.json` files** = one `ResourceSchema` each.
+- **Second-level dirs** = concrete versions (`5.30.0`). The loader infers
+  version from this directory name.
+- **`schema.json` files** = one complete `ProviderSchema` each. Includes
+  resources, data_sources, fetched_at.
 
 ## Per-file shape
 
-Each `<resource_type>.json` matches the
-`terrashift_knowledge::ResourceSchema` struct
-(`libs/knowledge/src/types.rs`):
+Each `schema.json` matches the public `ProviderSchema` struct
+(`libs/knowledge/src/types.rs`). The shape is what
+`terraform providers schema -json` emits, normalised through
+`TerraformCliSchemaFetcher::fetch`.
 
 ```json
 {
-  "name": "aws_vpc",
-  "description": "Virtual Private Cloud — isolated virtual network in AWS...",
-  "attributes": {
-    "<attr_name>": {
-      "name": "<attr_name>",
-      "attribute_type": "string|number|bool|list(string)|map(string)|...",
-      "required": true|false,
-      "optional": true|false,
-      "computed": false,
-      "sensitive": false,
-      "deprecated": null,
-      "description": "..."
+  "provider": "aws",
+  "version": "5.30.0",
+  "resources": {
+    "aws_vpc": {
+      "name": "aws_vpc",
+      "description": "Provides a VPC resource.",
+      "attributes": {
+        "cidr_block": {
+          "name": "cidr_block",
+          "attribute_type": "string",
+          "required": true,
+          "optional": false,
+          "computed": false,
+          "sensitive": false,
+          "deprecated": null,
+          "description": "..."
+        }
+      }
     }
-  }
+  },
+  "data_sources": { },
+  "fetched_at": "2026-05-07T11:00:00Z"
 }
 ```
 
-The loader infers `provider` from the parent directory
-(`aws/networking/aws_vpc.json` → provider = `"aws"`) and stamps the
-`version` field with `terrashift-seed-2025.01` (a label distinct from
-real Terraform provider versions).
+## Refreshing this bundle
 
-## Bulk-converting an external resource catalog
+The seed is produced by `cargo xtask capture-schemas` from the pins in
+`manifest.toml`. Workflow:
 
-If you have a TypeScript-based resource catalog (e.g.,
-[CloudForge](https://github.com/MohamedGouda99/CloudForge) or
-similar), the included Node converter walks the `.ts` files and emits
-JSON in the layout above.
+```bash
+# Edit pins.
+$EDITOR libs/knowledge/seed/manifest.toml
 
-```sh
-# One-time setup: install Node 18+ if not already present
-node --version
+# Capture schemas via the local terraform CLI.
+cargo xtask capture-schemas
 
-# Convert your external catalog into the seed
-node libs/knowledge/seed/scripts/import-resource-catalog.mjs \
-  --src "C:/path/to/your/resource-catalog/src" \
-  --dst libs/knowledge/seed
+# Verify nothing else broke.
+cargo nextest run -p terrashift-knowledge
 ```
 
-The converter expects each `.ts` file to export a `ServiceDefinition`
-object with `terraform_resource`, `description`, and
-`inputs.{required,optional}` fields. See the converter source for the
-exact shape it accepts; adapt as needed for your catalog.
+The capture step writes `schema.json` files into the layout above; commit
+the result alongside the manifest change. Article VI: every commit that
+touches this bundle pins a concrete, named version — no `latest` allowed.
 
-## Refreshing against the live registry
+## Refreshing against the live registry at runtime
 
-The seed is a starting point, not a substitute for live Terraform
-provider schemas. To pin against a real provider version:
+Operators don't need the bundle — they can pull schemas on demand from
+the shell:
 
-```sh
-terrashift schemas refresh --provider aws --version 5.30.0
+```bash
+terrashift schema update --provider aws --version 5.30.0
+terrashift schema list
 ```
 
-(This CLI command lands as part of the S17a follow-up — for now it's a
-placeholder; the underlying `KnowledgeService::sync_provider()` is
-already wired and operator-callable from a small driver binary.)
+Updates land in `~/.terrashift/schemas/`, indexed by
+`~/.terrashift/schemas/manifest.json`, and emit one
+`AuditPayload::SchemaCapture` entry per (provider, version) per
+invocation (Article V).
 
-## What ships in this initial bundle
+## Constitution
 
-Curated minimal subset to support the AWS→Azure VPC migration demo
-(see `libs/engine/tests/pratik_e2e_test.rs`):
-
-| Provider | Resources |
-|---|---|
-| `aws` | `aws_vpc`, `aws_subnet`, `aws_internet_gateway`, `aws_route_table`, `aws_route_table_association` |
-| `azurerm` | `azurerm_virtual_network`, `azurerm_subnet`, `azurerm_resource_group`, `azurerm_route_table`, `azurerm_public_ip`, `azurerm_network_security_group`, `azurerm_subnet_route_table_association` |
-
-Run the bulk converter on your full external catalog to expand from
-this minimal seed to comprehensive coverage.
+- **Article V** — every capture is recorded in the audit log; the operator,
+  resolved version, and Terraform version are all preserved.
+- **Article VI** — directory names ARE the version pin; there's no path
+  through this loader that resolves `latest`.
+- **Article IX** — schemas are NOT user data (they are reproducibly
+  re-fetchable from the same Terraform CLI subprocess). `gc` is therefore
+  permitted on this directory shape.

@@ -22,8 +22,10 @@ tokio = { workspace = true }
 async-trait = "0.1"
 chrono = { workspace = true }
 
-# RAG (Stage 3+)
-# lancedb = { workspace = true }
+# Concurrent hot-path cache (per-(provider, version) parsed Arc<ProviderSchema>)
+dashmap = { workspace = true }
+
+# Used by manifest+cache tests (already in workspace deps but listed here for clarity).
 
 # Internal
 terrashift-shared = { workspace = true }

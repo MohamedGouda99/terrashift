@@ -243,21 +243,25 @@ impl KnowledgeService {
     /// is a no-op when versions match. Misformatted JSON files are
     /// warn-skipped, never fatal.
     ///
-    /// Layout example:
+    /// **Layout (flat-per-version, post-RFC schema-source-migration):**
     /// ```text
     /// seed/
+    /// ├── manifest.toml                ← build-time pins (not loaded here)
     /// ├── aws/
-    /// │   └── networking/
-    /// │       ├── aws_vpc.json
-    /// │       └── aws_subnet.json
-    /// └── azurerm/
-    ///     ├── networking/
-    ///     │   └── azurerm_virtual_network.json
-    ///     └── security/
-    ///         └── azurerm_resource_group.json
+    /// │   └── 5.30.0/
+    /// │       └── schema.json          ← one full ProviderSchema per file
+    /// ├── azurerm/
+    /// │   └── 3.110.0/
+    /// │       └── schema.json
+    /// └── google/
+    ///     └── 5.40.2/
+    ///         └── schema.json
     /// ```
     ///
-    /// Returns the total resource count across all loaded providers.
+    /// Each `schema.json` is itself a complete `ProviderSchema` (resources +
+    /// data_sources + fetched_at). The version label comes from the
+    /// directory name. Returns the total resource count across every
+    /// (provider, version) loaded.
     pub async fn seed_from_bundle(&self, dir: &std::path::Path) -> Result<usize, KnowledgeError> {
         if !dir.exists() {
             warn!("seed bundle dir does not exist: {}", dir.display());
@@ -276,32 +280,60 @@ impl KnowledgeService {
             if !provider_path.is_dir() {
                 continue;
             }
-            let provider_name = match provider_path.file_name().and_then(|s| s.to_str()) {
-                Some(n) => n.to_string(),
-                None => continue,
-            };
-
-            let mut resources: BTreeMap<String, crate::types::ResourceSchema> = BTreeMap::new();
-            walk_resource_jsons(&provider_path, &mut resources);
-
-            if resources.is_empty() {
-                continue;
+            // Skip non-provider directories that may live alongside
+            // (e.g. `scripts/` if it's reintroduced for tooling, or
+            // `.schema-cache/` if a fixture-style cache is co-located).
+            // The accepted shape is `<provider>/<version>/schema.json`;
+            // each `schema.json` carries its own `provider` field, so we
+            // don't need the dirname for anything beyond the skip filter.
+            match provider_path.file_name().and_then(|s| s.to_str()) {
+                Some(n) if !n.starts_with('.') && n != "scripts" => {}
+                _ => continue,
             }
 
-            let schema = ProviderSchema {
-                provider: provider_name.clone(),
-                version: SEED_VERSION.to_string(),
-                resources,
-                data_sources: BTreeMap::new(),
-                fetched_at: chrono::Utc::now(),
+            // Walk version subdirectories.
+            let version_entries = match std::fs::read_dir(&provider_path) {
+                Ok(e) => e,
+                Err(err) => {
+                    warn!(
+                        "seed: cannot read provider dir {}: {err}",
+                        provider_path.display()
+                    );
+                    continue;
+                }
             };
 
-            let n = self.seed_provider(schema).await?;
-            info!(
-                "seed: loaded {} resources for provider '{}'",
-                n, provider_name
-            );
-            total += n;
+            for version_entry in version_entries.flatten() {
+                let version_path = version_entry.path();
+                if !version_path.is_dir() {
+                    continue;
+                }
+                let schema_path = version_path.join("schema.json");
+                if !schema_path.is_file() {
+                    continue;
+                }
+                let json = match std::fs::read_to_string(&schema_path) {
+                    Ok(s) => s,
+                    Err(e) => {
+                        warn!("seed: skip {} (read error: {e})", schema_path.display());
+                        continue;
+                    }
+                };
+                let schema: ProviderSchema = match serde_json::from_str(&json) {
+                    Ok(s) => s,
+                    Err(e) => {
+                        warn!("seed: skip {} (parse error: {e})", schema_path.display());
+                        continue;
+                    }
+                };
+                let n = self.seed_provider(schema).await?;
+                info!(
+                    "seed: loaded {} resources from {}",
+                    n,
+                    schema_path.display()
+                );
+                total += n;
+            }
         }
 
         Ok(total)
@@ -504,55 +536,8 @@ pub enum FetchOutcome {
     FetchFailed(String),
 }
 
-// ─────────────────────────────────────────────────────────────────────
-// Seed bundle helpers
-// ─────────────────────────────────────────────────────────────────────
-
-/// Version label stamped on bundled-seed `ProviderSchema` rows.
-/// Distinct from real Terraform provider versions (e.g., `5.30.0`)
-/// because the seed is a curated subset, not a 1:1 registry dump.
-/// Operators can still pin against real versions via
-/// `terrashift schemas refresh --provider aws --version 5.30.0`,
-/// which fetches from the live registry and supersedes the seed.
-const SEED_VERSION: &str = "terrashift-seed-2025.01";
-
-/// Recursively walk a provider directory, parse every leaf `*.json`
-/// as a `ResourceSchema`, and accumulate into the resources map keyed
-/// by `resource.name`. Misformatted files are warn-skipped.
-fn walk_resource_jsons(
-    dir: &std::path::Path,
-    resources: &mut BTreeMap<String, crate::types::ResourceSchema>,
-) {
-    let entries = match std::fs::read_dir(dir) {
-        Ok(e) => e,
-        Err(err) => {
-            warn!("seed: cannot read {}: {err}", dir.display());
-            return;
-        }
-    };
-    for entry in entries.flatten() {
-        let path = entry.path();
-        if path.is_dir() {
-            walk_resource_jsons(&path, resources);
-            continue;
-        }
-        if path.extension().and_then(|s| s.to_str()) != Some("json") {
-            continue;
-        }
-        let json = match std::fs::read_to_string(&path) {
-            Ok(s) => s,
-            Err(e) => {
-                warn!("seed: skip {} (read error: {e})", path.display());
-                continue;
-            }
-        };
-        let resource: crate::types::ResourceSchema = match serde_json::from_str(&json) {
-            Ok(r) => r,
-            Err(e) => {
-                warn!("seed: skip {} (parse error: {e})", path.display());
-                continue;
-            }
-        };
-        resources.insert(resource.name.clone(), resource);
-    }
-}
+// The `walk_resource_jsons` helper and `SEED_VERSION` constant from the
+// pre-RFC categorised layout were removed as part of the schema-source
+// migration. The new flat-per-version layout encodes the version in the
+// directory name, and each `schema.json` is a complete `ProviderSchema`
+// (no per-resource accumulation needed).

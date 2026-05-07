@@ -1,0 +1,34 @@
+# Nightly drift check against the registry. Per RFC schema-source-migration
+# §5.4 Job C: query the registry for current published versions per pinned
+# provider, surface whether a newer patch exists, and (when the write path
+# lands in S5) open a PR with the refreshed cache.
+#
+# Article VI: pinned schemas don't auto-update on the merge path. This
+# workflow only OPENS a PR — human approval is still the merge gate.
+
+name: Nightly eval schema refresh
+
+on:
+  schedule:
+    # 04:00 UTC daily. Outside business hours for every contributor
+    # timezone — minimises CI queue contention.
+    - cron: "0 4 * * *"
+  workflow_dispatch: {}
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-D warnings"
+
+jobs:
+  drift-check:
+    name: cargo xtask refresh-eval-schemas --check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Drift check
+        id: drift
+        run: cargo xtask refresh-eval-schemas --check
+      # Future: when the non-check write path lands (S5), conditionally
+      # open a PR with the refreshed cache files. Stage 1 only reports.

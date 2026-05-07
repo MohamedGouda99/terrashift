@@ -78,6 +78,11 @@ impl EvalRunner {
             source: e,
         })?;
 
+        // Schema presence check — fires only when the manifest declares
+        // `required_schemas`. Pre-existing fixtures (no schemas declared)
+        // skip immediately. RFC schema-source-migration §5.1.
+        check_required_schemas(golden)?;
+
         // Run the deterministic Generator over the pre-curated MappingPlan.
         // S4: replace pre-curated plan with real Mapper invocation here.
         self.generator
@@ -134,5 +139,154 @@ impl EvalRunner {
 impl Default for EvalRunner {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+/// For each `required_schemas` entry, verify a corresponding compressed
+/// schema file is present in `<suite_root>/.schema-cache/`. The expected
+/// filename is `<provider>@<version>.json.zst`; compression itself isn't
+/// checked here — Stage 1 only verifies existence. Decompression + content
+/// validation lands in S4 alongside Mapper-driven eval runs.
+///
+/// `golden.root.parent()` resolves to the suite root for fixtures laid out
+/// per the `terrashift-evals/<NNN_*>` convention. If `parent()` is `None`
+/// (golden is at filesystem root), the check uses `golden.root` itself —
+/// degenerate but doesn't panic.
+fn check_required_schemas(golden: &GoldenMigration) -> Result<(), EvalError> {
+    if golden.manifest.required_schemas.is_empty() {
+        return Ok(());
+    }
+    let suite_root = golden.root.parent().unwrap_or(&golden.root);
+    let cache_dir = suite_root.join(".schema-cache");
+    for req in &golden.manifest.required_schemas {
+        let schema_id = format!("{}@{}", req.provider, req.version);
+        let file = cache_dir.join(format!("{schema_id}.json.zst"));
+        if !file.exists() {
+            return Err(EvalError::MissingSchema {
+                fixture: golden.root.clone(),
+                schema_id,
+            });
+        }
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::golden::{GoldenManifest, RequiredSchema};
+    use terrashift_engine::mapper::MappingPlan;
+    use uuid::Uuid;
+
+    fn synthetic_golden(
+        suite_root: &Path,
+        name: &str,
+        required: Vec<RequiredSchema>,
+    ) -> GoldenMigration {
+        let root = suite_root.join(name);
+        std::fs::create_dir_all(&root).expect("mkdir golden root");
+        std::fs::create_dir_all(root.join("expected")).expect("mkdir expected");
+
+        let manifest = GoldenManifest {
+            name: name.to_string(),
+            description: String::new(),
+            source_provider: "aws".to_string(),
+            target_provider: "aws".to_string(),
+            token_cost_ceiling_micros: 0,
+            articles: vec![],
+            required_schemas: required,
+        };
+
+        let mapping_plan = MappingPlan {
+            run_id: Uuid::new_v4(),
+            source_provider: "aws".to_string(),
+            target_provider: "aws".to_string(),
+            resources: vec![],
+        };
+
+        GoldenMigration {
+            root,
+            manifest,
+            source_tf: suite_root.join(name).join("source.tf"),
+            mapping_plan,
+            expected_target_dir: suite_root.join(name).join("expected"),
+        }
+    }
+
+    #[test]
+    fn check_passes_when_required_schemas_is_empty() {
+        let suite = tempfile::tempdir().expect("tempdir");
+        let g = synthetic_golden(suite.path(), "001_test", vec![]);
+        check_required_schemas(&g).expect("empty required_schemas always passes");
+    }
+
+    #[test]
+    fn check_fails_loud_when_schema_missing_from_cache() {
+        let suite = tempfile::tempdir().expect("tempdir");
+        let g = synthetic_golden(
+            suite.path(),
+            "002_test",
+            vec![RequiredSchema {
+                provider: "aws".to_string(),
+                version: "5.30.0".to_string(),
+            }],
+        );
+        let err = check_required_schemas(&g).expect_err("missing cache must fail");
+        match err {
+            EvalError::MissingSchema { schema_id, .. } => {
+                assert_eq!(schema_id, "aws@5.30.0");
+            }
+            other => panic!("expected MissingSchema, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn check_passes_when_schema_file_present() {
+        let suite = tempfile::tempdir().expect("tempdir");
+        // Create the cache dir + the expected compressed file. We don't
+        // need it to be valid zstd — Stage 1 only checks existence.
+        let cache = suite.path().join(".schema-cache");
+        std::fs::create_dir_all(&cache).expect("mkdir cache");
+        std::fs::write(cache.join("aws@5.30.0.json.zst"), b"placeholder")
+            .expect("write fake schema");
+
+        let g = synthetic_golden(
+            suite.path(),
+            "003_test",
+            vec![RequiredSchema {
+                provider: "aws".to_string(),
+                version: "5.30.0".to_string(),
+            }],
+        );
+        check_required_schemas(&g).expect("present file must pass");
+    }
+
+    #[test]
+    fn check_aggregates_first_missing_first() {
+        let suite = tempfile::tempdir().expect("tempdir");
+        let cache = suite.path().join(".schema-cache");
+        std::fs::create_dir_all(&cache).expect("mkdir cache");
+        std::fs::write(cache.join("aws@5.30.0.json.zst"), b"x").expect("write aws");
+        // google deliberately absent.
+
+        let mut g = synthetic_golden(suite.path(), "004_test", vec![]);
+        g.manifest.required_schemas = vec![
+            RequiredSchema {
+                provider: "aws".to_string(),
+                version: "5.30.0".to_string(),
+            },
+            RequiredSchema {
+                provider: "google".to_string(),
+                version: "5.40.2".to_string(),
+            },
+        ];
+
+        let err = check_required_schemas(&g).expect_err("partial cache must fail loud");
+        match err {
+            EvalError::MissingSchema { schema_id, .. } => {
+                assert_eq!(schema_id, "google@5.40.2");
+            }
+            other => panic!("expected MissingSchema(google@5.40.2), got {other:?}"),
+        }
     }
 }

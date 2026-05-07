@@ -31,7 +31,7 @@ pub mod signer;
 pub mod store;
 pub mod verify;
 
-pub use entry::{Actor, AuditEntry, AuditPayload, FileOpKind, Outcome};
+pub use entry::{Actor, AuditEntry, AuditPayload, CaptureVia, FileOpKind, Outcome};
 pub use errors::AuditError;
 pub use hooks::AuditWriterHook;
 pub use scrubber::{ScrubMatch, PATTERN_NAMES};

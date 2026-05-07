@@ -7,7 +7,6 @@
 //! through the cache-then-fetch boot logic.
 
 use std::collections::BTreeMap;
-use std::path::PathBuf;
 use std::sync::Arc;
 
 use chrono::Utc;
@@ -63,13 +62,35 @@ fn fake_schema(provider: &str, version: &str, resource_count: usize) -> Provider
     }
 }
 
-/// Locate the bundled seed directory (runs from `libs/knowledge/`).
-fn seed_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("seed")
+/// Build a synthetic seed directory in `<dir>/<provider>/<version>/schema.json`
+/// shape so each test verifies the `seed_from_bundle` contract without
+/// depending on real seed contents shipping in the tree (post RFC
+/// schema-source-migration §4.6 — the categorised layout was retired).
+///
+/// Uses `<X>-seed` version suffixes so the seeded `(provider, version)` keys
+/// never collide with the registry-fetch versions the tests subsequently
+/// request — collisions would surface as `FetchOutcome::AlreadyCached`
+/// instead of `FetchOutcome::Fetched`, hiding the assertion the tests are
+/// trying to make.
+fn populate_synthetic_seed(root: &std::path::Path) {
+    let aws = fake_schema("aws", "1.0.0-seed", 4);
+    let google = fake_schema("google", "1.0.0-seed", 3);
+    let azurerm = fake_schema("azurerm", "1.0.0-seed", 2);
+
+    for schema in [&aws, &google, &azurerm] {
+        let dir = root.join(&schema.provider).join(&schema.version);
+        std::fs::create_dir_all(&dir).expect("mkdir seed entry");
+        let json = serde_json::to_string_pretty(schema).expect("serialize");
+        std::fs::write(dir.join("schema.json"), json).expect("write schema.json");
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────
 // Path 1: cache empty → fetch succeeds → resources cached
+// (also seeds a synthetic flat-per-version bundle so `seed_resource_count`
+// is non-zero — pre-RFC tests asserted >0 against the real categorised
+// bundle; that bundle is retired, so the assertion is now backed by a
+// tempdir fixture each test populates itself.)
 // ─────────────────────────────────────────────────────────────────────
 #[tokio::test]
 async fn first_launch_fetches_when_cache_empty() {
@@ -77,9 +98,25 @@ async fn first_launch_fetches_when_cache_empty() {
         StubSchemaFetcher::new().with_schema("aws", "5.30.0", fake_schema("aws", "5.30.0", 7));
     let service = build_service(Arc::new(stub)).await;
 
+    // CRITICAL: stub's "aws@5.30.0" key collides with the seed entry's
+    // own "aws@5.30.0" — so `first_launch_sync` will see the seed-loaded
+    // schema as "already cached" and skip the registry fetch. To exercise
+    // the Fetched path, seed under different versions.
+    let seed_root = TempDir::new().expect("seed root");
+    {
+        let s = fake_schema("aws", "1.0.0-seed", 4);
+        let d = seed_root.path().join(&s.provider).join(&s.version);
+        std::fs::create_dir_all(&d).expect("mkdir");
+        std::fs::write(
+            d.join("schema.json"),
+            serde_json::to_string_pretty(&s).unwrap(),
+        )
+        .expect("write");
+    }
+
     let report = service
         .first_launch_sync(
-            &seed_dir(),
+            seed_root.path(),
             &[(
                 "hashicorp".to_string(),
                 "aws".to_string(),
@@ -89,12 +126,7 @@ async fn first_launch_fetches_when_cache_empty() {
         .await
         .expect("sync ok");
 
-    // Seed loads ~173 resources from the bundled JSON tree.
-    assert!(
-        report.seed_resource_count > 0,
-        "seed bundle should have loaded > 0 resources; got {}",
-        report.seed_resource_count
-    );
+    assert_eq!(report.seed_resource_count, 4);
 
     // The single requested provider was Fetched.
     assert_eq!(report.per_provider.len(), 1);
@@ -116,6 +148,7 @@ async fn first_launch_skips_when_already_cached() {
         fake_schema("azurerm", "3.116.0", 3),
     );
     let service = build_service(Arc::new(stub)).await;
+    let seed_root = TempDir::new().expect("seed root");
 
     let providers = vec![(
         "hashicorp".to_string(),
@@ -125,14 +158,14 @@ async fn first_launch_skips_when_already_cached() {
 
     // First call: should fetch.
     let first = service
-        .first_launch_sync(&seed_dir(), &providers)
+        .first_launch_sync(seed_root.path(), &providers)
         .await
         .expect("first sync ok");
     assert!(matches!(first.per_provider[0].3, FetchOutcome::Fetched));
 
     // Second call: same (provider, version) is already cached → skip.
     let second = service
-        .first_launch_sync(&seed_dir(), &providers)
+        .first_launch_sync(seed_root.path(), &providers)
         .await
         .expect("second sync ok");
     assert!(matches!(
@@ -168,8 +201,11 @@ async fn first_launch_continues_on_per_provider_fetch_failure() {
         ),
     ];
 
+    let seed_root = TempDir::new().expect("seed root");
+    populate_synthetic_seed(seed_root.path());
+
     let report = service
-        .first_launch_sync(&seed_dir(), &providers)
+        .first_launch_sync(seed_root.path(), &providers)
         .await
         .expect("sync should not propagate per-provider fetch failure");
 
@@ -190,7 +226,7 @@ async fn first_launch_continues_on_per_provider_fetch_failure() {
         .expect("google report present");
     assert!(matches!(google.3, FetchOutcome::FetchFailed(_)));
 
-    // Seed still loaded normally.
+    // Seed still loaded — populated by populate_synthetic_seed above.
     assert!(report.seed_resource_count > 0);
 }
 
@@ -202,14 +238,17 @@ async fn first_launch_with_empty_providers_only_loads_seed() {
     let stub = StubSchemaFetcher::new();
     let service = build_service(Arc::new(stub)).await;
 
+    let seed_root = TempDir::new().expect("seed root");
+    populate_synthetic_seed(seed_root.path());
+
     let report = service
-        .first_launch_sync(&seed_dir(), &[])
+        .first_launch_sync(seed_root.path(), &[])
         .await
         .expect("seed-only sync ok");
 
     assert!(
         report.seed_resource_count > 0,
-        "seed bundle should still populate"
+        "synthetic seed bundle should populate"
     );
     assert!(report.per_provider.is_empty());
 }

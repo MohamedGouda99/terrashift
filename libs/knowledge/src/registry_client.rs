@@ -20,14 +20,20 @@
 //!    subcommand. Subprocess wrapper is the canonical approach (also used
 //!    by Pulumi tf2pulumi, Terraformer, etc.).
 //!
-//! ## Stage 1 status
+//! ## Status
 //!
-//! - `TerraformRegistryClient` ships now (HTTP-only; pure Rust via reqwest).
-//! - `SchemaFetcher` ships as a TRAIT + `StubSchemaFetcher` for tests. The
-//!   real `TerraformCliSchemaFetcher` impl arrives in S4 when terraform CLI
-//!   is verified on the host (requires `terraform >= 1.0` on PATH).
-//! - End-to-end Registry → schema → embed flow runs in S4 the first time
-//!   the user requests an actual provider sync.
+//! - `TerraformRegistryClient` is HTTP-only; pure Rust via reqwest. **Used for
+//!   metadata only** — listing available versions so `terrashift schema update`
+//!   can expand a constraint like `~> 5.30` against the registry's published
+//!   version list. It does NOT — and never has — fetched schemas; the registry
+//!   does not expose them as a REST endpoint (see paragraph above).
+//! - `SchemaFetcher` is a trait with two impls: `StubSchemaFetcher` (tests)
+//!   and `TerraformCliSchemaFetcher` (the real impl, in `schema_fetcher_cli.rs`).
+//!   The CLI fetcher runs the canonical `tempdir → versions.tf → terraform init →
+//!   terraform providers schema -json → ProviderSchema` flow.
+//! - The two layers are wired by `KnowledgeService::sync_provider`: the registry
+//!   client expands the version constraint; the CLI fetcher extracts the schema
+//!   for each resolved version.
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};

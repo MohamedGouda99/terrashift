@@ -1,0 +1,8 @@
+# Workspace cargo aliases. Adding `cargo xtask` here means contributors
+# can run `cargo xtask <subcommand>` from anywhere in the workspace
+# (including outside the xtask/ directory).
+#
+# Pattern: terrashift_plan.md §15; RFC schema-source-migration §3.
+
+[alias]
+xtask = "run --package xtask --"

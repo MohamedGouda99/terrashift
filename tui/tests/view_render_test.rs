@@ -42,15 +42,38 @@ fn view_renders_empty_state_without_panic() {
 #[test]
 fn view_renders_status_footer_with_profile_and_tier() {
     let mut terminal = make_terminal();
+    // Synthetic path — rendered to the buffer but never opened. Relative
+    // form is platform-neutral; the home-dir compression in view::render_status
+    // only triggers when the path starts with $HOME / $USERPROFILE, which a
+    // relative path cannot.
     let mut app = AppState::new(StatusInfo {
-        profile_path: Some(std::path::PathBuf::from("C:/test/profile.toml")),
+        profile_path: Some(std::path::PathBuf::from("test-fixtures/profile.toml")),
         seed_resources: Some(173),
         tier: "smart".to_string(),
+        cached_schema_count: None,
     });
     app.push(MessageKind::Banner, "ready");
     terminal.draw(|f| view::view(f, &app)).expect("draw");
     assert!(buffer_contains(&terminal, "smart"));
     assert!(buffer_contains(&terminal, "173"));
+}
+
+#[test]
+fn view_renders_status_footer_with_schema_count() {
+    let mut terminal = make_terminal();
+    let mut app = AppState::new(StatusInfo {
+        profile_path: None,
+        seed_resources: None,
+        tier: "eco".to_string(),
+        cached_schema_count: Some(7),
+    });
+    app.push(MessageKind::Banner, "ready");
+    terminal.draw(|f| view::view(f, &app)).expect("draw");
+    // The footer renders "schemas: 7 cached" when the manifest is present.
+    assert!(
+        buffer_contains(&terminal, "7 cached"),
+        "footer should render the cached schema count"
+    );
 }
 
 #[test]

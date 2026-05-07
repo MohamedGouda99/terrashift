@@ -25,4 +25,11 @@ pub enum SchemaError {
 
     #[error("invalid version format: {0} (expected semver-like e.g. '5.30.0')")]
     InvalidVersion(String),
+
+    /// Surfaced from runtime-manifest reads/writes and from
+    /// `RuntimeSchemaCache::load` when the on-disk `schema.json` is missing.
+    /// Carries the OS-level message verbatim so operators can localise the
+    /// failure (Article IV).
+    #[error("manifest/cache I/O: {0}")]
+    ManifestIo(String),
 }

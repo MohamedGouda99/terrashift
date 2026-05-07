@@ -32,7 +32,7 @@ fn help_lists_all_subcommands() {
     let out = ts().arg("--help").output().expect("spawn");
     assert!(out.status.success());
     let stdout = String::from_utf8_lossy(&out.stdout);
-    for sub in ["version", "migrate", "schemas", "scan"] {
+    for sub in ["version", "migrate", "schema", "scan"] {
         assert!(
             stdout.contains(sub),
             "missing subcommand `{sub}` in --help: {stdout}"
@@ -72,11 +72,12 @@ fn scan_missing_arg_returns_clap_error() {
 /// backtrace to the user. We caught this by testing the binary directly.
 #[test]
 fn scan_nonexistent_dir_prints_clean_error_no_backtrace() {
-    let out = ts()
-        .arg("scan")
-        .arg("C:/this/path/definitely/does/not/exist")
-        .output()
-        .expect("spawn");
+    // Construct a path inside a fresh tempdir that we deliberately never
+    // create. Cross-platform: tempdir resolves to the OS-appropriate root,
+    // and the join is just path arithmetic — no OS-specific shape.
+    let dir = tempfile::tempdir().expect("tempdir");
+    let nonexistent = dir.path().join("definitely-not-a-real-subdir");
+    let out = ts().arg("scan").arg(&nonexistent).output().expect("spawn");
     assert_eq!(
         out.status.code(),
         Some(1),
@@ -126,11 +127,17 @@ fn scan_real_fixture_succeeds() {
 }
 
 #[test]
-fn schemas_list_with_no_cache_succeeds() {
-    // We can't easily isolate the user's real ~/.terrashift cache, but the
-    // command must not panic regardless of cache state. Either "Cache empty"
-    // or a list of (provider, version) tuples is acceptable.
-    let out = ts().arg("schemas").arg("list").output().expect("spawn");
+fn schema_list_with_no_cache_succeeds() {
+    // Isolated cache root: regardless of what's in the user's real
+    // ~/.terrashift cache, list against an empty tempdir is well-defined.
+    let dir = tempfile::tempdir().expect("tempdir");
+    let out = ts()
+        .arg("schema")
+        .arg("list")
+        .arg("--cache")
+        .arg(dir.path())
+        .output()
+        .expect("spawn");
     assert!(
         out.status.success(),
         "exit: {:?} stderr: {}",
@@ -140,11 +147,92 @@ fn schemas_list_with_no_cache_succeeds() {
 }
 
 #[test]
-fn schemas_help_lists_subcommands() {
-    let out = ts().arg("schemas").arg("--help").output().expect("spawn");
+fn schema_help_lists_all_five_subcommands() {
+    let out = ts().arg("schema").arg("--help").output().expect("spawn");
     assert!(out.status.success());
     let stdout = String::from_utf8_lossy(&out.stdout);
-    for sub in ["sync", "list", "seed"] {
+    for sub in ["list", "update", "show", "verify", "gc"] {
         assert!(stdout.contains(sub), "missing `{sub}` in: {stdout}");
     }
+}
+
+#[test]
+fn schema_update_without_provider_returns_clap_error() {
+    // Without --provider/--version (and no --all), update must surface a
+    // clap error (exit 2), not run terraform with empty arguments.
+    let dir = tempfile::tempdir().expect("tempdir");
+    let out = ts()
+        .arg("schema")
+        .arg("update")
+        .arg("--cache")
+        .arg(dir.path())
+        .output()
+        .expect("spawn");
+    // Either clap rejects (exit 2) or our anyhow validation does (exit 1).
+    // Both are acceptable loud failures (Article IV).
+    assert!(
+        out.status.code() == Some(1) || out.status.code() == Some(2),
+        "expected exit 1 or 2, got {:?}: stderr={}",
+        out.status,
+        String::from_utf8_lossy(&out.stderr)
+    );
+}
+
+#[test]
+fn schema_show_with_invalid_spec_returns_clean_error() {
+    // Invalid `<provider>@<version>` spec must produce a clear error,
+    // not a panic or silent failure.
+    let dir = tempfile::tempdir().expect("tempdir");
+    let out = ts()
+        .arg("schema")
+        .arg("show")
+        .arg("not-a-spec")
+        .arg("--cache")
+        .arg(dir.path())
+        .output()
+        .expect("spawn");
+    assert_eq!(out.status.code(), Some(1), "expected exit 1 for bad spec");
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(stderr.contains("error:"), "stderr should be loud: {stderr}");
+    // No Rust backtrace leakage (regression test pattern from line 91).
+    assert!(
+        !stderr.contains("Stack backtrace"),
+        "no rustc backtrace: {stderr}"
+    );
+}
+
+#[test]
+fn schema_verify_with_empty_cache_succeeds() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let out = ts()
+        .arg("schema")
+        .arg("verify")
+        .arg("--cache")
+        .arg(dir.path())
+        .output()
+        .expect("spawn");
+    assert!(
+        out.status.success(),
+        "verify against empty cache must exit 0: {}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+}
+
+#[test]
+fn schema_gc_dry_run_does_not_delete() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    // No manifest.json — gc against empty cache exits 0, prints "nothing to gc".
+    let out = ts()
+        .arg("schema")
+        .arg("gc")
+        .arg("--dry-run")
+        .arg("--cache")
+        .arg(dir.path())
+        .output()
+        .expect("spawn");
+    assert!(
+        out.status.success(),
+        "dry-run gc must succeed: {}",
+        String::from_utf8_lossy(&out.stderr)
+    );
 }

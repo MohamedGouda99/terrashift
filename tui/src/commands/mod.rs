@@ -29,6 +29,7 @@ pub mod plan;
 pub mod quit;
 pub mod rollback;
 pub mod scan;
+pub mod schemas;
 
 use std::collections::BTreeMap;
 
@@ -91,8 +92,9 @@ pub struct Registry {
 }
 
 impl Registry {
-    /// Build the Stage 1 registry — 8 commands. 4 working, 4 stubs.
-    /// Per clarify Q1: explicit constructor (no compile-time discovery).
+    /// Build the Stage 1 registry. Per clarify Q1: explicit constructor
+    /// (no compile-time discovery). Adding a slash command is one new file
+    /// + one `commands.insert(...)` line below.
     pub fn stage1() -> Self {
         let mut commands: BTreeMap<&'static str, Box<dyn SlashCommand>> = BTreeMap::new();
         commands.insert("help", Box::new(help::Help));
@@ -104,6 +106,7 @@ impl Registry {
         commands.insert("cost", Box::new(cost::Cost));
         commands.insert("rollback", Box::new(rollback::Rollback));
         commands.insert("compact", Box::new(compact::Compact));
+        commands.insert("schemas", Box::new(schemas::Schemas));
         commands.insert("quit", Box::new(quit::Quit));
         commands.insert("exit", Box::new(quit::Quit));
         Self { commands }

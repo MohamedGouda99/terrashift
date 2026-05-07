@@ -42,9 +42,9 @@ enum Command {
     /// Migrate Terraform from one provider to another.
     Migrate(commands::migrate::Args),
 
-    /// Schema cache operations (list / sync / seed).
+    /// Schema cache operations (list / update / show / verify / gc).
     #[command(subcommand)]
-    Schemas(commands::schemas::Cmd),
+    Schema(commands::schema::Cmd),
 
     /// Read .tf files and print the resource inventory (no LLM).
     Scan(commands::scan::Args),
@@ -76,7 +76,7 @@ async fn run() -> Result<()> {
     match cli.command {
         Some(Command::Version) => print_version(),
         Some(Command::Migrate(args)) => commands::migrate::run(args, cli.profile).await?,
-        Some(Command::Schemas(cmd)) => commands::schemas::run(cmd).await?,
+        Some(Command::Schema(cmd)) => commands::schema::run(cmd, cli.profile).await?,
         Some(Command::Scan(args)) => commands::scan::run(args).await?,
         None => launch_tui(cli.profile).await?,
     }
@@ -94,16 +94,33 @@ async fn launch_tui(profile: Option<std::path::PathBuf>) -> Result<()> {
     // should prevent the TUI from launching — operators can fix the
     // profile and re-run /scan / /help inside the TUI.
     let profile_path = commands::util::resolve_profile_path(profile).ok();
+    let cached_schema_count = best_effort_cached_schema_count();
 
     let status = StatusInfo {
         profile_path: profile_path.clone(),
         seed_resources: None,
         tier: "eco".to_string(),
+        cached_schema_count,
     };
 
     terrashift_tui::start_tui(status)
         .await
         .map_err(|e| anyhow::anyhow!("TUI failed: {e}"))
+}
+
+/// Read the runtime manifest at `~/.terrashift/schemas/manifest.json` and
+/// return the cached pair count. None on any error — the TUI footer renders
+/// `"not loaded"` and the operator can run `terrashift schema list` from a
+/// shell to investigate. Synchronous read; manifest is small (KB scale).
+fn best_effort_cached_schema_count() -> Option<usize> {
+    use terrashift_knowledge::RuntimeManifest;
+
+    let home = std::env::var_os("USERPROFILE").or_else(|| std::env::var_os("HOME"))?;
+    let path = std::path::PathBuf::from(home)
+        .join(".terrashift")
+        .join("schemas")
+        .join("manifest.json");
+    RuntimeManifest::load(&path).ok().map(|m| m.schemas.len())
 }
 
 fn print_version() {

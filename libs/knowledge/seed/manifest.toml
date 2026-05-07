@@ -1,0 +1,30 @@
+# Build-time provider pins. `cargo xtask capture-schemas` reads this file
+# and produces `libs/knowledge/seed/<provider>/<version>/schema.json` per
+# pin via `terraform providers schema -json`.
+#
+# These versions ship with `cargo build --release`. Operators override
+# them per-profile via `[profiles.<name>.schemas.pinned]` in their
+# `~/.terrashift/profile.toml`.
+#
+# Auto-refreshed weekly by `.github/workflows/weekly-bundle-refresh.yml`
+# (calls `cargo xtask resolve-latest` then opens a PR if anything moved).
+#
+# Pattern: RFC schema-source-migration §4.6.
+# Constitution: Article VI (every pin is a concrete version, never "latest");
+#               resolved at build time, frozen in the binary.
+
+[[pin]]
+provider = "aws"
+version  = "6.44.0"
+source   = "hashicorp/aws"
+
+[[pin]]
+provider = "azurerm"
+version  = "4.71.0"
+source   = "hashicorp/azurerm"
+
+[[pin]]
+provider = "google"
+version  = "7.31.0"
+source   = "hashicorp/google"
+

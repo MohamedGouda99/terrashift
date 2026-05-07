@@ -1,0 +1,6 @@
+# Eval schema cache files are zstd-compressed once the S5 non-dry-run
+# capture path lands; Stage 1 ships text placeholders. Marking as binary
+# keeps git from attempting line-diff rendering on either shape and
+# prevents CRLF normalisation on Windows from corrupting the future
+# real captures.
+.schema-cache/*.json.zst binary

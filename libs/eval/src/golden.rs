@@ -37,6 +37,23 @@ pub struct GoldenManifest {
     /// SuiteReport to surface coverage gaps.
     #[serde(default)]
     pub articles: Vec<u8>,
+    /// Provider schemas required by the eval framework's Validator path.
+    /// Each entry is verified present in the test-fixture schema cache
+    /// (`<suite_root>/.schema-cache/`) BEFORE the Generator runs — a
+    /// missing schema produces `EvalError::MissingSchema`, not a silent
+    /// pass. Empty by default; pre-existing fixtures load unchanged.
+    /// RFC schema-source-migration §5.1.
+    #[serde(default)]
+    pub required_schemas: Vec<RequiredSchema>,
+}
+
+/// One schema requirement in `GoldenManifest::required_schemas`. Currently
+/// match-by-equality on `(provider, version)`; constraint expansion (e.g.
+/// `~> 5.30`) lands in S4 alongside `Mapper`-driven eval runs.
+#[derive(Debug, Clone, Deserialize)]
+pub struct RequiredSchema {
+    pub provider: String,
+    pub version: String,
 }
 
 /// Loaded golden migration — paths verified, manifest parsed, plan parsed.

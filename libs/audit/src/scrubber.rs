@@ -20,11 +20,19 @@ use std::sync::OnceLock;
 
 /// Names of the patterns we check, exposed to error messages so reviewers
 /// know WHAT was detected without seeing the raw value.
+///
+/// **Note on length:** the four named entries above the heuristic line are
+/// the regex-backed patterns; `"high_entropy_token"` is the inline heuristic
+/// at the bottom of `scan()`. They share a name namespace but are checked
+/// by different code paths. Do NOT zip this constant with `patterns()` —
+/// it has one fewer entry by design.
 pub const PATTERN_NAMES: &[&str] = &[
+    // Regex patterns (in order returned by `patterns()`):
     "aws_access_key",
     "gcp_api_key",
     "github_pat",
     "private_key_header",
+    // Heuristic — NOT in `patterns()`:
     "high_entropy_token",
 ];
 
@@ -74,6 +82,18 @@ pub fn scan(field_path: &str, value: &str) -> Option<ScrubMatch> {
                 field_path: field_path.to_string(),
             });
         }
+    }
+
+    // SHA-256 hex output: 64 chars, hex-only (case-insensitive). Used by
+    // AuditPayload::SchemaCapture.sha256 and Generator FileOperation hashes.
+    // Exempt from the high-entropy heuristic — these are content-addressable
+    // identifiers we deliberately store and a known-shape false positive.
+    if value.len() == 64
+        && value
+            .chars()
+            .all(|c| c.is_ascii_digit() || ('a'..='f').contains(&c) || ('A'..='F').contains(&c))
+    {
+        return None;
     }
 
     // High-entropy heuristic: if a token is ≥40 chars of base64-ish charset,
@@ -145,5 +165,35 @@ mod tests {
         );
         assert!(r.is_some());
         assert_eq!(r.unwrap().pattern_name, "high_entropy_token");
+    }
+
+    #[test]
+    fn sha256_hex_is_exempt_from_heuristic() {
+        // Real SHA-256 hex output (64 lowercase hex chars). Has plenty of
+        // digits and could superficially look high-entropy, but is a known
+        // content-addressable identifier shape and must not trigger.
+        let r = scan(
+            "payload.sha256",
+            "a1f7e21d8c3b0429f5e8d6c4b8a9f2e1d3c5b7a9e0d2f4c6b8a1d3e5f7c9b1d3",
+        );
+        assert!(r.is_none(), "lowercase SHA-256 hex must be exempt");
+
+        // Same length, mixed case (also a valid hex shape per RFC 4648).
+        let r = scan(
+            "payload.sha256",
+            "A1F7E21D8C3B0429F5E8D6C4B8A9F2E1D3C5B7A9E0D2F4C6B8A1D3E5F7C9B1D3",
+        );
+        assert!(r.is_none(), "uppercase SHA-256 hex must be exempt");
+
+        // Same length, but contains a non-hex letter — exemption must NOT
+        // apply; falls through to the regular heuristic.
+        let r = scan(
+            "payload.sha256",
+            "G1F7E21D8C3B0429F5E8D6C4B8A9F2E1D3C5B7A9E0D2F4C6B8A1D3E5F7C9B1D3",
+        );
+        assert!(
+            r.is_some(),
+            "non-hex char must defeat the SHA-256 exemption"
+        );
     }
 }
