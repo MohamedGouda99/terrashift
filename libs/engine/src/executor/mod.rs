@@ -32,27 +32,31 @@
 //! caller's process; subprocess inherits via OS).
 
 pub mod errors;
+pub mod runner;
 
 pub use errors::ExecutorError;
+pub use runner::{DockerRunner, LocalRunner, SubprocessOutcome, SubprocessRunner};
 
 use std::path::PathBuf;
+use std::sync::Arc;
 use terrashift_shell_tool_approvals::{resolve, stage1_policy, Policy, Verdict};
 use uuid::Uuid;
 
-/// What an Executor invocation returns when it would have succeeded.
-/// Stage 1 doesn't actually run subprocesses, but the *shape* is
-/// stable so S5 close just fills in the fields.
+/// What an Executor invocation returns. Populated with real subprocess
+/// outcomes when a runner is wired (S5 close); when no runner is set
+/// (legacy), `apply()` returns `NotImplementedYet` instead.
 #[derive(Debug, Clone)]
 pub struct ApplyOutcome {
     /// run_id passed in; echoed for audit correlation.
     pub run_id: Uuid,
     /// The terraform commands that were authorized to run (each
-    /// passed P-09a's gate). Stage 1: never actually spawned;
-    /// returned for inspection in tests.
+    /// passed P-09a's gate).
     pub authorized_commands: Vec<String>,
-    /// Working directory the Executor would have used. Stage 1:
-    /// `/tmp/terrashift-exec-{run_id}/` per the P-09 prompt
-    /// (`terrashift_prompts.md:521`).
+    /// Per-command subprocess outcomes (exit code, duration, log path).
+    /// Empty when no runner is wired.
+    pub subprocess_outcomes: Vec<SubprocessOutcome>,
+    /// Working directory used. Default: `/tmp/terrashift-exec-{run_id}/`
+    /// (S5 close: configurable via `Executor::with_cwd`).
     pub working_dir: PathBuf,
 }
 
@@ -72,15 +76,29 @@ pub enum ApprovalMode {
 pub struct Executor {
     policy: Policy,
     approval_mode: ApprovalMode,
+    /// Subprocess runner. When `Some`, `apply()` invokes real terraform;
+    /// when `None`, returns `NotImplementedYet` (legacy Stage 1 behavior).
+    runner: Option<Arc<dyn SubprocessRunner>>,
+    /// Working directory override. Default: `/tmp/terrashift-exec-{run_id}`.
+    cwd_override: Option<PathBuf>,
+    /// Environment variables to inject into every subprocess. Typically
+    /// populated from the cred broker (AWS_*/GOOGLE_*/ARM_* etc.).
+    env: Vec<(String, String)>,
 }
 
 impl Executor {
     /// Build an Executor with the canonical Stage 1 policy
     /// (`stage1_policy()` from P-09a) and non-interactive mode.
+    /// **No runner wired** — `apply()` returns `NotImplementedYet`.
+    /// Callers that want real subprocess execution should chain
+    /// `.with_runner(...)`.
     pub fn stage1_default() -> Self {
         Self {
             policy: stage1_policy(),
             approval_mode: ApprovalMode::NonInteractive,
+            runner: None,
+            cwd_override: None,
+            env: Vec::new(),
         }
     }
 
@@ -89,7 +107,36 @@ impl Executor {
         Self {
             policy,
             approval_mode,
+            runner: None,
+            cwd_override: None,
+            env: Vec::new(),
         }
+    }
+
+    /// Wire a subprocess runner. Without this, `apply()` returns
+    /// `NotImplementedYet`. Use `Arc::new(LocalRunner)` for
+    /// `--no-sandbox` mode or `Arc::new(DockerRunner::new())` for
+    /// the default sandboxed posture.
+    pub fn with_runner(mut self, runner: Arc<dyn SubprocessRunner>) -> Self {
+        self.runner = Some(runner);
+        self
+    }
+
+    /// Override the working directory. Default: a temp dir per run_id.
+    /// `terrashift apply <path>` sets this to `<path>` so terraform
+    /// reads/writes the migrated HCL in place.
+    pub fn with_cwd(mut self, cwd: PathBuf) -> Self {
+        self.cwd_override = Some(cwd);
+        self
+    }
+
+    /// Inject environment variables into every subprocess. Typically
+    /// the resolved cloud credentials (`AWS_ACCESS_KEY_ID=...`).
+    /// Values are passed via `Command::env()` only — never written
+    /// to disk (Article XIII rule 7).
+    pub fn with_env(mut self, env: Vec<(String, String)>) -> Self {
+        self.env = env;
+        self
     }
 
     /// Run the approval gate on a single command. Returns the
@@ -134,32 +181,34 @@ impl Executor {
         tracing::debug!(
             run_id = %run_id,
             n_commands = commands.len(),
+            has_runner = self.runner.is_some(),
             "Executor::apply start"
         );
 
-        let _working_dir = std::env::temp_dir().join(format!("terrashift-exec-{}", run_id));
+        let working_dir = self
+            .cwd_override
+            .clone()
+            .unwrap_or_else(|| working_dir_for_run(run_id));
 
-        // Stage 1 collects the authorized commands so the seam is
-        // visible — S5 close fills `ApplyOutcome.authorized_commands`
-        // from this and spawns each subprocess. Today the all-Allow
-        // path returns `NotImplementedYet` before the vec is used.
-        let mut _authorized: Vec<String> = Vec::with_capacity(commands.len());
+        let mut authorized: Vec<String> = Vec::with_capacity(commands.len());
 
         for &cmd in commands {
             let verdict = self.pre_apply_check(cmd);
             match verdict {
                 Verdict::Allow => {
-                    _authorized.push(cmd.to_string());
+                    authorized.push(cmd.to_string());
                 }
                 Verdict::Prompt => {
+                    // Stage 1: both NonInteractive and Interactive branches
+                    // return the same Err today. Interactive becomes a real
+                    // TUI prompt in Stage 5+ once the agent loop kernel's
+                    // prompt path is built. The explicit check on
+                    // `approval_mode` documents that future seam.
                     if self.approval_mode == ApprovalMode::NonInteractive {
                         return Err(ExecutorError::PromptRequiredButNonInteractive {
                             command: cmd.to_string(),
                         });
                     }
-                    // Interactive — Stage 5+ would dispatch the TUI prompt
-                    // here. Stage 1 short-circuits same as non-interactive
-                    // because the prompt path isn't built yet.
                     return Err(ExecutorError::PromptRequiredButNonInteractive {
                         command: cmd.to_string(),
                     });
@@ -173,11 +222,54 @@ impl Executor {
             }
         }
 
-        // Stage 1: every command authorized; subprocess invocation
-        // gated on Docker + cloud creds (S5 close).
-        Err(ExecutorError::NotImplementedYet {
-            which: "terraform_subprocess_via_docker",
-            session: "S5",
+        let runner = match &self.runner {
+            Some(r) => r,
+            None => {
+                return Err(ExecutorError::NotImplementedYet {
+                    which: "no_runner_wired_call_with_runner_on_executor",
+                    session: "S5",
+                });
+            }
+        };
+
+        let log_dir = working_dir
+            .join(".terrashift")
+            .join("runs")
+            .join(run_id.to_string())
+            .join("logs");
+        tokio::fs::create_dir_all(&log_dir)
+            .await
+            .map_err(|e| ExecutorError::Io {
+                path: log_dir.clone(),
+                source: e,
+            })?;
+
+        let mut subprocess_outcomes: Vec<SubprocessOutcome> = Vec::with_capacity(authorized.len());
+        for (idx, cmd_string) in authorized.iter().enumerate() {
+            let parts: Vec<String> = cmd_string.split_whitespace().map(String::from).collect();
+            if parts.is_empty() {
+                continue;
+            }
+            let log_path = log_dir.join(format!("{:02}-{}.log", idx, parts[0]));
+            let outcome = runner
+                .run(&parts, &self.env, &working_dir, &log_path)
+                .await?;
+            if outcome.exit_code != 0 && outcome.exit_code != 2 {
+                // terraform plan returns 2 for "changes detected" — that's a
+                // success signal, not a failure. Other non-zero codes are fatal.
+                return Err(ExecutorError::NonZeroExit {
+                    program: outcome.program.clone(),
+                    exit_code: outcome.exit_code,
+                });
+            }
+            subprocess_outcomes.push(outcome);
+        }
+
+        Ok(ApplyOutcome {
+            run_id,
+            authorized_commands: authorized,
+            subprocess_outcomes,
+            working_dir,
         })
     }
 

@@ -107,6 +107,13 @@ schemars = "0.8"
 # Security primitives (per Article V)
 zeroize = { version = "1", features = ["zeroize_derive"] }
 
+# AWS SDK — STS AssumeRole for short-lived federated tokens (P-10 / S5 close).
+# Article VI requires rustls-only (single-binary, no OpenSSL); aws-config v1+
+# accepts the rustls TLS provider via default-features=false + explicit feature.
+# Article XIII rule 7 — these clients hold tokens in memory only.
+aws-config = { version = "1", default-features = false, features = ["rustls", "rt-tokio", "behavior-version-latest"] }
+aws-sdk-sts = { version = "1", default-features = false, features = ["rustls", "behavior-version-latest"] }
+
 # Identifiers and time
 uuid = { version = "1", features = ["serde", "v4"] }
 chrono = { version = "0.4", features = ["serde"] }

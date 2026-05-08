@@ -14,6 +14,7 @@ use crate::errors::AiError;
 use crate::tier::Tier;
 use serde::Deserialize;
 use std::collections::BTreeMap;
+use terrashift_creds::CredConfig;
 
 /// Top-level: a profile bundle. The active profile is selected via
 /// `terrashift --profile <name>`; default is `"default"`.
@@ -53,6 +54,12 @@ pub struct Profile {
     /// RFC schema-source-migration §4.3.
     #[serde(default)]
     pub schemas: SchemasConfig,
+    /// Per-cloud credential resolution config. Keyed by cloud name
+    /// (`"aws"`, `"azurerm"`, `"google"`). Optional — only required
+    /// when running `terrashift apply` against that cloud. Default-
+    /// empty so existing profiles (LLM-only) keep parsing.
+    #[serde(default)]
+    pub creds: BTreeMap<String, CredConfig>,
 }
 
 /// Per-tier model assignments. Stage 1 supports `eco` (required) and

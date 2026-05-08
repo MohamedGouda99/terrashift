@@ -98,10 +98,13 @@ async fn us3_all_allow_path_returns_not_implemented_yet() {
         )
         .await;
 
-    // No Deny, no Prompt — Stage 1 hits the subprocess wall.
+    // No Deny, no Prompt — Stage 1 default has no runner wired, so
+    // apply() returns NotImplementedYet pointing the caller at
+    // `with_runner(...)`. S5 close: the runner-wired path is exercised
+    // by `apply_with_runner_runs_subprocess` below.
     match result {
         Err(ExecutorError::NotImplementedYet { which, session }) => {
-            assert_eq!(which, "terraform_subprocess_via_docker");
+            assert_eq!(which, "no_runner_wired_call_with_runner_on_executor");
             assert_eq!(session, "S5");
         }
         other => panic!(

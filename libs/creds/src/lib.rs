@@ -32,6 +32,8 @@
 pub mod aws;
 pub mod azure;
 pub mod broker;
+pub mod cloud_env;
+pub mod config;
 pub mod errors;
 pub mod federated;
 pub mod gcp;
@@ -42,6 +44,8 @@ pub mod substitution;
 pub use aws::AwsBroker;
 pub use azure::AzureBroker;
 pub use broker::{Credential, CredentialBroker};
+pub use cloud_env::CloudCredentialEnvVars;
+pub use config::{CredConfig, CredMode};
 pub use errors::CredsError;
 pub use federated::{FederatedTokenProvider, OidcIdToken, StubFederatedTokenProvider};
 pub use gcp::GcpBroker;
