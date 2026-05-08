@@ -25,3 +25,6 @@ uuid = { workspace = true }
 # Internal
 terrashift-shared = { workspace = true }
 terrashift-audit = { workspace = true }
+
+[dev-dependencies]
+toml = { workspace = true }

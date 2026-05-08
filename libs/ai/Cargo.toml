@@ -27,6 +27,7 @@ async-trait = "0.1"
 # Internal
 terrashift-shared = { workspace = true }
 terrashift-agent-core = { workspace = true }
+terrashift-creds = { workspace = true }
 
 [dev-dependencies]
 uuid = { workspace = true }
