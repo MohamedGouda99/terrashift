@@ -31,13 +31,15 @@ terrashift-engine = { workspace = true }
 terrashift-ai = { workspace = true }
 terrashift-knowledge = { workspace = true }
 terrashift-audit = { workspace = true }
+terrashift-agent-core = { workspace = true }
 tempfile = { workspace = true }
 
-# Direct deps of the schema CLI surface
+# Direct deps of the schema CLI surface + Recovery agent integration
 sha2 = { workspace = true }
 chrono = { workspace = true }
 uuid = { workspace = true }
 serde_json = { workspace = true }
+tokio-util = { workspace = true }
 
 [dev-dependencies]
 terrashift-agent-core = { workspace = true }

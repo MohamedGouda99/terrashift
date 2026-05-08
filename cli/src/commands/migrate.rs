@@ -21,11 +21,14 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use tempfile::TempDir;
-use terrashift_ai::Tier;
+use terrashift_agent_core::PassthroughCompactionEngine;
+use terrashift_ai::{JsonAgentLlmClient, Tier};
 use terrashift_engine::generator::Generator;
 use terrashift_engine::mapper::{Mapper, MapperCache, PassthroughContextReducer};
+use terrashift_engine::recovery::{run_recovery, RecoveryConfig, RecoveryOutcome};
 use terrashift_engine::scanner::Scanner;
 use terrashift_engine::validator::{ValidationError, Validator};
+use tokio_util::sync::CancellationToken;
 
 use super::util::{build_knowledge_service, build_llm_client, load_profile, resolve_profile_path};
 
@@ -97,26 +100,112 @@ pub async fn run(args: Args, profile_path: Option<PathBuf>) -> Result<()> {
     let mut cache = MapperCache::new();
 
     let started = std::time::Instant::now();
-    let plan = mapper
+    let mut plan = mapper
         .map(&inv, &knowledge, &llm, &reducer, &mut cache)
         .await
         .context("Mapper LLM round-trip")?;
     let elapsed = started.elapsed();
 
-    // ─── 4b. Validator (Article III gate) ───────────────────────────
-    // r07-mvp-closure: wire Validator into the migrate path. Skips when
-    // the schema cache has no entry for the target provider (graceful
-    // degradation per Mapper clarify Q2; downstream Generator still
-    // emits whatever it can).
+    // ─── 4b. Validator + Recovery agent (Article III gate + S10 self-healing) ─
+    // r07-mvp-closure: Validator on the migrate path (Article III).
+    // S10:           Recovery agent loops on Validator failures, asking the
+    //                LLM to propose fixes via `set_attribute` /
+    //                `change_target_type` / `remove_resource` tool calls.
+    // Both are no-ops when target schema isn't cached (graceful degradation).
     let target_version = knowledge
         .schema_store
         .list_versions(&args.to_provider)
         .await
         .ok()
         .and_then(|v| v.into_iter().next());
+
     let validator_errors_by_addr: HashMap<String, Vec<ValidationError>> = match &target_version {
         Some(ver) => {
             let validator = Validator::new(Arc::clone(&knowledge));
+            // 4b.i — Initial Validator pass.
+            let initial_report = match validator.validate(&plan, ver).await {
+                Ok(r) => r,
+                Err(e) => {
+                    println!(
+                        "⚠ Validator infrastructure error (proceeding without Article III gate): {e}"
+                    );
+                    return Ok(());
+                }
+            };
+
+            if !initial_report.errors.is_empty() {
+                // 4b.ii — Errors present; invoke Recovery agent (S10).
+                println!(
+                    "🛠️  Validator found {} gap(s); invoking Recovery agent ...",
+                    initial_report.errors.len()
+                );
+                let cancel = CancellationToken::new();
+                // Wrap the existing RealClient in an Arc<dyn LlmClient> so
+                // JsonAgentLlmClient can adapt it to the agent kernel's
+                // AgentLlmClient trait. The Arc holds the same client used
+                // by the Mapper above; no new connection is opened.
+                let llm_arc: Arc<dyn terrashift_ai::LlmClient> = Arc::new(llm);
+                let agent_llm = JsonAgentLlmClient::new(llm_arc, tier);
+                let compactor = PassthroughCompactionEngine;
+                let hooks: Vec<Box<dyn terrashift_agent_core::AgentHook>> = Vec::new();
+                let cfg = RecoveryConfig::default();
+
+                match run_recovery(
+                    &cfg,
+                    plan.clone(),
+                    &validator,
+                    ver,
+                    &agent_llm,
+                    &reducer,
+                    &compactor,
+                    &hooks,
+                    &cancel,
+                )
+                .await
+                {
+                    Ok((updated_plan, outcome)) => {
+                        plan = updated_plan;
+                        match outcome {
+                            RecoveryOutcome::Success {
+                                iterations,
+                                fixes_applied,
+                            } => {
+                                println!(
+                                    "✓ Recovery agent succeeded ({iterations} iter(s), {fixes_applied} fix(es) applied)"
+                                );
+                            }
+                            RecoveryOutcome::MaxIterationsReached {
+                                iterations,
+                                unresolved_errors,
+                            } => {
+                                println!(
+                                    "⚠ Recovery agent hit max_iterations ({iterations}); {} error(s) unresolved",
+                                    unresolved_errors.len()
+                                );
+                            }
+                            RecoveryOutcome::AgentGaveUp {
+                                iterations,
+                                unresolved_errors,
+                            } => {
+                                println!(
+                                    "⚠ Recovery agent gave up after {iterations} iteration(s); {} error(s) unresolved",
+                                    unresolved_errors.len()
+                                );
+                            }
+                            RecoveryOutcome::WaitingForApproval { iterations, .. } => {
+                                println!(
+                                    "⚠ Recovery agent paused at approval gate after {iterations} iteration(s) — Stage 2 narrowing"
+                                );
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        println!("⚠ Recovery agent error: {e}");
+                    }
+                }
+            }
+
+            // 4b.iii — Final Validator pass (after Recovery, if it ran).
             match validator.validate(&plan, ver).await {
                 Ok(report) => {
                     let mut by_addr: HashMap<String, Vec<ValidationError>> = HashMap::new();
@@ -129,16 +218,14 @@ pub async fn run(args: Args, profile_path: Option<PathBuf>) -> Result<()> {
                     by_addr
                 }
                 Err(e) => {
-                    println!(
-                        "⚠ Validator infrastructure error (proceeding without Article III gate): {e}"
-                    );
+                    println!("⚠ Validator infrastructure error on final pass: {e}");
                     HashMap::new()
                 }
             }
         }
         None => {
             println!(
-                "⚠ No cached schema for target provider '{}' — Validator skipped (Article III gate not active for this run). Run `terrashift schema update --provider {} --version <X>` to populate.",
+                "⚠ No cached schema for target provider '{}' — Validator + Recovery skipped. Run `terrashift schema update --provider {} --version <X>` to populate.",
                 args.to_provider, args.to_provider
             );
             HashMap::new()
