@@ -82,9 +82,9 @@ the next session. That's the load-bearing discipline.
 | 6a | Release pipeline (P-13) | 1 | ✅ Done | `920b7a4` | All |
 | 6b | TUI slash commands (P-14) | 1 | ✅ Done | this commit | All |
 | 7 | Eval expansion (3 → 5 → 10 golden migrations) | 1 | ✅ Done: 10/10 (`a01797c` 5/10, this commit 10/10) | — | All |
-| 8 | Stage 1 exit gate (P-16) + remediation | 1 | 🟡 Partial: R6 (Article XII rule 4 baseline + active CI regression gate) shipped this commit; #4 graduates from NOT MEASURABLE → ACTIVELY ENFORCED-pending-LLM-data. Full close awaits S4 GROQ_API_KEY + S5 Docker/cloud creds. | — | All |
-| 9 | Agent loop kernel (run_agent, approval, retry) | 2 | Planned | — | MVP+ |
-| 10 | Recovery agent | 2 | Planned | — | MVP+ |
+| 8 | Stage 1 exit gate (P-16) + remediation | 1 | 🟡 Partial: R6 (Article XII rule 4 baseline + active CI regression gate) shipped; **r07 mvp-closure (PR #7)** — Mapper prompt context-injection + Validator on migrate path + default-output convention; canonical aws→azurerm e2e on `fixtures/e2e-aws-to-azure/` 4/5 emit, 0 Validator gaps. Strict-gate gaps tracked as follow-up issues (15-resource fixture, token-cost telemetry, 13-article PR audit, macOS install). | `7df99d0`, `a637ccc`, PR #7 | All |
+| 9 | Agent loop kernel (run_agent, approval, retry) | 2 | 🟢 Done (kernel pre-existed; wired via `JsonAgentLlmClient` + `PassthroughCompactionEngine` adapter in PR #7) | `1a4da4e` (wiring) | MVP+ |
+| 10 | Recovery agent | 2 | 🟡 Wired-but-unexercised: bounded ReAct loop on migrate path; fires on `Validator.errors.is_empty() == false`; tools `set_attribute` / `change_target_type` / `remove_resource`. Not yet exercised end-to-end with real LLM call (canonical fixture has 0 Validator gaps — needs S14 eval with deterministic gap-producing fixtures). | `1a4da4e`, PR #7 | MVP+ |
 | 11 | Cost Optimizer agent + Infracost service | 2 | Planned | — | MVP+ |
 | 12 | WIF/OIDC cloud auth modernization | 2 | Planned | — | MVP+ |
 | 13 | Detached mode + notifications | 2 | Planned | — | MVP+ |
