@@ -160,6 +160,11 @@ fn render_status(f: &mut Frame, area: Rect, app: &AppState) {
         None => "not loaded".to_string(),
     };
 
+    let schemas = match app.status.cached_schema_count {
+        Some(n) => format!("{n} cached"),
+        None => "not loaded".to_string(),
+    };
+
     let line = Line::from(vec![
         Span::styled(
             "  profile: ",
@@ -171,6 +176,11 @@ fn render_status(f: &mut Frame, area: Rect, app: &AppState) {
             Style::default().fg(Color::Rgb(0x6B, 0x72, 0x80)),
         ),
         Span::styled(seed, Style::default().fg(Color::Rgb(0x94, 0xA3, 0xB8))),
+        Span::styled(
+            " │ schemas: ",
+            Style::default().fg(Color::Rgb(0x6B, 0x72, 0x80)),
+        ),
+        Span::styled(schemas, Style::default().fg(Color::Rgb(0x94, 0xA3, 0xB8))),
         Span::styled(
             " │ tier: ",
             Style::default().fg(Color::Rgb(0x6B, 0x72, 0x80)),

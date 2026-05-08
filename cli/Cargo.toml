@@ -30,7 +30,14 @@ terrashift-tui = { workspace = true }
 terrashift-engine = { workspace = true }
 terrashift-ai = { workspace = true }
 terrashift-knowledge = { workspace = true }
+terrashift-audit = { workspace = true }
 tempfile = { workspace = true }
+
+# Direct deps of the schema CLI surface
+sha2 = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+serde_json = { workspace = true }
 
 [dev-dependencies]
 terrashift-agent-core = { workspace = true }

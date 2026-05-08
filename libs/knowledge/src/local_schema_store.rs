@@ -122,6 +122,15 @@ impl SchemaStore for LocalSchemaStore {
     }
 
     #[instrument(skip(self))]
+    async fn list_providers(&self) -> Result<Vec<String>, SchemaError> {
+        let rows: Vec<(String,)> =
+            sqlx::query_as("SELECT DISTINCT provider FROM provider_schemas ORDER BY provider ASC")
+                .fetch_all(&self.pool)
+                .await?;
+        Ok(rows.into_iter().map(|(p,)| p).collect())
+    }
+
+    #[instrument(skip(self))]
     async fn search_mappings(
         &self,
         _query: &str,

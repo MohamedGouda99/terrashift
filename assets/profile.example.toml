@@ -90,3 +90,33 @@ model = "huggingface/meta-llama/Llama-3.3-70B-Instruct"
 
   [profiles.default.cloud.google]
   project_id_env = "GOOGLE_CLOUD_PROJECT"
+
+  # ─── Schema management ────────────────────────────────────────────
+  #
+  # The schema cache at ~/.terrashift/schemas/ is populated on first run
+  # from bundled schemas (extracted at `cargo build --release` time). To
+  # pin a specific provider version or refresh against a newer registry
+  # release, use:
+  #
+  #   terrashift schema update --provider aws --version "~> 5.30"
+  #   terrashift schema list           # show what's cached
+  #   terrashift schema verify         # SHA-256 every cached schema
+  #
+  # The block below is OPTIONAL. Without it, the binary uses the bundled
+  # cache and never auto-updates — explicit user control wins (Article VI).
+  [profiles.default.schemas]
+    # PREFERENCE — what versions to keep cached. Each pin is a semver
+    # constraint resolved against the registry at `schema update` time.
+    pinned = [
+      { provider = "aws",     version = "~> 5.30" },
+      { provider = "google",  version = "~> 5.40" },
+      { provider = "azurerm", version = "~> 3.110" },
+    ]
+
+    # POLICY — auto-update cadence. One of: "off" | "weekly" | "monthly".
+    # Default "off" keeps the user in full control of every schema swap.
+    # When != "off", the background check fires non-blocking on
+    # `terrashift migrate` startup and the next interactive command
+    # surfaces a confirmation prompt before applying anything.
+    auto_update        = "off"
+    auto_update_window = "off-hours"  # honored only when auto_update != "off"

@@ -7,8 +7,8 @@
 
 use std::path::PathBuf;
 use terrashift_audit::{
-    verify_chain, Actor, AuditEntry, AuditPayload, AuditStore, FileOpKind, LocalAuditStore,
-    Outcome, SessionSigner,
+    verify_chain, Actor, AuditEntry, AuditPayload, AuditStore, CaptureVia, FileOpKind,
+    LocalAuditStore, Outcome, SessionSigner,
 };
 use uuid::Uuid;
 
@@ -237,6 +237,100 @@ async fn llm_call_payload_records_provider_model_endpoint() {
         }
         other => panic!("expected LlmCall, got {other:?}"),
     }
+}
+
+#[tokio::test]
+async fn schema_capture_payload_records_all_metadata() {
+    let (store, signer, run_id) = fresh_store().await;
+
+    let payload = AuditPayload::SchemaCapture {
+        provider: "aws".to_string(),
+        source: "hashicorp/aws".to_string(),
+        version_constraint: "~> 5.30".to_string(),
+        resolved_version: "5.30.4".to_string(),
+        terraform_version: "1.7.5".to_string(),
+        captured_via: CaptureVia::UserCommand,
+        sha256: "a1f7e21d8c3b0429f5e8d6c4b8a9f2e1d3c5b7a9e0d2f4c6b8a1d3e5f7c9b1d3".to_string(),
+        duration_ms: 14_287,
+    };
+    let mut e = AuditEntry::new(
+        run_id,
+        Actor::User {
+            id: "operator@example.com".to_string(),
+        },
+        "schema.capture",
+        Outcome::Ok,
+        payload,
+    );
+    store.append(&signer, &mut e).await.expect("append");
+
+    let entries = store.export(run_id).await.expect("export");
+    match &entries[0].payload {
+        AuditPayload::SchemaCapture {
+            provider,
+            source,
+            version_constraint,
+            resolved_version,
+            terraform_version,
+            captured_via,
+            sha256,
+            duration_ms,
+        } => {
+            // Article V invariant: every schema is traceable end-to-end
+            assert_eq!(provider, "aws");
+            assert_eq!(source, "hashicorp/aws");
+            assert_eq!(version_constraint, "~> 5.30");
+            assert_eq!(resolved_version, "5.30.4");
+            assert_eq!(terraform_version, "1.7.5");
+            assert_eq!(captured_via, &CaptureVia::UserCommand);
+            assert_eq!(sha256.len(), 64);
+            assert!(*duration_ms > 0);
+        }
+        other => panic!("expected SchemaCapture, got {other:?}"),
+    }
+}
+
+#[tokio::test]
+async fn tampering_with_resolved_version_breaks_chain() {
+    let (store, signer, run_id) = fresh_store().await;
+
+    let payload = AuditPayload::SchemaCapture {
+        provider: "aws".to_string(),
+        source: "hashicorp/aws".to_string(),
+        version_constraint: "~> 5.30".to_string(),
+        resolved_version: "5.30.4".to_string(),
+        terraform_version: "1.7.5".to_string(),
+        captured_via: CaptureVia::Bundled,
+        sha256: "a1f7e21d8c3b0429f5e8d6c4b8a9f2e1d3c5b7a9e0d2f4c6b8a1d3e5f7c9b1d3".to_string(),
+        duration_ms: 14_287,
+    };
+    let mut e = AuditEntry::new(
+        run_id,
+        Actor::System,
+        "schema.capture",
+        Outcome::Ok,
+        payload,
+    );
+    store.append(&signer, &mut e).await.expect("append");
+
+    let mut entries = store.export(run_id).await.expect("export");
+    // Tamper: a malicious actor swaps the resolved_version to make a
+    // different schema look like the audited one. Chain must catch this.
+    if let AuditPayload::SchemaCapture {
+        resolved_version, ..
+    } = &mut entries[0].payload
+    {
+        *resolved_version = "5.31.0".to_string();
+    } else {
+        panic!("expected SchemaCapture variant");
+    }
+
+    let key = store.get_verify_key(run_id).await.expect("key");
+    let err = verify_chain(&entries, &key).expect_err("tampered schema must fail");
+    assert!(matches!(
+        err,
+        terrashift_audit::AuditError::ChainBroken { .. }
+    ));
 }
 
 #[tokio::test]

@@ -9,24 +9,29 @@
 use terrashift_tui::commands::{Action, CommandOutcome, Registry};
 
 // ─────────────────────────────────────────────────────────────────────────
-// Test 1 — Registry has 11 entries (Stage 1 = 8; +scan +quit + /exit alias).
+// Test 1 — Registry has 12 entries (Stage 1 = 8; +scan +schemas +quit + /exit alias).
 //
 // /exit and /quit map to the same `Quit` handler so `list()` shows "quit"
 // twice — that's expected. Dispatch works for both keys (test below).
+// /schemas added in the schema-source-migration RFC; emits a Hint pointing
+// at the canonical CLI surface (OQ-2: SlashCommand::run is sync; can't
+// await SchemaStore methods from inside the trait).
 // ─────────────────────────────────────────────────────────────────────────
 #[test]
-fn registry_has_eleven_commands() {
+fn registry_has_twelve_commands() {
     let r = Registry::stage1();
     assert_eq!(
         r.len(),
-        11,
-        "Stage 1 ships 11 slash commands (8 P-14 + /scan + /quit + /exit alias)"
+        12,
+        "Stage 1 + schema-source RFC: 12 slash commands (8 P-14 + /scan + /schemas + /quit + /exit alias)"
     );
 
     // Dispatch by name verifies all commands are reachable, including
     // the /exit alias that wouldn't show distinctly in `list()`.
     use terrashift_tui::commands::{Action, CommandOutcome};
-    for name in ["help", "audit", "migrate", "plan", "cost", "scan"] {
+    for name in [
+        "help", "audit", "migrate", "plan", "cost", "scan", "schemas",
+    ] {
         let out = r.dispatch(&format!("/{name}"));
         assert!(
             !matches!(out, CommandOutcome::Error(ref s) if s.contains("unknown command")),
@@ -40,6 +45,34 @@ fn registry_has_eleven_commands() {
             CommandOutcome::Action(Action::Exit) => {}
             other => panic!("/{name} should return Action::Exit; got {:?}", other),
         }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// /schemas — emits a Hint pointing at the canonical CLI surface.
+// Per RFC §OQ-2: the TUI doesn't run cache mutations directly because
+// SlashCommand::run is sync. /schemas instead documents the shell path.
+// ─────────────────────────────────────────────────────────────────────────
+#[test]
+fn schemas_emits_hint_pointing_at_cli() {
+    let r = Registry::stage1();
+    let out = r.dispatch("/schemas");
+    match out {
+        CommandOutcome::Hint(s) => {
+            assert!(
+                s.contains("terrashift schema"),
+                "hint should point at the CLI; got: {s}"
+            );
+            // The hint must mention every shell subcommand so operators
+            // discover them through the TUI without needing external docs.
+            for sub in ["list", "update", "show", "verify", "gc"] {
+                assert!(
+                    s.contains(sub),
+                    "hint should mention `{sub}` subcommand; got: {s}"
+                );
+            }
+        }
+        other => panic!("/schemas should return Hint, got {:?}", other),
     }
 }
 

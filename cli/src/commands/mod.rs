@@ -8,5 +8,5 @@
 
 pub mod migrate;
 pub mod scan;
-pub mod schemas;
+pub mod schema;
 pub mod util;

@@ -56,7 +56,10 @@ pub use agent_client::JsonAgentLlmClient;
 pub use client::{LlmClient, StubClient};
 pub use errors::AiError;
 pub use metadata::CompletionMetadata;
-pub use profile::{Profile, ProviderConfig, Tiers};
+pub use profile::{
+    AutoUpdateCadence, AutoUpdateWindow, PinnedSchema, Profile, ProviderConfig, SchemasConfig,
+    Tiers,
+};
 pub use provider::{build_provider, Provider};
 pub use real::RealClient;
 pub use resolver::{ResolvedModel, Resolver};

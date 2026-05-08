@@ -1,0 +1,129 @@
+# Weekly bundled-schema refresh.
+#
+# Resolves "latest stable" per provider in
+# `libs/knowledge/seed/manifest.toml`, re-captures via
+# `terraform providers schema -json`, and opens a PR if any pin moved.
+# Article VI is preserved: the resolution happens AT BUILD TIME inside
+# this workflow, producing a concrete pinned version that the binary
+# then ships with. The runtime path never sees "latest".
+#
+# Operator override is independent: profiles can pin via
+# `[profiles.<name>.schemas.pinned]` and `terrashift schema update`
+# captures into `~/.terrashift/schemas/`, which the Validator reads from
+# in preference to the bundled cache. See
+# `docs/RFC-schema-source-migration.md` §4.3 for the policy/preference
+# split.
+#
+# Triggers:
+# - Mondays at 04:00 UTC (off-hours for every contributor timezone).
+# - Manual via workflow_dispatch (e.g., right after a major provider
+#   GA release that we want to bundle ahead of the cadence).
+
+name: Weekly bundle refresh
+
+on:
+  schedule:
+    - cron: "0 4 * * 1"
+  workflow_dispatch: {}
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-D warnings"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    name: resolve-latest + capture-schemas + open PR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: weekly-bundle-refresh
+
+      # Terraform CLI is the canonical schema source. Pin the action's
+      # default version (1.x current); the resulting `terraform_version`
+      # is recorded in the audit-bound xtask output for traceability.
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: terraform version (recorded in PR)
+        id: tf
+        run: |
+          echo "terraform=$(terraform version -json | jq -r .terraform_version)" >> $GITHUB_OUTPUT
+
+      - name: Resolve current registry latest into manifest pins
+        run: cargo xtask resolve-latest
+
+      # Bail early if no pin moved — no PR, no churn.
+      - name: Detect manifest changes
+        id: detect
+        run: |
+          if git diff --quiet libs/knowledge/seed/manifest.toml; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No pin moved; nothing to capture."
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Pins moved:"
+            git diff libs/knowledge/seed/manifest.toml
+          fi
+
+      - name: Capture schemas at the new pins
+        if: steps.detect.outputs.changed == 'true'
+        run: cargo xtask capture-schemas
+
+      - name: Verify the workspace still builds against new schemas
+        if: steps.detect.outputs.changed == 'true'
+        run: cargo test --workspace
+
+      # Article VI: the human approves every pin change. Bot opens the PR;
+      # human reviews + merges. After merge, the next release tag picks up
+      # the bumped bundle automatically.
+      - name: Open PR with the refreshed bundle
+        if: steps.detect.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore(schemas): refresh bundle to current registry latest"
+          title: "chore(schemas): refresh bundle (terraform ${{ steps.tf.outputs.terraform }})"
+          branch: chore/weekly-bundle-refresh
+          delete-branch: true
+          body: |
+            Automated weekly bundle refresh — see
+            `.github/workflows/weekly-bundle-refresh.yml`.
+
+            ## What changed
+            ${{ steps.detect.outputs.diff }}
+
+            ## What this is
+
+            `cargo xtask resolve-latest` rewrote
+            `libs/knowledge/seed/manifest.toml` so each pin references the
+            highest stable version currently published in the Terraform
+            Registry. `cargo xtask capture-schemas` then ran
+            `terraform providers schema -json` against each new pin and
+            regenerated the bundled `libs/knowledge/seed/<provider>/<version>/schema.json`
+            files.
+
+            ## What this is NOT
+
+            * NOT a runtime change. Operators using `[profiles.<name>.schemas.pinned]`
+              keep getting their pinned versions — see RFC §4.3.
+            * NOT an Article VI exception. The binary ships with a concrete
+              pinned version (whatever `resolve-latest` resolved to at this
+              workflow run); the runtime never observes "latest".
+            * NOT auto-merged. CI must pass; a maintainer must approve.
+
+            ## Provider versions captured
+
+            * `terraform_version`: ${{ steps.tf.outputs.terraform }}
+
+            ## Constitution
+            * Article VI — pinning preserved (resolved at build time, frozen in binary)
+            * Article XII rule 4 — eval suite ran via `cargo test --workspace`; gate passes or this PR isn't open

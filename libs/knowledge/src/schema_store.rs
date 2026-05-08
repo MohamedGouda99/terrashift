@@ -34,6 +34,11 @@ pub trait SchemaStore: Send + Sync {
     /// List all cached versions for a provider, sorted descending (newest first).
     async fn list_versions(&self, provider: &str) -> Result<Vec<String>, SchemaError>;
 
+    /// List every provider with at least one cached schema, sorted alphabetically.
+    /// Used by `terrashift schema list` to enumerate the cache without a
+    /// hardcoded provider list (Surprise S-4 in the schema-source-migration RFC).
+    async fn list_providers(&self) -> Result<Vec<String>, SchemaError>;
+
     /// Search the mappings corpus by free-text query. Stage 1: returns empty
     /// (RAG implementation arrives in S17). API stable so Mapper can compile.
     async fn search_mappings(

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "captured_at": "2026-05-07T18:57:58.177861100+00:00",
+  "terraform_version": "1.13.5",
+  "entries": [
+    {
+      "schema_id": "aws@5.30.0",
+      "provider": "aws",
+      "version": "5.30.0",
+      "sha256": "431cc73d54cc6bab731fb7a154480f0ef5cfa22eeef9843302119c5caf8448fc",
+      "size_bytes": 99346,
+      "uncompressed_size_bytes": 3035464
+    },
+    {
+      "schema_id": "azurerm@3.110.0",
+      "provider": "azurerm",
+      "version": "3.110.0",
+      "sha256": "c5727a4506778b093c3dba59b2af2e99ad9848700b5bf52de6a950df2285a09d",
+      "size_bytes": 83691,
+      "uncompressed_size_bytes": 2619466
+    },
+    {
+      "schema_id": "google@5.45.2",
+      "provider": "google",
+      "version": "5.45.2",
+      "sha256": "7669e5be078368df1d848bb4623e500e8ac7a16f03806eea6bbad7e84dc24214",
+      "size_bytes": 193219,
+      "uncompressed_size_bytes": 2858748
+    }
+  ]
+}

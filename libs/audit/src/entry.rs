@@ -104,6 +104,29 @@ pub enum AuditPayload {
         kind: FileOpKind,
         backup_path: Option<PathBuf>,
     },
+
+    /// Provider schema captured via the `terraform providers schema -json`
+    /// subprocess. One entry per (provider, version) per capture invocation.
+    ///
+    /// Per Article V: every schema in the system is traceable to who captured
+    /// it, when, against which Terraform version, and with which constraint
+    /// expansion. Reviewers can answer "where did the AWS 5.30.0 schema in
+    /// this run come from?" deterministically.
+    ///
+    /// Per Article VI: `version_constraint` records what the user asked for
+    /// (e.g. `"~> 5.30"`); `resolved_version` records what was actually
+    /// captured (e.g. `"5.30.4"`). The pair is the audit trail for any
+    /// "did this migration use the same schema as the prior run?" question.
+    SchemaCapture {
+        provider: String,           // e.g. "aws"
+        source: String,             // e.g. "hashicorp/aws"
+        version_constraint: String, // e.g. "~> 5.30"
+        resolved_version: String,   // e.g. "5.30.4"
+        terraform_version: String,  // e.g. "1.7.5"
+        captured_via: CaptureVia,
+        sha256: String, // 64-char lowercase hex of the captured schema.json
+        duration_ms: u32,
+    },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -112,6 +135,23 @@ pub enum FileOpKind {
     Create,
     Modify,
     Delete,
+}
+
+/// How a `SchemaCapture` was triggered. Recorded in the audit log so
+/// reviewers can distinguish "this schema came with the binary" from
+/// "the operator ran `terrashift schema update`" from "the auto-update
+/// flow swapped this in" — three different trust contexts.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(tag = "via", rename_all = "snake_case")]
+pub enum CaptureVia {
+    /// Captured at `cargo build --release` via the xtask; bundled with the
+    /// release binary and extracted into `~/.terrashift/schemas/` on first run.
+    Bundled,
+    /// Captured by an explicit `terrashift schema update` invocation.
+    UserCommand,
+    /// Captured by the background auto-update flow during `terrashift migrate`
+    /// startup; user authorization required before swap (Article VI).
+    AutoUpdate,
 }
 
 impl AuditEntry {

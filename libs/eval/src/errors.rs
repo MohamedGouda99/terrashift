@@ -67,4 +67,16 @@ pub enum EvalError {
     /// Used for diagnostics, not test failure.
     #[error("comparison error at fixture '{name}': {detail}")]
     Comparison { name: String, detail: String },
+
+    /// A `required_schemas` entry has no matching file in the eval
+    /// fixture's `.schema-cache/`. Reusing `MissingFixtureFile` is not an
+    /// option because that variant's `missing` field is `&'static str`;
+    /// the schema id is constructed at runtime as `<provider>@<version>`.
+    /// RFC schema-source-migration §OQ-5.
+    #[error(
+        "golden fixture at '{fixture}' requires schema '{schema_id}' \
+         which is not present in the eval schema cache — run: \
+         cargo xtask capture-eval-schemas"
+    )]
+    MissingSchema { fixture: PathBuf, schema_id: String },
 }

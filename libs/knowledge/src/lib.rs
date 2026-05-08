@@ -36,16 +36,19 @@
 //! Pattern: terrashift_plan.md §7 (Knowledge Service multi-tier architecture).
 //! Constitution: Article VI (version pinning), XII rule 2 (cache-first).
 
+pub mod cache;
 pub mod embedding;
 pub mod errors;
 pub mod knowledge_service;
 pub mod local_schema_store;
+pub mod manifest;
 pub mod registry_client;
 pub mod schema_fetcher_cli;
 pub mod schema_store;
 pub mod types;
 pub mod vector_store;
 
+pub use cache::RuntimeSchemaCache;
 pub use embedding::{
     EmbeddingError, EmbeddingService, StubEmbeddingService, DEFAULT_EMBEDDING_DIM,
 };
@@ -54,6 +57,7 @@ pub use knowledge_service::{
     FetchOutcome, FirstLaunchReport, KnowledgeError, KnowledgeService, ResourceMatch,
 };
 pub use local_schema_store::LocalSchemaStore;
+pub use manifest::{RuntimeManifest, RuntimeManifestEntry, SCHEMA_VERSION};
 pub use registry_client::{
     ProviderMetadata, ProviderVersionEntry, ProviderVersions, RegistryError, SchemaFetcher,
     StubSchemaFetcher, TerraformRegistryClient,

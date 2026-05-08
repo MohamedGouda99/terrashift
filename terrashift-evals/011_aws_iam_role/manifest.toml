@@ -4,3 +4,6 @@ source_provider = "google"
 target_provider = "aws"
 token_cost_ceiling_micros = 0
 articles = [3, 6]
+required_schemas = [
+  { provider = "aws", version = "5.30.0" },
+]

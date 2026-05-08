@@ -21,6 +21,7 @@ members = [
     "libs/mcp/server",
     "libs/mcp/proxy",
     "libs/mcp/config",
+    "xtask",
 ]
 
 [workspace.package]
@@ -81,8 +82,21 @@ hcl-rs = "0.18"
 # Filesystem walking (Scanner P-04)
 walkdir = "2"
 
-# Vector store (embedded, file-based; for RAG — Stage 3+)
-lancedb = "0.10"
+# Concurrent map for hot-path schema cache (RuntimeSchemaCache).
+# Replaces RwLock<HashMap> when reads dominate writes — every migration is
+# read-heavy (Validator + Mapper hit the cache N+ times per resource).
+dashmap = "6"
+
+# Compression for the eval-fixture schema cache (per RFC §5.2).
+# zstd-19 hits ~10× compression on typed provider-schema JSON, keeping
+# `terrashift-evals/.schema-cache/*.json.zst` git-tractable.
+zstd = "0.13"
+
+# Semver comparison for bundled-pin resolution.
+# Lexicographic max returns the wrong answer for `5.10.0 vs 5.9.0`; this
+# crate's typed Version + Prerelease filter is what `cargo xtask resolve-latest`
+# and `refresh-eval-schemas` use to pick "highest stable" deterministically.
+semver = "1"
 
 # Database
 sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "sqlite", "macros", "chrono", "uuid"] }

@@ -49,6 +49,21 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo test --workspace
 
+  # RFC schema-source-migration §5.4 Job A — eval schema cache integrity.
+  # Recomputes SHA-256 of every entry in terrashift-evals/.schema-cache/,
+  # compares with the manifest. Runs before the eval suite so a corrupt
+  # schema cache surfaces as a verify failure rather than a confusing
+  # downstream eval error.
+  verify-eval-schemas:
+    name: verify-eval-schemas (RFC §5.4 Job A)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: SHA-256 audit of eval schema cache
+        run: cargo xtask verify-eval-schemas
+
   # Article XII rule 4 — token cost regression gate.
   # P-12 (libs/eval) shipped in commit 311b12c, R6 (commit <hash>) added
   # the active baseline + regression gate. Stage 1 baseline is all-zero
@@ -57,12 +72,13 @@ jobs:
   #
   # The `baseline_test` integration test inside the suite IS the gate:
   # `us3_running_suite_against_stage1_baseline_passes` runs the full
-  # 10-golden suite + loads `terrashift-evals/eval-baseline.json` +
+  # 13-golden suite + loads `terrashift-evals/eval-baseline.json` +
   # asserts `compare_against_baseline(report, baseline, Lenient).verdict
   # == Pass`. CI fails when that test fails — i.e., when token cost
   # regresses >30% against the committed baseline.
   eval:
     name: eval (golden suite + Article XII rule 4 regression gate)
+    needs: verify-eval-schemas
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

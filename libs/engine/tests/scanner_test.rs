@@ -210,7 +210,13 @@ fn skips_dot_terraform_and_hidden_dirs() {
 
 #[test]
 fn nonexistent_root_returns_io_error() {
-    let bogus = std::path::PathBuf::from("C:/this/path/does/not/exist/anywhere");
+    // Build a path inside a fresh tempdir that we never create. tempdir
+    // resolves to the OS-appropriate root (so this works on Windows + Linux
+    // + macOS); the joined subpath is pure path arithmetic, not OS-shaped
+    // string literals (Article IV: failures must be loud REGARDLESS of
+    // which OS the contributor is testing on).
+    let dir = tempfile::tempdir().unwrap_or_else(|e| panic!("tempdir: {e}"));
+    let bogus = dir.path().join("definitely-not-a-real-subdir");
     let err = Scanner::scan(&bogus)
         .err()
         .unwrap_or_else(|| panic!("expected error for nonexistent root"));
