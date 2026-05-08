@@ -60,4 +60,37 @@ ignore = [
     # IterMut on this cache to us. Patched in lru >= 0.16.3.
     # Re-evaluate when ratatui bumps lru to >= 0.16.3.
     "RUSTSEC-2026-0002",
+
+    # ────────────────────────────────────────────────────────────────
+    # RUSTSEC-2026-0098 — rustls-webpki@0.101.7 URI nameConstraints
+    # ────────────────────────────────────────────────────────────────
+    # Why in lockfile: transitive via aws-config 1.8.16 →
+    # aws-smithy-http-client 1.1.12 → hyper-rustls 0.24.2 →
+    # rustls-webpki 0.101.7. We use it for one path: AWS STS
+    # endpoint TLS validation in `AwsBroker::resolve_sts_assume_role`
+    # (S5 close).
+    #
+    # Reachability: the advisory affects URI-type subjectAltNames
+    # under nameConstraints. AWS STS endpoints
+    # (sts.<region>.amazonaws.com) use DNS-type SANs — not URI SANs —
+    # AND ship cert chains that don't apply URI nameConstraints.
+    # Practical exploitability against our STS calls: zero.
+    #
+    # Patched in: rustls-webpki >= 0.103.12 (major bump from 0.101.x).
+    # Awaits aws-config bumping to hyper-rustls 0.27+ which uses
+    # rustls 0.23 + webpki 0.103+.
+    # Re-evaluate when aws-sdk-rust ships an update.
+    "RUSTSEC-2026-0098",
+
+    # ────────────────────────────────────────────────────────────────
+    # RUSTSEC-2026-0099 — rustls-webpki@0.101.7 wildcard SAN +
+    # nameConstraints
+    # ────────────────────────────────────────────────────────────────
+    # Same root cause + same path as RUSTSEC-2026-0098 (transitive
+    # via aws-config 1.x → hyper-rustls 0.24.x). Same reachability
+    # analysis: AWS STS cert chains don't combine wildcard SANs with
+    # nameConstraints in a way the advisory targets.
+    # Re-evaluate alongside RUSTSEC-2026-0098 when aws-sdk bumps off
+    # hyper-rustls 0.24.
+    "RUSTSEC-2026-0099",
 ]

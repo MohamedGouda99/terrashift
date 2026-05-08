@@ -166,12 +166,22 @@ fn pre_llm_check_error_does_not_leak_raw_value() {
 // ─────────────────────────────────────────────────────────────────
 
 #[tokio::test]
-async fn aws_broker_returns_not_implemented_until_s5() {
+async fn aws_broker_legacy_fetch_aws_points_to_new_api() {
+    // S5 close: the legacy single-Credential `fetch_aws` is preserved
+    // as `NotImplementedYet` because STS naturally returns 3 values
+    // (access_key + secret + session_token) which don't fit the
+    // single-string Credential shape. New code calls
+    // `AwsBroker::resolve_sts_assume_role` (returns
+    // CloudCredentialEnvVars). The error message points the caller
+    // at the new API.
     let broker = AwsBroker::new();
     let err = broker.fetch_aws("test-role").await.unwrap_err();
     match err {
         CredsError::NotImplementedYet { which, session } => {
-            assert_eq!(which, "aws_sts_assume_role");
+            assert!(
+                which.contains("resolve_sts_assume_role"),
+                "error should redirect callers to the new multi-var API; got which='{which}'"
+            );
             assert_eq!(session, "S5");
         }
         other => panic!("expected NotImplementedYet, got {other:?}"),
