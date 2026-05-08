@@ -49,4 +49,30 @@ pub enum ExecutorError {
     /// Wrapped audit-store error. Boxed for clippy `result_large_err`.
     #[error("audit append failed: {0}")]
     Audit(Box<terrashift_audit::AuditError>),
+
+    /// Caller passed an empty `command` slice to a `SubprocessRunner`.
+    /// Article IV: surface immediately rather than silently no-op.
+    #[error("subprocess runner received empty command slice")]
+    EmptyCommand,
+
+    /// `tokio::process::Command::spawn` failed (program not found,
+    /// permission denied, fork limit hit, etc.).
+    #[error("spawn failed for program '{program}': {source}")]
+    SpawnFailed {
+        program: String,
+        #[source]
+        source: std::io::Error,
+    },
+
+    /// `Child::stdout` / `Child::stderr` was already consumed or
+    /// not piped. Should never happen given our spawn config — kept
+    /// loud per Article IV.
+    #[error("subprocess pipe '{stream}' was unexpectedly None")]
+    PipeUnavailable { stream: &'static str },
+
+    /// Subprocess returned a non-zero exit code that the caller
+    /// considers fatal. Caller decides per-command (e.g. `terraform
+    /// plan` returns 2 on changes-detected, which is fine).
+    #[error("subprocess '{program}' exited with code {exit_code} (treated as failure)")]
+    NonZeroExit { program: String, exit_code: i32 },
 }
