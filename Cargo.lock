@@ -3019,6 +3019,7 @@ dependencies = [
  "terrashift-knowledge",
  "terrashift-notify",
  "terrashift-shared",
+ "terrashift-shell-tool-approvals",
  "terrashift-tui",
  "tokio",
  "tokio-util",

@@ -42,6 +42,10 @@ enum Command {
     /// Migrate Terraform from one provider to another.
     Migrate(commands::migrate::Args),
 
+    /// Run `terraform plan` (+ optionally `apply`) against migrated HCL.
+    /// Default: Docker-isolated; `--approve` actually deploys.
+    Apply(commands::apply::Args),
+
     /// Schema cache operations (list / update / show / verify / gc).
     #[command(subcommand)]
     Schema(commands::schema::Cmd),
@@ -77,6 +81,7 @@ async fn run() -> Result<()> {
         Some(Command::Version) => print_version(),
         Some(Command::Migrate(args)) => commands::migrate::run(args, cli.profile).await?,
         Some(Command::Schema(cmd)) => commands::schema::run(cmd, cli.profile).await?,
+        Some(Command::Apply(args)) => commands::apply::run(args, cli.profile).await?,
         Some(Command::Scan(args)) => commands::scan::run(args).await?,
         None => launch_tui(cli.profile).await?,
     }

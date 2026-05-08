@@ -6,6 +6,7 @@
 //! over the corresponding lib crate(s) — the constitution's "thin
 //! CLI, fat libs" rule.
 
+pub mod apply;
 pub mod migrate;
 pub mod scan;
 pub mod schema;
