@@ -2,21 +2,30 @@
 // SPDX-License-Identifier: LicenseRef-Terrashift-Source-Available-1.0
 // See LICENSE file in the project root for full license information.
 
-//! `terrashift migrate` — run the Scanner → Mapper → Generator pipeline.
+//! `terrashift migrate` — run the Scanner → Mapper → Validator → Generator pipeline.
 //!
-//! Stage 2 narrowing: skips Validator + Recovery + Executor for now.
-//! Validator integration lands when KnowledgeService schema versions
-//! are pinned to real Terraform-registry pulls (run `terrashift
-//! schemas sync` first to populate). Executor integration lands at
-//! S5-close once Docker + cloud creds are wired.
+//! r07-mvp-closure (this PR): wired Validator into the pipeline. The
+//! prior "Stage 2 narrowing" deferred Validator until real
+//! Terraform-registry pulls were cached in `KnowledgeService`. PR #6
+//! (feat/schema-source-migration) satisfied that precondition by
+//! shipping the bundled flat-per-version seed populated via
+//! `cargo xtask capture-schemas`. Article III gate is now load-bearing
+//! on the migrate path: Mapper → Validator → Generator. Per-resource
+//! Validator errors land in the "skipped (gaps)" section of the
+//! migration summary.
+//!
+//! Executor integration lands at S5-close once Docker + cloud creds are wired.
 
 use anyhow::{Context, Result};
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 use tempfile::TempDir;
 use terrashift_ai::Tier;
 use terrashift_engine::generator::Generator;
 use terrashift_engine::mapper::{Mapper, MapperCache, PassthroughContextReducer};
 use terrashift_engine::scanner::Scanner;
+use terrashift_engine::validator::{ValidationError, Validator};
 
 use super::util::{build_knowledge_service, build_llm_client, load_profile, resolve_profile_path};
 
@@ -59,7 +68,9 @@ pub async fn run(args: Args, profile_path: Option<PathBuf>) -> Result<()> {
     println!("🤖 LLM tier: {tier:?} (model resolved from profile)\n");
 
     // ─── 2. Build KnowledgeService (loads seed) ──────────────────────
-    let knowledge = build_knowledge_service().await?;
+    // Wrap in Arc since both Mapper (via &) and Validator (via Arc clone)
+    // consume it. Article III gate is now on the migrate path.
+    let knowledge = Arc::new(build_knowledge_service().await?);
 
     // ─── 3. Scan source ──────────────────────────────────────────────
     println!("📂 Scanning {} ...", args.source.display());
@@ -91,6 +102,48 @@ pub async fn run(args: Args, profile_path: Option<PathBuf>) -> Result<()> {
         .await
         .context("Mapper LLM round-trip")?;
     let elapsed = started.elapsed();
+
+    // ─── 4b. Validator (Article III gate) ───────────────────────────
+    // r07-mvp-closure: wire Validator into the migrate path. Skips when
+    // the schema cache has no entry for the target provider (graceful
+    // degradation per Mapper clarify Q2; downstream Generator still
+    // emits whatever it can).
+    let target_version = knowledge
+        .schema_store
+        .list_versions(&args.to_provider)
+        .await
+        .ok()
+        .and_then(|v| v.into_iter().next());
+    let validator_errors_by_addr: HashMap<String, Vec<ValidationError>> = match &target_version {
+        Some(ver) => {
+            let validator = Validator::new(Arc::clone(&knowledge));
+            match validator.validate(&plan, ver).await {
+                Ok(report) => {
+                    let mut by_addr: HashMap<String, Vec<ValidationError>> = HashMap::new();
+                    for err in report.errors {
+                        by_addr
+                            .entry(addr_of_validation_error(&err).to_string())
+                            .or_default()
+                            .push(err);
+                    }
+                    by_addr
+                }
+                Err(e) => {
+                    println!(
+                        "⚠ Validator infrastructure error (proceeding without Article III gate): {e}"
+                    );
+                    HashMap::new()
+                }
+            }
+        }
+        None => {
+            println!(
+                "⚠ No cached schema for target provider '{}' — Validator skipped (Article III gate not active for this run). Run `terrashift schema update --provider {} --version <X>` to populate.",
+                args.to_provider, args.to_provider
+            );
+            HashMap::new()
+        }
+    };
 
     println!(
         "✓ Mapper returned {} target resource(s) in {:.1}s\n",
@@ -147,6 +200,20 @@ pub async fn run(args: Args, profile_path: Option<PathBuf>) -> Result<()> {
     let mut skipped: Vec<(String, String)> = Vec::new();
 
     for r in &plan.resources {
+        // Article III gate: if Validator flagged this resource, skip emission
+        // and report the gap. Recovery agent (S10) is what closes these by
+        // re-prompting the Mapper with the gap context; Stage 1 reports them.
+        if let Some(errs) = validator_errors_by_addr.get(&r.target_addr) {
+            // Surface the first error for the summary; chain is preserved
+            // in the full ValidatorReport for future Recovery use.
+            let first = errs
+                .first()
+                .map(|e| e.to_string())
+                .unwrap_or_else(|| "Validator: unknown error".to_string());
+            skipped.push((r.target_addr.clone(), format!("Validator — {first}")));
+            continue;
+        }
+
         let single_plan = terrashift_engine::mapper::MappingPlan {
             run_id: plan.run_id,
             source_provider: plan.source_provider.clone(),
@@ -174,7 +241,7 @@ pub async fn run(args: Args, profile_path: Option<PathBuf>) -> Result<()> {
                 }
             }
             Err(err) => {
-                skipped.push((r.target_addr.clone(), err.to_string()));
+                skipped.push((r.target_addr.clone(), format!("Generator — {err}")));
             }
         }
     }
@@ -208,6 +275,18 @@ pub async fn run(args: Args, profile_path: Option<PathBuf>) -> Result<()> {
     let _ = output_was_explicit;
 
     Ok(())
+}
+
+/// Pull the resource address out of any `ValidationError` variant.
+/// All current variants carry `addr: String` as the first field; this
+/// helper centralises the projection so adding a new variant doesn't
+/// silently break per-resource attribution.
+fn addr_of_validation_error(err: &ValidationError) -> &str {
+    match err {
+        ValidationError::UnknownResourceType { addr, .. } => addr,
+        ValidationError::UnknownAttribute { addr, .. } => addr,
+        ValidationError::MissingRequiredAttribute { addr, .. } => addr,
+    }
 }
 
 /// Compute the default output directory for a migration when the user
