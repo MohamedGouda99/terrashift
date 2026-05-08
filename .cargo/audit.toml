@@ -93,4 +93,19 @@ ignore = [
     # Re-evaluate alongside RUSTSEC-2026-0098 when aws-sdk bumps off
     # hyper-rustls 0.24.
     "RUSTSEC-2026-0099",
+
+    # ────────────────────────────────────────────────────────────────
+    # RUSTSEC-2026-0104 — rustls-webpki@0.101.7 reachable panic in
+    # certificate revocation list (CRL) parsing
+    # ────────────────────────────────────────────────────────────────
+    # Same crate + same lockfile path as 0098/0099 (aws-config 1.x →
+    # hyper-rustls 0.24.x → rustls-webpki 0.101.7). The advisory
+    # affects the CRL-parsing path. Reachability for our use case:
+    # AWS STS endpoints don't ship CRLs in the cert chain — STS uses
+    # OCSP-stapled validation via the AWS-managed CAs. The CRL
+    # parsing code path is therefore not exercised against
+    # legitimate STS responses.
+    # Patched in: rustls-webpki >= 0.103.13. Re-evaluate alongside
+    # 0098/0099 when aws-sdk bumps off hyper-rustls 0.24.
+    "RUSTSEC-2026-0104",
 ]
