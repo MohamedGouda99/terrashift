@@ -48,6 +48,46 @@ The "Conventions" section maps to the project's internal governance rules
 loud failure, no `unwrap` / `expect` in production code, etc.). Maintainers
 will help reviewers identify which convention applies if you're new.
 
+## Branch naming conventions
+
+Use Conventional-Commits-prefixed slugs. Pattern: `<type>/<slug>` where
+`<type>` matches the commit-type vocabulary below and `<slug>` is a
+short kebab-case description (≤4 hyphenated words).
+
+| Branch prefix | When to use | Example |
+|---|---|---|
+| `feat/<slug>` | New user-visible feature | `feat/r07-mvp-closure` |
+| `fix/<slug>` | Bug fix on a non-blocking issue | `fix/install-path-windows` |
+| `refactor/<slug>` | Pure refactor; no behaviour change | `refactor/scanner-walkdir` |
+| `chore/<slug>` | Dependency bumps, CI hygiene, repo plumbing | `chore/audit-rustsec-bumps` |
+| `docs/<slug>` | Documentation-only changes | `docs/onboarding-macos` |
+| `spec/<slug>` | Spec Kit cycle artifacts only | `spec/s5-close-executor` |
+| `dependabot/...` | Dependabot-managed (don't rename) | `dependabot/cargo/...` |
+
+**Rules:**
+
+- Branch name MUST start with one of the prefixes above (or `dependabot/` for bot PRs).
+- Slugs use lowercase + hyphens; no underscores, no slashes (other than the prefix separator).
+- For Spec-Kit-driven work tied to a P-NN prompt, the slug starts with the prompt code: `feat/p05-mapper`, `feat/p10-credential-broker`.
+- Do not rebrand existing branches; convention applies going forward.
+- The pre-push hook does NOT enforce branch names today (manual review). If naming drift accumulates we'll add a hook.
+
+## Release tags
+
+Tags are `vMAJOR.MINOR.PATCH` (semver). The release pipeline at
+`.github/workflows/release.yml` triggers on `v*` tag pushes, builds
+Linux + macOS binaries, and publishes a GitHub Release.
+
+| Increment | When to bump |
+|---|---|
+| MAJOR | Breaking CLI/profile/config changes |
+| MINOR | New features (e.g., new cloud provider, new agent) |
+| PATCH | Bug fixes + install / docs / dependency hygiene |
+
+Stage gates from `docs/governance/SESSION_PLAN.md` map to MINOR
+versions: Stage 1 MVP → 0.1.x, Stage 2 agentic → 0.2.x, Stage 3
+multi-cloud → 0.3.x, etc.
+
 ## Commit message conventions
 
 Conventional Commits with these scopes:
