@@ -63,6 +63,20 @@ impl TemplateRegistry {
         by_type.insert("aws_iam_role", template_aws_iam_role);
         by_type.insert("google_storage_bucket", template_google_storage_bucket);
 
+        // GCP target parity with AWS + Azure (Stage 3 / S16 + S20 prep).
+        // Covers the canonical 5-resource networking-and-compute set so
+        // aws→google and azurerm→google migrations have the same template
+        // surface area as aws→azurerm. Nested-block emission (boot_disk,
+        // network_interface, allow/deny rules) is Stage 5+ work; flat
+        // attributes ship now.
+        by_type.insert("google_compute_network", template_google_compute_network);
+        by_type.insert(
+            "google_compute_subnetwork",
+            template_google_compute_subnetwork,
+        );
+        by_type.insert("google_compute_firewall", template_google_compute_firewall);
+        by_type.insert("google_compute_instance", template_google_compute_instance);
+
         // Pratik-fixture E2E expansion — additional azurerm types the
         // Mapper proposes when migrating a real-world AWS VPC module.
         by_type.insert("azurerm_route_table", template_azurerm_route_table);
@@ -83,6 +97,14 @@ impl TemplateRegistry {
     /// Look up the template fn for a `target_type`. None means template-miss.
     pub fn template_for(&self, target_type: &str) -> Option<TemplateFn> {
         self.by_type.get(target_type).copied()
+    }
+
+    /// Iterate the registered `target_type` keys. Used by the Mapper to
+    /// build the `VALID TARGET TYPES` prompt block and to validate the
+    /// LLM-produced `MappedResource.target_type` against the supported
+    /// set before emitting (RFC r07-mvp-closure / FR-2 + FR-4).
+    pub fn registered_types(&self) -> impl Iterator<Item = &'static str> + '_ {
+        self.by_type.keys().copied()
     }
 
     /// How many templates are registered. Used by tests.
@@ -336,6 +358,87 @@ fn template_google_storage_bucket(r: &MappedResource) -> Result<Block, Generator
             "storage_class",
             "uniform_bucket_level_access",
             "versioning",
+        ],
+    )
+}
+
+/// GCP VPC — analog of `aws_vpc` and `azurerm_virtual_network`. Stage 1
+/// emits flat attributes; subnetworks are emitted as siblings via
+/// `template_google_compute_subnetwork`. Stage 5+ adds nested
+/// `subnet { … }` block emission for the `auto_create_subnetworks =
+/// false` + inline subnetwork pattern.
+fn template_google_compute_network(r: &MappedResource) -> Result<Block, GeneratorError> {
+    build_resource_block(
+        r,
+        &["name"],
+        &[
+            "description",
+            "auto_create_subnetworks",
+            "routing_mode",
+            "mtu",
+            "delete_default_routes_on_create",
+        ],
+    )
+}
+
+/// GCP subnet — analog of `aws_subnet` and `azurerm_subnet`. The required
+/// CIDR is `ip_cidr_range` (vs AWS `cidr_block`, vs Azure `address_prefixes`).
+fn template_google_compute_subnetwork(r: &MappedResource) -> Result<Block, GeneratorError> {
+    build_resource_block(
+        r,
+        &["name", "ip_cidr_range", "network", "region"],
+        &[
+            "description",
+            "private_ip_google_access",
+            "purpose",
+            "role",
+            "stack_type",
+            "ipv6_access_type",
+        ],
+    )
+}
+
+/// GCP firewall — analog of `aws_security_group` and `azurerm_network_security_group`.
+/// Stage 1 emits flat attributes only; the nested `allow {}` / `deny {}`
+/// blocks are deferred to Stage 5+ (dynamic blocks). Operators add rules
+/// via sibling `google_compute_firewall_rule` resources or the inline
+/// blocks once nested-block emission ships.
+fn template_google_compute_firewall(r: &MappedResource) -> Result<Block, GeneratorError> {
+    build_resource_block(
+        r,
+        &["name", "network"],
+        &[
+            "description",
+            "direction",
+            "priority",
+            "source_ranges",
+            "destination_ranges",
+            "source_tags",
+            "target_tags",
+            "disabled",
+            "log_config",
+        ],
+    )
+}
+
+/// GCP compute instance — analog of `aws_instance` and `azurerm_linux_virtual_machine`.
+/// Stage 1 emits flat attributes; the required `boot_disk { initialize_params { … } }`
+/// and `network_interface { … }` nested blocks are deferred to Stage 5+
+/// (dynamic blocks). Recovery agent (S10) typically gets the operator past
+/// the resulting `terraform validate` errors via `set_attribute` on the
+/// nested-block-as-flat-string fallback shape.
+fn template_google_compute_instance(r: &MappedResource) -> Result<Block, GeneratorError> {
+    build_resource_block(
+        r,
+        &["name", "machine_type", "zone"],
+        &[
+            "description",
+            "tags",
+            "labels",
+            "metadata_startup_script",
+            "can_ip_forward",
+            "deletion_protection",
+            "hostname",
         ],
     )
 }

@@ -38,4 +38,31 @@ pub enum MapperError {
     /// sneaking into `EstateInventory` later).
     #[error("inventory serialize: {0}")]
     Serialize(Box<serde_json::Error>),
+
+    /// LLM emitted a `MappedResource` with `target_type == ""`. Caught at
+    /// the Mapper boundary so the user sees a single named source resource
+    /// rather than a misleading `template miss for ''` two layers
+    /// downstream. Article IV. RFC r07-mvp-closure / FR-3.
+    #[error(
+        "Mapper produced empty target_type for source resource '{source_addr}' — \
+         rejected at parse time. Supported target types for this provider: {supported:?}"
+    )]
+    EmptyTargetType {
+        source_addr: String,
+        supported: Vec<String>,
+    },
+
+    /// LLM emitted a `target_type` outside `TemplateRegistry::stage1()`. The
+    /// Generator would `TemplateMiss` downstream; we catch it here with a
+    /// useful error that names the offending resource AND the supported set.
+    /// Article IV. RFC r07-mvp-closure / FR-4.
+    #[error(
+        "Mapper produced unsupported target_type '{target_type}' for source resource \
+         '{source_addr}'. Supported target types for this provider: {supported:?}"
+    )]
+    UnsupportedTargetType {
+        source_addr: String,
+        target_type: String,
+        supported: Vec<String>,
+    },
 }
