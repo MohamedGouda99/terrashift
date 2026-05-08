@@ -11,7 +11,7 @@
 //! S5-close once Docker + cloud creds are wired.
 
 use anyhow::{Context, Result};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use tempfile::TempDir;
 use terrashift_ai::Tier;
 use terrashift_engine::generator::Generator;
@@ -114,16 +114,23 @@ pub async fn run(args: Args, profile_path: Option<PathBuf>) -> Result<()> {
     }
 
     // ─── 5. Generator ───────────────────────────────────────────────
+    // r07-mvp-closure / FR-5: default-output is now `<source>-<target>/`
+    // next to the source, not a tempdir that disappears. Convention-over-
+    // configuration: matches the standard a user expects from a migration
+    // tool. Explicit `--output <path>` still wins.
     let output_was_explicit = args.output.is_some();
-    let (output_dir, _temp_holder) = match args.output.clone() {
+    let output_dir: PathBuf = match args.output.clone() {
         Some(p) => {
             std::fs::create_dir_all(&p)
                 .with_context(|| format!("create output dir {}", p.display()))?;
-            (p, None::<TempDir>)
+            p
         }
         None => {
-            let tmp = TempDir::new().context("create temp output dir")?;
-            (tmp.path().to_path_buf(), Some(tmp))
+            let p = default_output_for(&args.source, &args.to_provider);
+            std::fs::create_dir_all(&p)
+                .with_context(|| format!("create default output dir {}", p.display()))?;
+            println!("📁 No --output specified; defaulting to {}", p.display());
+            p
         }
     };
     let cwd_holder = TempDir::new().context("create temp cwd for backups")?;
@@ -196,16 +203,32 @@ pub async fn run(args: Args, profile_path: Option<PathBuf>) -> Result<()> {
         }
     }
 
-    if !output_was_explicit {
-        println!(
-            "\n💡 No --output specified; files were written to a temp dir that\n   \
-             will be deleted on exit. Re-run with --output <path> to keep them."
-        );
-        // Hold onto _temp_holder so files survive at least until the
-        // user reads the output. Drop happens at end of fn.
-    }
+    // r07-mvp-closure: no more "files disappear on exit" footnote. The
+    // default-output is now a real persistent path next to the source.
+    let _ = output_was_explicit;
 
     Ok(())
+}
+
+/// Compute the default output directory for a migration when the user
+/// doesn't pass `--output`. Convention: `<source-stem>-<target-provider>/`
+/// next to the source. Falls back to `./terrashift-output-<target>/` when
+/// the source's file_name is missing or trivial (`.`, `..`).
+///
+/// r07-mvp-closure / FR-5. Test cases pinned in `mod tests` below.
+fn default_output_for(source: &Path, target_provider: &str) -> PathBuf {
+    let stem = source.file_name().and_then(|s| s.to_str());
+    match stem {
+        Some(s) if !s.is_empty() && s != "." && s != ".." => {
+            let parent = source.parent().filter(|p| !p.as_os_str().is_empty());
+            let new_name = format!("{s}-{target_provider}");
+            match parent {
+                Some(p) => p.join(new_name),
+                None => PathBuf::from(format!("./{new_name}")),
+            }
+        }
+        _ => PathBuf::from(format!("./terrashift-output-{target_provider}")),
+    }
 }
 
 fn parse_tier(s: &str) -> Result<Tier> {
@@ -215,5 +238,62 @@ fn parse_tier(s: &str) -> Result<Tier> {
         other => Err(anyhow::anyhow!(
             "invalid --tier '{other}': expected 'eco' or 'smart'"
         )),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    //! r07-mvp-closure / FR-5: default-output convention pinned by tests.
+    use super::*;
+
+    #[test]
+    fn default_output_for_normal_relative_path() {
+        let p = default_output_for(Path::new("./aws-app"), "azurerm");
+        assert_eq!(p, PathBuf::from("./aws-app-azurerm"));
+    }
+
+    #[test]
+    fn default_output_for_relative_no_dot_prefix() {
+        let p = default_output_for(Path::new("aws-app"), "azurerm");
+        // No parent → ./aws-app-azurerm fallback.
+        assert_eq!(p, PathBuf::from("./aws-app-azurerm"));
+    }
+
+    #[test]
+    fn default_output_for_absolute_path() {
+        let p = default_output_for(Path::new("/home/user/aws-app"), "azurerm");
+        assert_eq!(p, PathBuf::from("/home/user/aws-app-azurerm"));
+    }
+
+    #[test]
+    fn default_output_for_dot_uses_terrashift_output_fallback() {
+        let p = default_output_for(Path::new("."), "azurerm");
+        assert_eq!(p, PathBuf::from("./terrashift-output-azurerm"));
+    }
+
+    #[test]
+    fn default_output_for_dotdot_uses_fallback() {
+        let p = default_output_for(Path::new(".."), "azurerm");
+        assert_eq!(p, PathBuf::from("./terrashift-output-azurerm"));
+    }
+
+    #[test]
+    fn default_output_for_target_provider_appears_in_name() {
+        // For each provider we support, the default-output name should
+        // contain the provider key.
+        for tp in ["azurerm", "aws", "google"] {
+            let p = default_output_for(Path::new("./tf-tree"), tp);
+            assert!(
+                p.to_string_lossy().contains(tp),
+                "default output for target '{tp}' should contain '{tp}', got {p:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn default_output_for_path_with_trailing_slash() {
+        // PathBuf::file_name() drops the trailing slash naturally.
+        let p = default_output_for(Path::new("./aws-app/"), "azurerm");
+        assert_eq!(p, PathBuf::from("./aws-app-azurerm"));
     }
 }

@@ -45,6 +45,7 @@ pub use errors::MapperError;
 // importing libs/engine.
 pub use terrashift_agent_core::{ContextReducer, Message, PassthroughContextReducer, Role};
 
+use crate::generator::templates::TemplateRegistry;
 use crate::scanner::EstateInventory;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
@@ -144,9 +145,20 @@ impl Mapper {
             knowledge_hits.push((source_type, hits));
         }
 
+        // r07-mvp-closure / FR-1, FR-2: prompt context-injection.
+        // Build the per-target-provider supported-target-type set and
+        // (when cached) the per-target-type required-attributes hint.
+        let supported_types = supported_types_for(&self.target_provider);
+        let target_schema = lookup_target_schema(knowledge, &self.target_provider).await;
+
         // Build the prompt + route through the reducer. Article XIII
         // rule 1: the `reducer.reduce` call is non-optional on this
         // path; the type system makes bypass impossible.
+        let system_prompt = prompt::build_system_prompt(
+            &self.target_provider,
+            target_schema.as_ref(),
+            &supported_types,
+        );
         let user_prompt = prompt::build_user_prompt(
             &self.source_provider,
             &self.target_provider,
@@ -156,7 +168,7 @@ impl Mapper {
         let messages = vec![
             Message {
                 role: Role::System,
-                content: prompt::SYSTEM_PROMPT.to_string(),
+                content: system_prompt,
             },
             Message {
                 role: Role::User,
@@ -201,9 +213,74 @@ impl Mapper {
             }
         })?;
 
+        // r07-mvp-closure / FR-3, FR-4: post-parse validation. Reject empty
+        // and unsupported target_types at the Mapper boundary so users get
+        // a single named error per offending source resource, not a confusing
+        // `template miss for ''` two layers downstream.
+        validate_plan(&plan, &supported_types)?;
+
         cache.insert(key, plan.clone());
         Ok(plan)
     }
+}
+
+/// Build the supported-target-type set for the given target provider.
+/// Filters `TemplateRegistry::stage1()` keys by `<target_provider>_` prefix.
+/// r07-mvp-closure / FR-2.
+fn supported_types_for(target_provider: &str) -> Vec<String> {
+    let registry = TemplateRegistry::stage1();
+    let prefix = format!("{target_provider}_");
+    registry
+        .registered_types()
+        .filter(|k| k.starts_with(&prefix))
+        .map(|k| k.to_string())
+        .collect()
+}
+
+/// Best-effort lookup of the target provider's schema from the cache.
+/// Returns `None` (graceful degradation per r07-mvp-closure clarify Q2)
+/// when the cache has no entry — the prompt builder omits the
+/// REQUIRED ATTRIBUTES block in that case.
+async fn lookup_target_schema(
+    knowledge: &KnowledgeService,
+    target_provider: &str,
+) -> Option<terrashift_knowledge::ProviderSchema> {
+    // Method calls on `Arc<dyn SchemaStore>` resolve through the vtable,
+    // so the trait doesn't need to be in scope here.
+    let versions = knowledge
+        .schema_store
+        .list_versions(target_provider)
+        .await
+        .ok()?;
+    let version = versions.into_iter().next()?;
+    knowledge
+        .schema_store
+        .fetch_provider_schema(target_provider, &version)
+        .await
+        .ok()
+}
+
+/// Validate a parsed `MappingPlan` against the supported-target-type set.
+/// Returns the first error encountered (no aggregation — Mapper is
+/// fail-fast at this boundary; Recovery agent S10 handles per-resource
+/// retries). r07-mvp-closure / FR-3, FR-4.
+fn validate_plan(plan: &MappingPlan, supported_types: &[String]) -> Result<(), MapperError> {
+    for r in &plan.resources {
+        if r.target_type.is_empty() {
+            return Err(MapperError::EmptyTargetType {
+                source_addr: r.source_addr.clone(),
+                supported: supported_types.to_vec(),
+            });
+        }
+        if !supported_types.iter().any(|t| t == &r.target_type) {
+            return Err(MapperError::UnsupportedTargetType {
+                source_addr: r.source_addr.clone(),
+                target_type: r.target_type.clone(),
+                supported: supported_types.to_vec(),
+            });
+        }
+    }
+    Ok(())
 }
 
 /// Truncate a string at a UTF-8 boundary near `max_bytes`. Matches
@@ -352,4 +429,137 @@ pub enum MapperLookupError {
         attr: String,
         expected: &'static str,
     },
+}
+
+#[cfg(test)]
+mod tests {
+    //! r07-mvp-closure tests: validate_plan + supported_types_for + the
+    //! Mapper-side rejection of empty / unsupported target_types.
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
+
+    use super::*;
+
+    fn synthetic_plan(resources: Vec<MappedResource>) -> MappingPlan {
+        MappingPlan {
+            run_id: Uuid::new_v4(),
+            source_provider: "aws".to_string(),
+            target_provider: "azurerm".to_string(),
+            resources,
+        }
+    }
+
+    fn synthetic_resource(source_addr: &str, target_type: &str) -> MappedResource {
+        MappedResource {
+            source_addr: source_addr.to_string(),
+            target_addr: format!("{target_type}.synthetic"),
+            target_type: target_type.to_string(),
+            target_name: "synthetic".to_string(),
+            attributes: BTreeMap::new(),
+            dependencies: Vec::new(),
+        }
+    }
+
+    #[test]
+    fn supported_types_for_azurerm_includes_template_registry_keys() {
+        let supported = supported_types_for("azurerm");
+        // Per templates.rs:50-78, azurerm has at least 5 templates registered.
+        assert!(
+            supported.len() >= 5,
+            "expected ≥5 azurerm templates, got {} ({:?})",
+            supported.len(),
+            supported
+        );
+        assert!(supported.iter().any(|t| t == "azurerm_virtual_network"));
+        assert!(supported.iter().any(|t| t == "azurerm_subnet"));
+        assert!(supported
+            .iter()
+            .any(|t| t == "azurerm_linux_virtual_machine"));
+        assert!(supported.iter().any(|t| t == "azurerm_storage_account"));
+        // Should NOT include the deprecated azurerm_virtual_machine the LLM
+        // sometimes emits — that's the whole point of FR-4.
+        assert!(
+            !supported.iter().any(|t| t == "azurerm_virtual_machine"),
+            "deprecated azurerm_virtual_machine should NOT be in the registry"
+        );
+    }
+
+    #[test]
+    fn supported_types_for_aws_includes_template_registry_keys() {
+        let supported = supported_types_for("aws");
+        assert!(supported.iter().any(|t| t == "aws_vpc"));
+        assert!(supported.iter().any(|t| t == "aws_s3_bucket"));
+    }
+
+    #[test]
+    fn supported_types_for_unknown_provider_is_empty() {
+        // No templates registered for `tencentcloud_*`. Returns empty —
+        // Mapper graceful behaviour: prompt will warn, validation will
+        // reject every output. This is the right Stage 1 posture.
+        let supported = supported_types_for("tencentcloud");
+        assert!(supported.is_empty());
+    }
+
+    #[test]
+    fn validate_plan_rejects_empty_target_type() {
+        let plan = synthetic_plan(vec![synthetic_resource("aws_vpc.main", "")]);
+        let supported = vec!["azurerm_virtual_network".to_string()];
+        let err = validate_plan(&plan, &supported).unwrap_err();
+        match err {
+            MapperError::EmptyTargetType { source_addr, .. } => {
+                assert_eq!(source_addr, "aws_vpc.main");
+            }
+            other => panic!("expected EmptyTargetType, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn validate_plan_rejects_unsupported_target_type() {
+        // The deprecated `azurerm_virtual_machine` — exactly the failure
+        // mode the e2e test surfaced.
+        let plan = synthetic_plan(vec![synthetic_resource(
+            "aws_instance.app",
+            "azurerm_virtual_machine",
+        )]);
+        let supported = vec!["azurerm_linux_virtual_machine".to_string()];
+        let err = validate_plan(&plan, &supported).unwrap_err();
+        match err {
+            MapperError::UnsupportedTargetType {
+                source_addr,
+                target_type,
+                supported: s,
+            } => {
+                assert_eq!(source_addr, "aws_instance.app");
+                assert_eq!(target_type, "azurerm_virtual_machine");
+                assert_eq!(s, vec!["azurerm_linux_virtual_machine".to_string()]);
+            }
+            other => panic!("expected UnsupportedTargetType, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn validate_plan_accepts_supported_target_types() {
+        let plan = synthetic_plan(vec![
+            synthetic_resource("aws_vpc.main", "azurerm_virtual_network"),
+            synthetic_resource("aws_subnet.public", "azurerm_subnet"),
+        ]);
+        let supported = vec![
+            "azurerm_virtual_network".to_string(),
+            "azurerm_subnet".to_string(),
+        ];
+        validate_plan(&plan, &supported).expect("supported plan must validate");
+    }
+
+    #[test]
+    fn validate_plan_short_circuits_on_first_failure() {
+        // First resource is empty target_type; second is unsupported.
+        // Spec says we fail-fast on the first error encountered.
+        let plan = synthetic_plan(vec![
+            synthetic_resource("aws_vpc.first", ""),
+            synthetic_resource("aws_subnet.second", "azurerm_virtual_machine"),
+        ]);
+        let supported = vec!["azurerm_virtual_network".to_string()];
+        let err = validate_plan(&plan, &supported).unwrap_err();
+        // Should be the first error, not the second.
+        assert!(matches!(err, MapperError::EmptyTargetType { .. }));
+    }
 }

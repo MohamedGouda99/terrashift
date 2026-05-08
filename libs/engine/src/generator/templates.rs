@@ -85,6 +85,14 @@ impl TemplateRegistry {
         self.by_type.get(target_type).copied()
     }
 
+    /// Iterate the registered `target_type` keys. Used by the Mapper to
+    /// build the `VALID TARGET TYPES` prompt block and to validate the
+    /// LLM-produced `MappedResource.target_type` against the supported
+    /// set before emitting (RFC r07-mvp-closure / FR-2 + FR-4).
+    pub fn registered_types(&self) -> impl Iterator<Item = &'static str> + '_ {
+        self.by_type.keys().copied()
+    }
+
     /// How many templates are registered. Used by tests.
     pub fn len(&self) -> usize {
         self.by_type.len()
