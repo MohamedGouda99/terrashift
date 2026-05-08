@@ -58,4 +58,22 @@ pub enum CredsError {
     /// cause without echoing any token contents (Article V).
     #[error("federated token resolution failed: name='{name}' cause='{cause}'")]
     ResolutionError { name: String, cause: String },
+
+    /// Profile says `mode = "sts_assume_role"` but `role_arn` is unset.
+    /// Article IV — name the offending profile field.
+    #[error("AWS STS AssumeRole requires 'role_arn' in profile.creds.aws (got mode={mode})")]
+    MissingRoleArn { mode: String },
+
+    /// AWS SDK's STS AssumeRole call returned an error (network
+    /// failure, role not assumable, MFA required, etc.). Cause is
+    /// the SDK's `Display` rendering — never includes a token, but
+    /// may include the role ARN (ARNs are not secrets).
+    #[error("AWS STS AssumeRole failed for role='{role_arn}': {cause}")]
+    AwsStsCallFailed { role_arn: String, cause: String },
+
+    /// AWS STS returned an AssumeRole response missing required
+    /// fields. Should never happen in practice — STS guarantees the
+    /// shape — but we name the missing field for diagnostics.
+    #[error("AWS STS AssumeRole response missing field: {field}")]
+    AwsStsResponseShape { field: &'static str },
 }

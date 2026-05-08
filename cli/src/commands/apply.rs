@@ -36,11 +36,14 @@ use clap::Args as ClapArgs;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Arc;
+use terrashift_creds::{AwsBroker, CredMode};
 use terrashift_engine::executor::{
     ApprovalMode, DockerRunner, Executor, LocalRunner, SubprocessRunner,
 };
 use terrashift_shell_tool_approvals::{stage1_policy, Policy, Verdict};
 use uuid::Uuid;
+
+use crate::commands::util::{load_profile, resolve_profile_path};
 
 #[derive(ClapArgs, Debug)]
 pub struct Args {
@@ -65,7 +68,7 @@ pub struct Args {
     pub approve: bool,
 }
 
-pub async fn run(args: Args, _profile_path: Option<PathBuf>) -> Result<()> {
+pub async fn run(args: Args, profile_path: Option<PathBuf>) -> Result<()> {
     if !args.path.exists() {
         return Err(anyhow!(
             "path does not exist: {} — run `terrashift migrate` first",
@@ -87,22 +90,7 @@ pub async fn run(args: Args, _profile_path: Option<PathBuf>) -> Result<()> {
         ));
     }
 
-    let env = inherit_cloud_env(&cloud);
-    if env.is_empty() {
-        eprintln!(
-            "⚠ No {} cloud env vars found in your shell. terraform may fail to authenticate.",
-            cloud
-        );
-        eprintln!(
-            "   Set the appropriate env vars (or wait for T4-T13 broker dispatch in a follow-up session)."
-        );
-    } else {
-        println!(
-            "✓ Inherited {} cloud env var(s) for {} from shell",
-            env.len(),
-            cloud
-        );
-    }
+    let env = resolve_cloud_env(profile_path.clone(), &cloud).await?;
 
     let runner: Arc<dyn SubprocessRunner> = if args.no_sandbox {
         println!("⚙  --no-sandbox: running terraform directly on host (Article V trade-off)");
@@ -176,11 +164,94 @@ pub async fn run(args: Args, _profile_path: Option<PathBuf>) -> Result<()> {
     Ok(())
 }
 
-/// Inherit cloud-specific env vars from the parent process.
+/// Resolve cloud env vars for the subprocess. Strategy:
 ///
-/// Stage 1 close: the operator must have set these in their shell. The
-/// real cred broker dispatch (STS AssumeRole / ADC / managed identity)
-/// lands in T4-T13 in a follow-up session.
+/// 1. If operator profile has `[profiles.X.creds.<cloud>]` configured,
+///    dispatch to the matching broker (AWS STS today; GCP ADC + Azure
+///    SP/MI in follow-up sessions).
+/// 2. Otherwise fall back to inheriting cloud-prefix env vars from
+///    the operator's shell (`AWS_*`, `GOOGLE_*`, `ARM_*`).
+///
+/// The fall-back is the Stage 1 close ergonomic — operators who
+/// already have working cloud creds in their shell can use
+/// `terrashift apply` immediately. Operators who want short-lived
+/// federated tokens declare a `[creds.<cloud>]` block.
+async fn resolve_cloud_env(
+    profile_path: Option<PathBuf>,
+    cloud: &str,
+) -> Result<Vec<(String, String)>> {
+    let resolved_profile = resolve_profile_path(profile_path)?;
+
+    if resolved_profile.exists() {
+        let profile = load_profile(&resolved_profile)
+            .with_context(|| format!("loading profile from {}", resolved_profile.display()))?;
+        if let Some(cfg) = profile.creds.get(cloud) {
+            tracing::info!(
+                cloud = cloud,
+                mode = ?cfg.mode,
+                "apply: dispatching to cred broker via profile"
+            );
+            match cfg.mode {
+                CredMode::StsAssumeRole if cloud == "aws" => {
+                    println!("🔐 Resolving AWS short-lived creds via STS AssumeRole ...");
+                    let bundle = AwsBroker::new()
+                        .resolve_sts_assume_role(cfg)
+                        .await
+                        .context("AWS STS AssumeRole resolution failed")?;
+                    println!(
+                        "✓ STS AssumeRole succeeded; {} env var(s) resolved (expires {}, method={})",
+                        bundle.len(),
+                        bundle.expires_at,
+                        bundle.resolution_method
+                    );
+                    return Ok(bundle.into_env());
+                }
+                CredMode::Adc | CredMode::ServicePrincipalEnv | CredMode::ManagedIdentity => {
+                    eprintln!(
+                        "⚠ profile.creds.{cloud}.mode={:?} is not yet implemented (GCP ADC + Azure backends are follow-up sessions); falling back to shell-env inheritance",
+                        cfg.mode
+                    );
+                }
+                CredMode::StaticEnv => {
+                    println!("ℹ profile says mode=static_env; using shell-env inheritance");
+                }
+                _ => {
+                    eprintln!(
+                        "⚠ profile.creds.{cloud}.mode={:?} is set but not handled for cloud='{}'; falling back to shell-env inheritance",
+                        cfg.mode, cloud
+                    );
+                }
+            }
+        }
+    } else {
+        tracing::debug!(
+            "no profile at {} — falling back to shell-env inheritance",
+            resolved_profile.display()
+        );
+    }
+
+    let env = inherit_cloud_env(cloud);
+    if env.is_empty() {
+        eprintln!(
+            "⚠ No {} cloud env vars found in your shell. terraform may fail to authenticate.",
+            cloud
+        );
+        eprintln!(
+            "   Either set the env vars (e.g. AWS_ACCESS_KEY_ID) or configure [profiles.<name>.creds.{}] in ~/.terrashift/profile.toml.",
+            cloud
+        );
+    } else {
+        println!(
+            "✓ Inherited {} cloud env var(s) for {} from shell",
+            env.len(),
+            cloud
+        );
+    }
+    Ok(env)
+}
+
+/// Inherit cloud-specific env vars from the parent process. Used as
+/// the fall-back when no profile cred config is set.
 fn inherit_cloud_env(cloud: &str) -> Vec<(String, String)> {
     let prefixes: &[&str] = match cloud {
         "aws" => &["AWS_"],
