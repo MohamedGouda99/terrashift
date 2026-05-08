@@ -71,14 +71,15 @@ fn plan_with(resources: Vec<MappedResource>) -> MappingPlan {
 // google_storage_bucket). Pratik-e2e expansion: +5 (azurerm_route_table,
 // azurerm_public_ip, azurerm_subnet_network_security_group_association,
 // azurerm_subnet_route_table_association, azurerm_resource_group).
+// GCP cross-cloud parity: +4 (google_compute_network/subnetwork/firewall/instance).
 // ─────────────────────────────────────────────────────────────────────────
 #[test]
-fn template_count_is_17() {
+fn template_count_is_21() {
     let g = Generator::new();
     assert_eq!(
         g.template_count(),
-        17,
-        "Stage 2 ships 17 templates (10 Stage-1 + 2 S14 + 5 Pratik-e2e additions)"
+        21,
+        "Stage 2 + GCP parity ships 21 templates (10 Stage-1 + 2 S14 + 5 Pratik-e2e + 4 GCP)"
     );
 }
 
@@ -469,13 +470,35 @@ fn minimal_required_attrs(target_type: &str) -> Vec<(&'static str, AttributeValu
         "azurerm_resource_group" => {
             vec![("name", S("rg-1".into())), ("location", S("eastus".into()))]
         }
+        "google_compute_network" => vec![("name", S("vpc-1".into()))],
+        "google_compute_subnetwork" => vec![
+            ("name", S("snet-1".into())),
+            ("ip_cidr_range", S("10.0.0.0/24".into())),
+            (
+                "network",
+                AttributeValue::Reference("google_compute_network.vpc1.id".into()),
+            ),
+            ("region", S("us-central1".into())),
+        ],
+        "google_compute_firewall" => vec![
+            ("name", S("fw-1".into())),
+            (
+                "network",
+                AttributeValue::Reference("google_compute_network.vpc1.id".into()),
+            ),
+        ],
+        "google_compute_instance" => vec![
+            ("name", S("vm-1".into())),
+            ("machine_type", S("e2-micro".into())),
+            ("zone", S("us-central1-a".into())),
+        ],
         other => {
             panic!("no minimal_required_attrs entry for `{other}` — add one alongside the template")
         }
     }
 }
 
-/// Hard-coded list of all 17 registered templates. The `template_count_is_17`
+/// Hard-coded list of all 21 registered templates. The `template_count_is_21`
 /// test catches drift in the registry size; this test catches drift in
 /// per-template wiring.
 const ALL_TEMPLATES: &[&str] = &[
@@ -496,6 +519,10 @@ const ALL_TEMPLATES: &[&str] = &[
     "azurerm_subnet_network_security_group_association",
     "azurerm_subnet_route_table_association",
     "azurerm_resource_group",
+    "google_compute_network",
+    "google_compute_subnetwork",
+    "google_compute_firewall",
+    "google_compute_instance",
 ];
 
 #[test]
