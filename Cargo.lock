@@ -2980,7 +2980,7 @@ dependencies = [
 
 [[package]]
 name = "terrashift"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3007,7 +3007,7 @@ dependencies = [
 
 [[package]]
 name = "terrashift-agent-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3027,7 +3027,7 @@ dependencies = [
 
 [[package]]
 name = "terrashift-ai"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3048,7 +3048,7 @@ dependencies = [
 
 [[package]]
 name = "terrashift-audit"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3071,7 +3071,7 @@ dependencies = [
 
 [[package]]
 name = "terrashift-creds"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3089,7 +3089,7 @@ dependencies = [
 
 [[package]]
 name = "terrashift-engine"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3117,7 +3117,7 @@ dependencies = [
 
 [[package]]
 name = "terrashift-eval"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "chrono",
@@ -3137,7 +3137,7 @@ dependencies = [
 
 [[package]]
 name = "terrashift-knowledge"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3155,7 +3155,7 @@ dependencies = [
 
 [[package]]
 name = "terrashift-mcp-client"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "rmcp",
@@ -3170,7 +3170,7 @@ dependencies = [
 
 [[package]]
 name = "terrashift-mcp-config"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "serde",
  "serde_json",
@@ -3181,7 +3181,7 @@ dependencies = [
 
 [[package]]
 name = "terrashift-mcp-proxy"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "rmcp",
@@ -3197,7 +3197,7 @@ dependencies = [
 
 [[package]]
 name = "terrashift-mcp-server"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "rmcp",
@@ -3212,7 +3212,7 @@ dependencies = [
 
 [[package]]
 name = "terrashift-notify"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "async-trait",
  "chrono",
@@ -3227,7 +3227,7 @@ dependencies = [
 
 [[package]]
 name = "terrashift-shared"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "chrono",
  "serde",
@@ -3241,7 +3241,7 @@ dependencies = [
 
 [[package]]
 name = "terrashift-shell-tool-approvals"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "serde",
@@ -3254,7 +3254,7 @@ dependencies = [
 
 [[package]]
 name = "terrashift-tui"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "crossterm 0.29.0",
