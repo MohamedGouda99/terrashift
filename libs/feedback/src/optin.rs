@@ -38,7 +38,9 @@ fn default_path() -> Result<PathBuf, OptInError> {
     let home = std::env::var_os("USERPROFILE")
         .or_else(|| std::env::var_os("HOME"))
         .ok_or(OptInError::HomeMissing)?;
-    Ok(PathBuf::from(home).join(".terrashift").join("telemetry.json"))
+    Ok(PathBuf::from(home)
+        .join(".terrashift")
+        .join("telemetry.json"))
 }
 
 pub fn current_state(path: Option<&Path>) -> Result<OptIn, OptInError> {
@@ -50,7 +52,8 @@ pub fn current_state(path: Option<&Path>) -> Result<OptIn, OptInError> {
         return Ok(OptIn::Disabled);
     }
     let raw = std::fs::read_to_string(&p).map_err(|e| OptInError::Read(p.clone(), e))?;
-    let parsed: Persisted = serde_json::from_str(&raw).map_err(|e| OptInError::Parse(p.clone(), e))?;
+    let parsed: Persisted =
+        serde_json::from_str(&raw).map_err(|e| OptInError::Parse(p.clone(), e))?;
     Ok(parsed.opt_in)
 }
 
@@ -63,7 +66,8 @@ pub fn should_prompt_for_optin(path: Option<&Path>) -> Result<bool, OptInError> 
         return Ok(true);
     }
     let raw = std::fs::read_to_string(&p).map_err(|e| OptInError::Read(p.clone(), e))?;
-    let parsed: Persisted = serde_json::from_str(&raw).map_err(|e| OptInError::Parse(p.clone(), e))?;
+    let parsed: Persisted =
+        serde_json::from_str(&raw).map_err(|e| OptInError::Parse(p.clone(), e))?;
     Ok(!parsed.asked)
 }
 
@@ -75,10 +79,11 @@ pub fn record_choice(opt_in: OptIn, path: Option<&Path>) -> Result<(), OptInErro
     if let Some(parent) = p.parent() {
         std::fs::create_dir_all(parent).map_err(|e| OptInError::Write(p.clone(), e))?;
     }
-    let val = Persisted { opt_in, asked: true };
-    let raw = serde_json::to_string_pretty(&val).map_err(|e| {
-        OptInError::Parse(p.clone(), e)
-    })?;
+    let val = Persisted {
+        opt_in,
+        asked: true,
+    };
+    let raw = serde_json::to_string_pretty(&val).map_err(|e| OptInError::Parse(p.clone(), e))?;
     std::fs::write(&p, raw).map_err(|e| OptInError::Write(p, e))?;
     Ok(())
 }

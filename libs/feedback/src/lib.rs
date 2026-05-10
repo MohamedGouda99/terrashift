@@ -43,7 +43,11 @@ pub struct FeedbackReport {
 impl FeedbackReport {
     /// Build a pre-filled GitHub issue URL the operator can open.
     pub fn to_github_issue_url(&self, repo: &str) -> String {
-        let title = format!("[{}] {}", self.category.as_label(), truncate(&self.message, 60));
+        let title = format!(
+            "[{}] {}",
+            self.category.as_label(),
+            truncate(&self.message, 60)
+        );
         let mut body = String::new();
         body.push_str("**Category:** ");
         body.push_str(self.category.as_label());
