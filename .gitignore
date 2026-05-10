@@ -71,3 +71,11 @@ specs/*/output/
 
 # Stakpak session DB + working state
 .stakpak/
+
+# Third-party Claude Code skills installed locally for security tooling
+# (e.g. Masriyan/Claude-Code-CyberSecurity-Skill, MIT-licensed). Kept out
+# of the public repo because (a) they're not Terrashift's source, (b) the
+# upstream may evolve independently, (c) contributors should pull them
+# themselves if they want the same workflow. Numbered folders only —
+# leaves project-local notes (eval-design.md etc.) tracked as before.
+/.claude/skills/[0-9][0-9]-*/

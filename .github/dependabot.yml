@@ -21,9 +21,29 @@ updates:
         exclude-patterns: ["stakai", "rmcp"]
     # stakai + rmcp are pinned per CLAUDE.md (LLM/MCP plumbing) —
     # bumping them needs an explicit refs/ re-audit, not a PR-bot bump.
+    # lru is transitive (via ratatui); the soundness fix is harmless to
+    # defer until ratatui ships a clean upgrade path.
+    #
+    # Each entry below pairs with an audited GHSA + a revisit trigger so
+    # the suppression is not a silent forever-ignore (Article IV — loud
+    # failures, deferred not silenced).
     ignore:
       - dependency-name: "stakai"
       - dependency-name: "rmcp"
+        # GHSA-89vp-x53w-74fx / CVE-2026-42559 (DNS rebinding in
+        # Streamable HTTP server transport, fixed in 1.4.0).
+        # Terrashift runtime exposure: NONE — libs/mcp/server/src/lib.rs
+        # is currently a 12-line placeholder that never instantiates a
+        # StreamableHttpService. The vulnerable code path is
+        # dead-stripped at link time. Revisit at S6+ when the real MCP
+        # server transport is wired up; bump to rmcp >= 1.4.0 then and
+        # re-audit refs/stakpak alignment per CLAUDE.md.
+      - dependency-name: "lru"
+        # GHSA-rhfx-m35p-ff5j (IterMut violates Stacked Borrows,
+        # fixed in 0.16.3). Soundness only — not remotely exploitable.
+        # Transitive via ratatui 0.29.x. Revisit when ratatui upstream
+        # bumps to a release that pulls lru >= 0.16.3, or earlier if
+        # Miri/sanitizer reports start firing on TUI code paths.
 
   - package-ecosystem: "github-actions"
     directory: "/"
