@@ -36,6 +36,29 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo clippy --all-targets -- -D warnings
 
+  # Stage 1 MVP gate criterion #5 — every Constitution article cited in
+  # at least one PR. Spec 020. Reads docs/governance/CONSTITUTION.md for
+  # the canonical article list, walks PRs via `gh`, fails when any
+  # article has zero citations.
+  citation-audit:
+    name: cargo xtask audit-citations (gate criterion #5)
+    runs-on: ubuntu-latest
+    # Pull-request only — the audit needs the PR's body to count its own
+    # citations. On push-to-main the PR is already merged so re-running
+    # would just re-confirm what passed at merge time.
+    if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: cargo xtask audit-citations --check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: cargo run -p xtask --quiet -- audit-citations --check
+
   test:
     name: cargo test --workspace
     runs-on: ${{ matrix.os }}
