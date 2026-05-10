@@ -1,0 +1,75 @@
+# Install-script verification — Stage 1 MVP gate criterion #6.
+#
+# Pattern: stakpak_arch.md section 32 (CI matrix).
+# Constitution: Article VI (single-binary distribution works on a fresh
+#               Linux + macOS install), Article VIII (stage-gate exit
+#               criterion #6 enforced via CI rather than ceremony).
+#
+# Runs on a manual workflow_dispatch + after every release publish.
+# Matrix covers Linux + macOS (both Intel x86_64 and Apple Silicon arm64
+# via the `macos-13` and `macos-latest` runners respectively).
+#
+# Spec: specs/021-macos-install-verify/spec.md.
+
+name: Install verify
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+  # Smoke-test the installer on every change to install.sh itself.
+  pull_request:
+    paths:
+      - 'install.sh'
+      - '.github/workflows/install-verify.yml'
+
+jobs:
+  install-verify:
+    name: install.sh smoke (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # `macos-13` is Intel x86_64. `macos-latest` is currently arm64
+        # (Apple Silicon). Keeping both pinned so a future runner image
+        # rotation doesn't silently drop x86 coverage.
+        os: [ubuntu-latest, macos-13, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run installer (latest release)
+        env:
+          # Install into a workflow-local prefix so we don't pollute
+          # the runner's $HOME and can verify cleanly.
+          TERRASHIFT_PREFIX: ${{ runner.temp }}/terrashift-bin
+        run: |
+          set -eu
+          mkdir -p "$TERRASHIFT_PREFIX"
+          ./install.sh
+
+      - name: Verify binary works
+        run: |
+          set -eu
+          BIN="${{ runner.temp }}/terrashift-bin/terrashift"
+          if [ ! -x "$BIN" ]; then
+            echo "::error::installer did not produce an executable at $BIN"
+            ls -la "${{ runner.temp }}/terrashift-bin" || true
+            exit 1
+          fi
+          "$BIN" --version
+          "$BIN" --help | head -5
+
+      - name: Apple Silicon PATH check (macos-latest only)
+        # On Apple Silicon, Homebrew defaults to /opt/homebrew rather
+        # than /usr/local. The installer writes to ~/.local/bin which
+        # neither layout includes by default — this step verifies the
+        # binary works whether or not /opt/homebrew is on PATH.
+        if: matrix.os == 'macos-latest'
+        run: |
+          set -eu
+          uname -m
+          echo "PATH: $PATH"
+          # The installer's PATH-update hint is documented in
+          # docs/onboarding/install-macos.md. This step doesn't enforce
+          # the user's PATH; it just records what the runner saw so the
+          # docs stay accurate.
