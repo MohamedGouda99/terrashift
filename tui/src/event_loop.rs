@@ -74,17 +74,58 @@ pub async fn start_tui(status: StatusInfo) -> io::Result<()> {
     Ok(())
 }
 
+/// Multi-line welcome surface — pushed once on TUI launch.
+///
+/// Visual hierarchy intentionally uses three `MessageKind`s:
+/// - `Banner` for framing lines (gray)
+/// - `Output` for the command list (foreground white)
+/// - `Hint` for the call-to-action that points operators at the shell
+///   subcommand (yellow italic — same style used for unhandled actions).
+///
+/// Pattern: claude-code welcome screen + stakpak's `services/banner.rs`
+/// hierarchy. Keeps the welcome under 12 lines so an 80×24 terminal
+/// shows it without scroll, with room for the operator's first command.
+///
+/// Article IV: every command in the list maps to a real entry in
+/// `commands::Registry::stage1()`. If a command is removed from the
+/// registry, the welcome is the canonical place to remove its mention
+/// — no silent drift.
 fn push_welcome(app: &mut AppState) {
+    let version = env!("CARGO_PKG_VERSION");
     app.push(
         MessageKind::Banner,
-        "Welcome. Try /help to list commands, /scan <dir> to inspect a Terraform tree.",
+        format!("Welcome to Terrashift v{version} — cross-cloud Terraform migration."),
+    );
+    app.push(MessageKind::Banner, "");
+    app.push(
+        MessageKind::Output,
+        "Quick commands (type and press Enter):",
+    );
+    app.push(
+        MessageKind::Output,
+        "  /scan <dir>      — inventory a Terraform tree (no LLM)",
+    );
+    app.push(
+        MessageKind::Output,
+        "  /schemas list    — list cached provider schemas (AWS, AzureRM, Google)",
+    );
+    app.push(
+        MessageKind::Output,
+        "  /plan <dir>      — preview a migration (mapper output, no emission)",
+    );
+    app.push(
+        MessageKind::Output,
+        "  /help            — full command reference",
+    );
+    app.push(MessageKind::Banner, "");
+    app.push(
+        MessageKind::Hint,
+        "For full migrations: exit, then run `terrashift migrate --source <dir> --from <src> --to <tgt>`.",
     );
     app.push(
         MessageKind::Banner,
-        "For full migrations with real LLM, run `terrashift migrate ...` from the shell \
-         (the in-TUI agent runtime arrives in S6).",
+        "Press Ctrl+C or type /quit to exit. PageUp / PageDown to scroll.",
     );
-    app.push(MessageKind::Banner, "Press Ctrl+C or type /quit to exit.");
 }
 
 fn handle_key(code: KeyCode, modifiers: KeyModifiers, app: &mut AppState, registry: &Registry) {
