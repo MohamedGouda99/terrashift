@@ -150,8 +150,8 @@ fn us3_committed_baseline_loads_and_has_all_fixtures() {
     let baseline = Baseline::load(&path).unwrap();
     assert_eq!(
         baseline.per_fixture.len(),
-        16,
-        "Stage 2 ships 16 goldens at all-zero baseline (10 from S7 close + 1 R2 15-resource fixture + 2 S14 Stage-2 patterns: aws_iam_role, gcp_storage_bucket_lifecycle + 3 bidirectional cross-cloud goldens: 016 azurerm→aws_vpc, 017 google→aws_s3, 018 google→azurerm_vnet)"
+        17,
+        "Stage 2 ships 17 goldens at all-zero baseline (10 from S7 close + 1 R2 15-resource fixture + 2 S14 Stage-2 patterns: aws_iam_role, gcp_storage_bucket_lifecycle + 4 bidirectional cross-cloud goldens completing the 6-direction matrix: 016 azurerm→aws_vpc, 017 google→aws_s3, 018 google→azurerm_vnet, 019 azurerm→google_compute_network)"
     );
     assert_eq!(
         baseline.total_token_cost_micros, 0,

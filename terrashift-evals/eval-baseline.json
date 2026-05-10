@@ -1,6 +1,6 @@
 {
   "total_token_cost_micros": 0,
-  "last_refreshed_iso": "2026-05-10T00:00:00Z",
+  "last_refreshed_iso": "2026-05-11T00:00:00Z",
   "per_fixture": {
     "001_aws_vpc_minimal": { "token_cost_micros": 0 },
     "002_aws_subnet_with_reference": { "token_cost_micros": 0 },
@@ -17,6 +17,7 @@
     "015_aws_full_stack": { "token_cost_micros": 0 },
     "016_azurerm_vnet_to_aws_vpc": { "token_cost_micros": 0 },
     "017_google_storage_to_aws_s3": { "token_cost_micros": 0 },
-    "018_google_network_to_azurerm_vnet": { "token_cost_micros": 0 }
+    "018_google_network_to_azurerm_vnet": { "token_cost_micros": 0 },
+    "019_azurerm_vnet_to_google_compute_network": { "token_cost_micros": 0 }
   }
 }

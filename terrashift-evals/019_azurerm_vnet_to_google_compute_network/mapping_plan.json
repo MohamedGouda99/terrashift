@@ -1,0 +1,18 @@
+{
+  "run_id": "00000000-0000-0000-0000-000000000019",
+  "source_provider": "azurerm",
+  "target_provider": "google",
+  "resources": [
+    {
+      "source_addr": "azurerm_virtual_network.main",
+      "target_addr": "google_compute_network.main",
+      "target_type": "google_compute_network",
+      "target_name": "main",
+      "attributes": {
+        "name": { "string": "main" },
+        "auto_create_subnetworks": { "bool": false }
+      },
+      "dependencies": []
+    }
+  ]
+}

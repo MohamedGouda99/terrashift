@@ -28,21 +28,22 @@ fn suite_root() -> PathBuf {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// Test 1 — discover_suite finds all 16 golden migrations.
+// Test 1 — discover_suite finds all 17 golden migrations.
 // S3b: 3 AWS-as-target. S7 prefetch: +2 Azure-as-target. S7 close: +5
 // more (suite to 10/10). R2: +1 fixture covering the Stage 1 P-16 #1
 // demo scenario (15-resource GCP→AWS stack). S14: +2 Stage-2 patterns
 // (aws_iam_role JSON-string emission, gcp_storage_bucket_lifecycle).
-// Bidirectional coverage: +3 fixtures closing the previously-zero
-// azurerm-source and google-source quadrants (016/017/018).
+// Bidirectional coverage: +4 fixtures closing every previously-zero
+// cross-cloud quadrant (016 azurerm→aws, 017 google→aws,
+// 018 google→azurerm, 019 azurerm→google — full 6-direction matrix).
 // ─────────────────────────────────────────────────────────────────────────
 #[test]
 fn discover_suite_finds_all_goldens() {
     let goldens = discover_suite(&suite_root()).unwrap();
     assert_eq!(
         goldens.len(),
-        16,
-        "Stage 2 ships 16 hand-curated goldens; suite_root = {:?}",
+        17,
+        "Stage 2 ships 17 hand-curated goldens; suite_root = {:?}",
         suite_root()
     );
 
@@ -64,6 +65,7 @@ fn discover_suite_finds_all_goldens() {
         "016_azurerm_vnet_to_aws_vpc",
         "017_google_storage_to_aws_s3",
         "018_google_network_to_azurerm_vnet",
+        "019_azurerm_vnet_to_google_compute_network",
     ] {
         assert!(
             names.contains(&expected),
@@ -88,16 +90,17 @@ fn manifest_toml_parses_correctly() {
 
 // ─────────────────────────────────────────────────────────────────────────
 // Test 3 — All goldens pass with the Stage 1 Generator (criterion #2).
-// Suite now contains 16 fixtures after the bidirectional-coverage expansion
-// (013/014 are reserved; 016/017/018 close azurerm-source + google-source gaps).
+// Suite now contains 17 fixtures after the bidirectional-coverage expansion
+// (013/014 are reserved; 016/017/018/019 close every cross-cloud quadrant,
+// giving the suite full 6-direction matrix coverage).
 // Skipped automatically if `expected/` is empty; bootstrap test below
 // populates it.
 // ─────────────────────────────────────────────────────────────────────────
 #[test]
-fn all_sixteen_goldens_pass() {
+fn all_seventeen_goldens_pass() {
     let runner = EvalRunner::new();
     let report = runner.run_suite(&suite_root()).unwrap();
-    assert_eq!(report.total, 16);
+    assert_eq!(report.total, 17);
     assert!(
         report.all_passed(),
         "{} of {} goldens failed:\n{}",
@@ -115,7 +118,7 @@ fn all_sixteen_goldens_pass() {
             .collect::<Vec<_>>()
             .join("\n\n")
     );
-    assert_eq!(report.passed, 16);
+    assert_eq!(report.passed, 17);
     assert_eq!(report.failed, 0);
     assert_eq!(
         report.total_token_cost_micros, 0,

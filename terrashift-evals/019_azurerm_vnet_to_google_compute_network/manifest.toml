@@ -1,0 +1,9 @@
+name = "019_azurerm_vnet_to_google_compute_network"
+description = "AzureRM virtual network → GCP compute network; closes the azurerm→google quadrant (the last 0%-covered cross-cloud direction after 016/017/018) and gives the suite full bidirectional matrix coverage between every provider pair."
+source_provider = "azurerm"
+target_provider = "google"
+token_cost_ceiling_micros = 0
+articles = [3, 6, 8]
+required_schemas = [
+  { provider = "google", version = "5.45.2" },
+]
