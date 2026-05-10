@@ -24,3 +24,6 @@
 pub mod cache;
 pub mod errors;
 pub mod infracost;
+
+pub use cache::{CostCache, CostCacheError};
+pub use errors::CostOptimizerError;
