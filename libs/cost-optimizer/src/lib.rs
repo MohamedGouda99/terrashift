@@ -27,3 +27,4 @@ pub mod infracost;
 
 pub use cache::{CostCache, CostCacheError};
 pub use errors::CostOptimizerError;
+pub use infracost::{InfracostClient, ResourceCostQuery, ResourceCostResult};
