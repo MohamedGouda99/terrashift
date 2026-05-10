@@ -28,19 +28,21 @@ fn suite_root() -> PathBuf {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// Test 1 — discover_suite finds all 13 golden migrations.
+// Test 1 — discover_suite finds all 16 golden migrations.
 // S3b: 3 AWS-as-target. S7 prefetch: +2 Azure-as-target. S7 close: +5
 // more (suite to 10/10). R2: +1 fixture covering the Stage 1 P-16 #1
 // demo scenario (15-resource GCP→AWS stack). S14: +2 Stage-2 patterns
 // (aws_iam_role JSON-string emission, gcp_storage_bucket_lifecycle).
+// Bidirectional coverage: +3 fixtures closing the previously-zero
+// azurerm-source and google-source quadrants (016/017/018).
 // ─────────────────────────────────────────────────────────────────────────
 #[test]
 fn discover_suite_finds_all_goldens() {
     let goldens = discover_suite(&suite_root()).unwrap();
     assert_eq!(
         goldens.len(),
-        13,
-        "Stage 2 ships 13 hand-curated goldens; suite_root = {:?}",
+        16,
+        "Stage 2 ships 16 hand-curated goldens; suite_root = {:?}",
         suite_root()
     );
 
@@ -59,6 +61,9 @@ fn discover_suite_finds_all_goldens() {
         "011_aws_iam_role",
         "012_gcp_storage_bucket_lifecycle",
         "015_aws_full_stack",
+        "016_azurerm_vnet_to_aws_vpc",
+        "017_google_storage_to_aws_s3",
+        "018_google_network_to_azurerm_vnet",
     ] {
         assert!(
             names.contains(&expected),
@@ -82,15 +87,17 @@ fn manifest_toml_parses_correctly() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// Test 3 — All 3 goldens pass with the Stage 1 Generator (criterion #2).
-// (Skipped automatically if `expected/` is empty; bootstrap test below
-//  populates it.)
+// Test 3 — All goldens pass with the Stage 1 Generator (criterion #2).
+// Suite now contains 16 fixtures after the bidirectional-coverage expansion
+// (013/014 are reserved; 016/017/018 close azurerm-source + google-source gaps).
+// Skipped automatically if `expected/` is empty; bootstrap test below
+// populates it.
 // ─────────────────────────────────────────────────────────────────────────
 #[test]
-fn all_thirteen_goldens_pass() {
+fn all_sixteen_goldens_pass() {
     let runner = EvalRunner::new();
     let report = runner.run_suite(&suite_root()).unwrap();
-    assert_eq!(report.total, 13);
+    assert_eq!(report.total, 16);
     assert!(
         report.all_passed(),
         "{} of {} goldens failed:\n{}",
@@ -108,7 +115,7 @@ fn all_thirteen_goldens_pass() {
             .collect::<Vec<_>>()
             .join("\n\n")
     );
-    assert_eq!(report.passed, 13);
+    assert_eq!(report.passed, 16);
     assert_eq!(report.failed, 0);
     assert_eq!(
         report.total_token_cost_micros, 0,
