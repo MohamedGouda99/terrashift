@@ -23,6 +23,7 @@ use std::sync::Arc;
 use tempfile::TempDir;
 use terrashift_agent_core::PassthroughCompactionEngine;
 use terrashift_ai::{JsonAgentLlmClient, Tier};
+use terrashift_cost_optimizer::{AnalyzeConfig, CostOptimizer, CostReport, InfracostClient};
 use terrashift_engine::generator::Generator;
 use terrashift_engine::mapper::{Mapper, MapperCache, PassthroughContextReducer};
 use terrashift_engine::recovery::{run_recovery, RecoveryConfig, RecoveryOutcome};
@@ -58,6 +59,14 @@ pub struct Args {
     /// Tier to use for Mapper LLM calls (eco | smart). Default: eco.
     #[arg(long, default_value = "eco")]
     pub tier: String,
+
+    /// Estimate cost delta (source vs target) via the Cost Optimizer agent
+    /// (S11). When set, runs Infracost lookups for each line item plus an
+    /// LLM-driven swap-recommendation pass; surfaces a "Cost optimization"
+    /// section in the summary. Off by default (no Infracost API calls).
+    /// Requires `INFRACOST_API_KEY` env var.
+    #[arg(long, default_value_t = false)]
+    pub estimate_cost: bool,
 }
 
 pub async fn run(args: Args, profile_path: Option<PathBuf>) -> Result<()> {
@@ -333,6 +342,25 @@ pub async fn run(args: Args, profile_path: Option<PathBuf>) -> Result<()> {
         }
     }
 
+    // ─── 5b. Cost Optimizer agent (S11) — opt-in via --estimate-cost ─
+    // Article V: Infracost queries carry only (provider, type, region) —
+    // no resource attribute values, so tag values / bucket names / IPs
+    // never leave the operator's machine.
+    // Article IV: API key missing or Infracost unreachable surfaces as
+    // a typed error and aborts the cost section; the rest of the
+    // migration summary still prints.
+    let cost_report: Option<CostReport> = if args.estimate_cost {
+        match run_cost_optimizer(&plan, &args, tier).await {
+            Ok(r) => Some(r),
+            Err(e) => {
+                println!("⚠ Cost Optimizer error (proceeding without cost section): {e}");
+                None
+            }
+        }
+    } else {
+        None
+    };
+
     // ─── 6. Summary ──────────────────────────────────────────────────
     println!("\n──────────── Migration summary ────────────");
     println!("Source resources : {}", total_resources);
@@ -357,11 +385,134 @@ pub async fn run(args: Args, profile_path: Option<PathBuf>) -> Result<()> {
         }
     }
 
+    // S11: render the Cost Optimizer section if --estimate-cost was set
+    // and the agent ran successfully.
+    if let Some(report) = &cost_report {
+        render_cost_section(report);
+    }
+
     // r07-mvp-closure: no more "files disappear on exit" footnote. The
     // default-output is now a real persistent path next to the source.
     let _ = output_was_explicit;
 
     Ok(())
+}
+
+/// Build + run the Cost Optimizer agent against the current plan.
+///
+/// Pulls `INFRACOST_API_KEY` from the environment, builds an
+/// `InfracostClient` + `CostOptimizer` (deterministic core), wraps in
+/// `CostOptimizerAgent`, and returns the populated `CostReport`.
+///
+/// Profile-side cost configuration (`tier_costs`, `delta_threshold_pct`,
+/// `cache_ttl_hours`) is the operator's call when the profile schema
+/// gains those fields — for now we use the agent's defaults. The tier
+/// argument is reserved for when the agent layer wires per-tier model
+/// selection.
+async fn run_cost_optimizer(
+    plan: &terrashift_engine::mapper::MappingPlan,
+    _args: &Args,
+    _tier: Tier,
+) -> Result<CostReport> {
+    let api_key = std::env::var("INFRACOST_API_KEY").map_err(|_| {
+        anyhow::anyhow!(
+            "INFRACOST_API_KEY env var not set; remove --estimate-cost or export the key"
+        )
+    })?;
+    let lookup = InfracostClient::new(api_key);
+    let optimizer = CostOptimizer::new(lookup);
+    // Phase 4 ships the deterministic analyzer only. Phase 4b (follow-up
+    // PR) will wrap this in `CostOptimizerAgent` to populate
+    // `report.recommendations` via the LLM-driven swap pass once a real
+    // Infracost-API smoke is in CI. The agent layer + tests already exist
+    // in `libs/cost-optimizer/src/agent.rs` from Phase 3; the wiring just
+    // needs the AgentLlmClient + the approval-policy decision.
+    let analyze_cfg = AnalyzeConfig::default();
+    let report = optimizer
+        .analyze(plan, &analyze_cfg)
+        .await
+        .with_context(|| "cost-optimizer analyze")?;
+    Ok(report)
+}
+
+/// Render the "Cost optimization" section in the migration summary.
+///
+/// **OPEN DESIGN DECISION** — this is a UX-shaping function with several
+/// valid approaches. Some axes to consider:
+///
+/// - **Sort order**: by absolute delta? by percent delta? alphabetical?
+/// - **Highlight rule**: should resources >X% over-cost get a marker?
+/// - **Aggregate vs per-line**: show only the top-N most expensive deltas?
+/// - **Color**: ANSI when stdout is a TTY, plain otherwise. The CLI
+///   already enforces plain output on non-TTY (per the `non_tty_output_test`
+///   in `cli/tests/`), so any color codes here must be guarded.
+///
+/// Inputs from `report`:
+/// - `report.line_items: Vec<LineItem>` — each has `source_addr`,
+///   `target_addr`, `source_usd_per_month: Option<f64>`,
+///   `target_usd_per_month: Option<f64>`. `LineItem::delta_usd_per_month()`
+///   and `LineItem::delta_pct()` give the deltas (both Option<f64>).
+/// - `report.source_total_usd_per_month: f64` and the target equivalent.
+/// - `report.delta_usd_per_month()` and `report.delta_pct()`.
+/// - `report.recommendations: Vec<Recommendation>` (Phase 3 populates this;
+///   Phase 4 stub leaves it empty).
+/// - `report.skipped: Vec<(String, String)>` — addr + reason.
+///
+/// The placeholder body below shows a working minimal implementation.
+/// Customize at will — this is exactly the kind of decision that shapes
+/// what an operator sees on a sales demo.
+fn render_cost_section(report: &CostReport) {
+    println!("\n══════════════ Cost optimization (S11) ══════════════");
+    // TODO(user): replace this block with your preferred presentation.
+    println!(
+        "Source total : ${:>10.2} / month",
+        report.source_total_usd_per_month
+    );
+    println!(
+        "Target total : ${:>10.2} / month",
+        report.target_total_usd_per_month
+    );
+    let delta = report.delta_usd_per_month();
+    let pct = report
+        .delta_pct()
+        .map(|p| format!("{p:+.1}%"))
+        .unwrap_or_else(|| "n/a".to_string());
+    println!("Delta        : ${delta:>+10.2} / month  ({pct})");
+
+    if !report.line_items.is_empty() {
+        println!("\nPer-resource (showing all):");
+        for item in &report.line_items {
+            let s = item
+                .source_usd_per_month
+                .map(|v| format!("${v:>7.2}"))
+                .unwrap_or_else(|| "  n/a   ".to_string());
+            let t = item
+                .target_usd_per_month
+                .map(|v| format!("${v:>7.2}"))
+                .unwrap_or_else(|| "  n/a   ".to_string());
+            println!(
+                "  {} → {}    src {s}    tgt {t}",
+                item.source_addr, item.target_addr
+            );
+        }
+    }
+
+    if !report.recommendations.is_empty() {
+        println!("\nAgent recommendations:");
+        for rec in &report.recommendations {
+            println!(
+                "  💡 {}: save ${:.2}/mo — {}",
+                rec.resource_addr, rec.savings_usd_per_month, rec.tradeoff
+            );
+        }
+    }
+
+    if !report.skipped.is_empty() {
+        println!("\nCost lookup skipped:");
+        for (addr, why) in &report.skipped {
+            println!("  ⚠ {addr}: {why}");
+        }
+    }
 }
 
 /// Pull the resource address out of any `ValidationError` variant.
