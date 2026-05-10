@@ -30,6 +30,8 @@ pub enum OptInError {
     Write(PathBuf, std::io::Error),
     #[error("parse {0}: {1}")]
     Parse(PathBuf, serde_json::Error),
+    #[error("serialize {0}: {1}")]
+    Serialize(PathBuf, serde_json::Error),
     #[error("home directory not found")]
     HomeMissing,
 }
@@ -48,10 +50,11 @@ pub fn current_state(path: Option<&Path>) -> Result<OptIn, OptInError> {
         Some(p) => p.to_path_buf(),
         None => default_path()?,
     };
-    if !p.exists() {
-        return Ok(OptIn::Disabled);
-    }
-    let raw = std::fs::read_to_string(&p).map_err(|e| OptInError::Read(p.clone(), e))?;
+    let raw = match std::fs::read_to_string(&p) {
+        Ok(s) => s,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(OptIn::Disabled),
+        Err(e) => return Err(OptInError::Read(p, e)),
+    };
     let parsed: Persisted =
         serde_json::from_str(&raw).map_err(|e| OptInError::Parse(p.clone(), e))?;
     Ok(parsed.opt_in)
@@ -62,10 +65,11 @@ pub fn should_prompt_for_optin(path: Option<&Path>) -> Result<bool, OptInError> 
         Some(p) => p.to_path_buf(),
         None => default_path()?,
     };
-    if !p.exists() {
-        return Ok(true);
-    }
-    let raw = std::fs::read_to_string(&p).map_err(|e| OptInError::Read(p.clone(), e))?;
+    let raw = match std::fs::read_to_string(&p) {
+        Ok(s) => s,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(true),
+        Err(e) => return Err(OptInError::Read(p, e)),
+    };
     let parsed: Persisted =
         serde_json::from_str(&raw).map_err(|e| OptInError::Parse(p.clone(), e))?;
     Ok(!parsed.asked)
@@ -83,7 +87,8 @@ pub fn record_choice(opt_in: OptIn, path: Option<&Path>) -> Result<(), OptInErro
         opt_in,
         asked: true,
     };
-    let raw = serde_json::to_string_pretty(&val).map_err(|e| OptInError::Parse(p.clone(), e))?;
+    let raw =
+        serde_json::to_string_pretty(&val).map_err(|e| OptInError::Serialize(p.clone(), e))?;
     std::fs::write(&p, raw).map_err(|e| OptInError::Write(p, e))?;
     Ok(())
 }

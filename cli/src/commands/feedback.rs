@@ -42,6 +42,9 @@ impl From<Category> for FeedbackCategory {
 }
 
 pub fn run(args: Args) -> Result<()> {
+    if args.message.trim().is_empty() {
+        anyhow::bail!("--message must not be empty");
+    }
     let report = FeedbackReport {
         category: args.category.into(),
         message: args.message,
