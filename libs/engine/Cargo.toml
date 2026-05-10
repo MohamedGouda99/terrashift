@@ -37,3 +37,8 @@ terrashift-shell-tool-approvals = { workspace = true }
 [dev-dependencies]
 tempfile = { workspace = true }
 chrono = { workspace = true }
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[[bench]]
+name = "pipeline"
+harness = false

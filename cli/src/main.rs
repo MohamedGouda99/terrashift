@@ -42,6 +42,9 @@ enum Command {
     /// Migrate Terraform from one provider to another.
     Migrate(commands::migrate::Args),
 
+    /// Open a pre-filled GitHub issue with feedback.
+    Feedback(commands::feedback::Args),
+
     /// Schema cache operations (list / update / show / verify / gc).
     #[command(subcommand)]
     Schema(commands::schema::Cmd),
@@ -76,6 +79,7 @@ async fn run() -> Result<()> {
     match cli.command {
         Some(Command::Version) => print_version(),
         Some(Command::Migrate(args)) => commands::migrate::run(args, cli.profile).await?,
+        Some(Command::Feedback(args)) => commands::feedback::run(args)?,
         Some(Command::Schema(cmd)) => commands::schema::run(cmd, cli.profile).await?,
         Some(Command::Scan(args)) => commands::scan::run(args).await?,
         None => launch_tui(cli.profile).await?,

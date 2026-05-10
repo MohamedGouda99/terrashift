@@ -15,6 +15,7 @@ members = [
     "libs/creds",
     "libs/audit",
     "libs/eval",
+    "libs/feedback",
     "libs/notify",
     "libs/shell-tool-approvals",
     "libs/mcp/client",
@@ -123,6 +124,10 @@ similar = "2"
 tree-sitter = "0.26"
 tree-sitter-bash = "0.25"
 
+# CLI test harness — used by cli/ for non-TTY output assertions.
+# Promoted to workspace per Article VII to avoid version drift.
+assert_cmd = "2"
+
 # Test fixture isolation — used by libs/engine and libs/eval as both
 # runtime dep (eval framework) and dev-dep (engine tests). Promoted to
 # workspace per Article VII to avoid version drift.
@@ -144,6 +149,7 @@ terrashift-mcp-server = { path = "libs/mcp/server" }
 terrashift-mcp-proxy = { path = "libs/mcp/proxy" }
 terrashift-mcp-config = { path = "libs/mcp/config" }
 terrashift-tui = { path = "tui" }
+terrashift-feedback = { path = "libs/feedback" }
 
 # Workspace-wide lints — Article XIII rule 3 enforcement
 # Pattern: stakpak_arch.md section 31

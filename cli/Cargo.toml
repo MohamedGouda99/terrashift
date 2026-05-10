@@ -32,6 +32,11 @@ terrashift-ai = { workspace = true }
 terrashift-knowledge = { workspace = true }
 terrashift-audit = { workspace = true }
 terrashift-agent-core = { workspace = true }
+terrashift-feedback = { workspace = true }
+# Cross-platform default-browser launcher — used only by `terrashift feedback`
+# to open the pre-filled GitHub issue URL. On GUI-less hosts the open()
+# call returns Err and the CLI falls back to printing the URL (Article IV).
+webbrowser = "1"
 tempfile = { workspace = true }
 
 # Direct deps of the schema CLI surface + Recovery agent integration
@@ -50,3 +55,4 @@ serde_json = { workspace = true }
 async-trait = "0.1"
 stakai = { workspace = true }
 dirs = "5"
+assert_cmd = { workspace = true }
