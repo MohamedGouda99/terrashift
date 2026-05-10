@@ -17,6 +17,7 @@
 //! The xtask workflow is a separate compile target so day-to-day developers
 //! don't need `terraform` on PATH unless they explicitly run a capture command.
 
+mod audit_citations;
 mod capture_eval_schemas;
 mod capture_schemas;
 mod refresh_eval_schemas;
@@ -68,6 +69,13 @@ enum Command {
     /// Article VI inside the shipped binary. Used by the weekly bundle
     /// refresh workflow (`.github/workflows/weekly-bundle-refresh.yml`).
     ResolveLatest(resolve_latest::Args),
+
+    /// Audit Constitution-article citations across PRs. Reads
+    /// CONSTITUTION.md for the canonical article list, walks every PR
+    /// (open + merged) via `gh pr list`, counts per-article references,
+    /// writes a report. Closes Stage 1 MVP gate criterion #5.
+    /// CI uses `--check` to fail when any article has zero citations.
+    AuditCitations(audit_citations::Args),
 }
 
 #[tokio::main]
@@ -96,5 +104,6 @@ async fn run() -> Result<()> {
         Command::VerifyEvalSchemas(args) => verify_eval_schemas::run(args).await,
         Command::RefreshEvalSchemas(args) => refresh_eval_schemas::run(args).await,
         Command::ResolveLatest(args) => resolve_latest::run(args).await,
+        Command::AuditCitations(args) => audit_citations::run(args).await,
     }
 }
