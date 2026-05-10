@@ -22,6 +22,12 @@ tracing = { workspace = true }
 sha2 = { workspace = true }
 chrono = { workspace = true }
 
+# Internal
+terrashift-engine = { workspace = true }
+terrashift-shared = { workspace = true }
+async-trait = "0.1"
+
 [dev-dependencies]
 tempfile = { workspace = true }
 wiremock = { workspace = true }
+uuid = { workspace = true }

@@ -3168,16 +3168,20 @@ name = "terrashift-cost-optimizer"
 version = "0.1.1"
 dependencies = [
  "anyhow",
+ "async-trait",
  "chrono",
  "reqwest",
  "serde",
  "serde_json",
  "sha2",
  "tempfile",
+ "terrashift-engine",
+ "terrashift-shared",
  "thiserror 1.0.69",
  "tokio",
  "tokio-util",
  "tracing",
+ "uuid",
  "wiremock",
 ]
 

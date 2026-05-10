@@ -5,7 +5,7 @@
 //! Cost Optimizer infrastructure.
 //!
 //! Phase 1: Infracost client + cache + errors.
-//! Phase 2 (this commit): deterministic CostOptimizer::analyze report types.
+//! Phase 2 (this commit): deterministic CostOptimizer::analyze.
 //! Phase 3 (later): agent layer with 3 tools.
 //!
 //! Constitution:
@@ -17,11 +17,13 @@
 //! - Article XII rule 4 (regression-gate plumbing — token cost will be
 //!   tracked when the agent layer lands in Phase 3).
 
+pub mod analyze;
 pub mod cache;
 pub mod errors;
 pub mod infracost;
 pub mod report;
 
+pub use analyze::{AnalyzeConfig, CostLookup, CostOptimizer};
 pub use cache::{CostCache, CostCacheError};
 pub use errors::CostOptimizerError;
 pub use infracost::{InfracostClient, ResourceCostQuery, ResourceCostResult};
