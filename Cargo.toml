@@ -12,6 +12,7 @@ members = [
     "libs/ai",
     "libs/knowledge",
     "libs/engine",
+    "libs/cost-optimizer",
     "libs/creds",
     "libs/audit",
     "libs/eval",
@@ -128,12 +129,17 @@ tree-sitter-bash = "0.25"
 # workspace per Article VII to avoid version drift.
 tempfile = "3"
 
+# Mock HTTP server for tests that exercise external APIs without
+# touching the real provider. Used by libs/cost-optimizer/tests/.
+wiremock = "0.6"
+
 # Internal workspace crates
 terrashift-shared = { path = "libs/shared" }
 terrashift-agent-core = { path = "libs/agent-core" }
 terrashift-ai = { path = "libs/ai" }
 terrashift-knowledge = { path = "libs/knowledge" }
 terrashift-engine = { path = "libs/engine" }
+terrashift-cost-optimizer = { path = "libs/cost-optimizer" }
 terrashift-creds = { path = "libs/creds" }
 terrashift-audit = { path = "libs/audit" }
 terrashift-eval = { path = "libs/eval" }
