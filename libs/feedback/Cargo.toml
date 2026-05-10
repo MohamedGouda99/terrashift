@@ -1,0 +1,28 @@
+[package]
+name = "terrashift-feedback"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+uuid = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+
+[features]
+default = []
+# When enabled, telemetry::record_event will eventually POST to a
+# receiver. Disabled by default until the Stage 6 receiver backend
+# exists. Today the feature flag is wired but the impl is still no-op.
+telemetry-net = []

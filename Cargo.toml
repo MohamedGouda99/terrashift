@@ -15,6 +15,7 @@ members = [
     "libs/creds",
     "libs/audit",
     "libs/eval",
+    "libs/feedback",
     "libs/notify",
     "libs/shell-tool-approvals",
     "libs/mcp/client",
@@ -148,6 +149,7 @@ terrashift-mcp-server = { path = "libs/mcp/server" }
 terrashift-mcp-proxy = { path = "libs/mcp/proxy" }
 terrashift-mcp-config = { path = "libs/mcp/config" }
 terrashift-tui = { path = "tui" }
+terrashift-feedback = { path = "libs/feedback" }
 
 # Workspace-wide lints — Article XIII rule 3 enforcement
 # Pattern: stakpak_arch.md section 31
