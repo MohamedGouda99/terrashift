@@ -1,8 +1,8 @@
 # 50-resource AWS perf fixture
 
 50 source resources across 6 types — used by `libs/engine/benches/pipeline.rs`
-to measure Scanner / Generator / Validator wall time and memory at MVP-strict
-scale.
+to measure Scanner and Generator (Validator bench deferred — needs async
+KnowledgeService init) wall time and memory at MVP-strict scale.
 
 | Type | Count |
 |---|---|

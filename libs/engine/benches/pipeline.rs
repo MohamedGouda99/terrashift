@@ -156,13 +156,20 @@ fn bench_scanner(c: &mut Criterion) {
 
 fn bench_generator(c: &mut Criterion) {
     let plan = build_plan();
+    let g = Generator::new();
     c.bench_function("generator_50", |b| {
-        b.iter(|| {
-            let cwd = tempfile::TempDir::new().unwrap();
-            let out = tempfile::TempDir::new().unwrap();
-            let g = Generator::new();
-            black_box(g.generate(cwd.path(), out.path(), &plan).expect("generate"));
-        });
+        b.iter_batched(
+            || {
+                (
+                    tempfile::TempDir::new().expect("setup cwd"),
+                    tempfile::TempDir::new().expect("setup out"),
+                )
+            },
+            |(cwd, out)| {
+                black_box(g.generate(cwd.path(), out.path(), &plan).expect("generate"));
+            },
+            criterion::BatchSize::SmallInput,
+        );
     });
 }
 
@@ -189,9 +196,9 @@ mod canary {
     #[test]
     fn canary_generator_runs() {
         let plan = build_plan();
-        let cwd = tempfile::TempDir::new().unwrap();
-        let out = tempfile::TempDir::new().unwrap();
         let g = Generator::new();
+        let cwd = tempfile::TempDir::new().expect("setup cwd");
+        let out = tempfile::TempDir::new().expect("setup out");
         g.generate(cwd.path(), out.path(), &plan)
             .expect("generator canary");
     }
