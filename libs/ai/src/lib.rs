@@ -43,6 +43,7 @@
 
 pub mod agent_client;
 pub mod client;
+pub mod cost;
 pub mod errors;
 pub mod metadata;
 pub mod profile;
@@ -54,6 +55,7 @@ pub mod tier;
 
 pub use agent_client::JsonAgentLlmClient;
 pub use client::{LlmClient, StubClient};
+pub use cost::{aggregate as aggregate_costs, CostSummary, TierCosts};
 pub use errors::AiError;
 pub use metadata::CompletionMetadata;
 pub use profile::{
