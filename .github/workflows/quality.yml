@@ -1,0 +1,95 @@
+# Quality CI — advisory-mode pipeline that augments ci.yml.
+# Pattern: stakpak_arch.md section 32 (CI matrix).
+# Constitution: Article XII rule 4 (regression-gate plumbing — perf side).
+
+name: Quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-D warnings"
+
+jobs:
+  perf-bench:
+    name: perf-bench (advisory)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: quality
+      - name: Run criterion benches (quick)
+        run: cargo bench -p terrashift-engine --bench pipeline -- --quick
+      - name: Upload criterion HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: criterion-report
+          path: target/criterion/
+          if-no-files-found: warn
+
+  windows-test:
+    name: windows-test (advisory)
+    runs-on: windows-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: quality-win
+      - name: cargo test --workspace
+        run: cargo test --workspace
+
+  a11y-snapshot:
+    name: a11y-snapshot (advisory)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: quality
+      - name: TUI accessibility tests
+        run: cargo test -p terrashift-tui --test accessibility_test
+      - name: CLI non-TTY tests
+        run: cargo test --test non_tty_output_test
+
+  usability-stub:
+    name: usability-stub (advisory)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: quality
+      - name: feedback crate tests
+        run: cargo test -p terrashift-feedback
+
+  summarize:
+    name: summarize (informational)
+    needs: [perf-bench, windows-test, a11y-snapshot, usability-stub]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Print job results
+        run: |
+          echo "perf-bench:     ${{ needs.perf-bench.result }}"
+          echo "windows-test:   ${{ needs.windows-test.result }}"
+          echo "a11y-snapshot:  ${{ needs.a11y-snapshot.result }}"
+          echo "usability-stub: ${{ needs.usability-stub.result }}"
+          echo ""
+          echo "All jobs are advisory (continue-on-error). Red x does not block merge."
+          echo "Flip individual jobs to strict via a documented stage gate after"
+          echo "~50 PRs of baseline data per the spec at"
+          echo "docs/superpowers/specs/2026-05-10-extended-testing-design.md."
