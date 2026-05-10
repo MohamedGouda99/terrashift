@@ -24,7 +24,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
-          shared-key: quality
+          shared-key: quality-perf
       - name: Run criterion benches (quick)
         run: cargo bench -p terrashift-engine --bench pipeline -- --quick
       - name: Upload criterion HTML report
@@ -57,11 +57,20 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
-          shared-key: quality
+          shared-key: quality-a11y
       - name: TUI accessibility tests
         run: cargo test -p terrashift-tui --test accessibility_test
       - name: CLI non-TTY tests
         run: cargo test --test non_tty_output_test
+      - name: Upload TUI snapshot diffs (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-snapshot-diffs
+          path: |
+            tui/tests/snapshots/
+            target/debug/build/**/snapshot*
+          if-no-files-found: warn
 
   usability-stub:
     name: usability-stub (advisory)
@@ -72,24 +81,67 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
-          shared-key: quality
+          shared-key: quality-usability
       - name: feedback crate tests
         run: cargo test -p terrashift-feedback
+      - name: Upload feedback test logs (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: usability-stub-logs
+          path: target/debug/deps/feedback*.log
+          if-no-files-found: ignore
 
   summarize:
     name: summarize (informational)
     needs: [perf-bench, windows-test, a11y-snapshot, usability-stub]
     runs-on: ubuntu-latest
-    if: always()
+    if: always() && github.event_name == 'pull_request'
     steps:
-      - name: Print job results
+      - name: Build summary body
+        id: body
+        env:
+          R_PERF: ${{ needs.perf-bench.result }}
+          R_WIN:  ${{ needs.windows-test.result }}
+          R_A11Y: ${{ needs.a11y-snapshot.result }}
+          R_UX:   ${{ needs.usability-stub.result }}
         run: |
-          echo "perf-bench:     ${{ needs.perf-bench.result }}"
-          echo "windows-test:   ${{ needs.windows-test.result }}"
-          echo "a11y-snapshot:  ${{ needs.a11y-snapshot.result }}"
-          echo "usability-stub: ${{ needs.usability-stub.result }}"
-          echo ""
-          echo "All jobs are advisory (continue-on-error). Red x does not block merge."
-          echo "Flip individual jobs to strict via a documented stage gate after"
-          echo "~50 PRs of baseline data per the spec at"
-          echo "docs/superpowers/specs/2026-05-10-extended-testing-design.md."
+          status() {
+            case "$1" in
+              success)   echo "✅ $1";;
+              failure)   echo "❌ $1";;
+              cancelled) echo "⏹ $1";;
+              skipped)   echo "⏭ $1";;
+              *)         echo "❓ $1";;
+            esac
+          }
+          {
+            echo "### Quality pipeline (advisory)"
+            echo ""
+            echo "| Job | Result |"
+            echo "|---|---|"
+            echo "| perf-bench    | $(status "$R_PERF") |"
+            echo "| windows-test  | $(status "$R_WIN") |"
+            echo "| a11y-snapshot | $(status "$R_A11Y") |"
+            echo "| usability-stub | $(status "$R_UX") |"
+            echo ""
+            echo "All four jobs are advisory (\`continue-on-error: true\`). Red ❌ does not block merge."
+            echo ""
+            echo "Artifacts: criterion HTML report, accessibility snapshot diffs, feedback test logs."
+            echo ""
+            echo "_Flip jobs to strict via a documented stage gate after collecting baseline data._"
+          } > /tmp/quality-summary.md
+          {
+            echo "body<<EOF"
+            cat /tmp/quality-summary.md
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+      - name: Post or update sticky PR comment
+        if: always()
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: quality-pipeline
+          message: ${{ steps.body.outputs.body }}
+      - name: Mirror summary to job summary
+        if: always()
+        run: cat /tmp/quality-summary.md >> "$GITHUB_STEP_SUMMARY"
