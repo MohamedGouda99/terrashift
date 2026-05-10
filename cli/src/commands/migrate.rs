@@ -22,7 +22,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use tempfile::TempDir;
 use terrashift_agent_core::PassthroughCompactionEngine;
-use terrashift_ai::{JsonAgentLlmClient, Tier};
+use terrashift_ai::{aggregate_costs, CompletionMetadata, JsonAgentLlmClient, Tier};
 use terrashift_engine::generator::Generator;
 use terrashift_engine::mapper::{Mapper, MapperCache, PassthroughContextReducer};
 use terrashift_engine::recovery::{run_recovery, RecoveryConfig, RecoveryOutcome};
@@ -340,6 +340,15 @@ pub async fn run(args: Args, profile_path: Option<PathBuf>) -> Result<()> {
     println!("HCL files emitted: {}", emitted_files.len());
     println!("Skipped (gaps)   : {}", skipped.len());
     println!("Output directory : {}", output_dir.display());
+
+    // Token-cost telemetry — Article XII rule 4 (gate criterion #4).
+    // Stage 1: Mapper doesn't return metadata up through `map()` yet, so
+    // we collect the empty slice here. Once S4-close wires `Vec<CompletionMetadata>`
+    // out of Mapper + Recovery, the aggregator picks up real costs against
+    // the profile's `[tier_costs]` block. Spec 019.
+    let llm_metas: Vec<CompletionMetadata> = Vec::new();
+    let cost_summary = aggregate_costs(&llm_metas, &profile.tier_costs);
+    println!("{}", cost_summary.format_human());
 
     if !emitted_files.is_empty() {
         println!("\nEmitted files:");

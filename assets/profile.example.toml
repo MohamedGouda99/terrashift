@@ -91,6 +91,31 @@ model = "huggingface/meta-llama/Llama-3.3-70B-Instruct"
   [profiles.default.cloud.google]
   project_id_env = "GOOGLE_CLOUD_PROJECT"
 
+  # ─── Token-cost telemetry (per-tier USD rates) ───────────────────
+  #
+  # Optional. When set, `terrashift migrate` ends with a "Token cost:
+  # $X.XXXX" summary line broken down by tier. Without this block, the
+  # summary still prints but reports zero USD (token totals only).
+  #
+  # Rates are USD per million tokens (input + output billed separately).
+  # Anthropic Haiku 4.5 (Stage 1 default `eco`) at time of writing:
+  #   input  = $0.25 / Mtok
+  #   output = $1.25 / Mtok
+  # Anthropic Sonnet 4.6 (typical `smart` choice):
+  #   input  = $3.00 / Mtok
+  #   output = $15.00 / Mtok
+  #
+  # Update these values when your provider changes pricing or when you
+  # swap models. Spec 019 keeps the rates user-configurable so BYOK
+  # customers running custom gateways can plug in whatever they pay.
+  [profiles.default.tier_costs.eco]
+  input_usd_per_mtok  = 0.25
+  output_usd_per_mtok = 1.25
+
+  [profiles.default.tier_costs.smart]
+  input_usd_per_mtok  = 3.00
+  output_usd_per_mtok = 15.00
+
   # ─── Schema management ────────────────────────────────────────────
   #
   # The schema cache at ~/.terrashift/schemas/ is populated on first run

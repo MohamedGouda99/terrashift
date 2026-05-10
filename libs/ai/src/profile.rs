@@ -10,6 +10,7 @@
 //! resolved value), Article XIII rule 10 (config lives under
 //! `~/.terrashift/`; resolver validates at load time).
 
+use crate::cost::TierCosts;
 use crate::errors::AiError;
 use crate::tier::Tier;
 use serde::Deserialize;
@@ -53,6 +54,12 @@ pub struct Profile {
     /// RFC schema-source-migration §4.3.
     #[serde(default)]
     pub schemas: SchemasConfig,
+    /// Per-tier USD cost rates. Keyed by tier name (`"eco"`, `"smart"`).
+    /// Defaults to empty so existing profiles (no `[tier_costs]` block)
+    /// load unchanged; the migration summary then renders raw token
+    /// totals with a hint to add rates. Spec 019.
+    #[serde(default)]
+    pub tier_costs: BTreeMap<String, TierCosts>,
 }
 
 /// Per-tier model assignments. Stage 1 supports `eco` (required) and
