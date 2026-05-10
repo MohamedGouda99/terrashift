@@ -17,6 +17,11 @@
 //! is defined as the rendered output of a freshly-constructed `AppState` with a
 //! default `StatusInfo` — i.e. exactly what an operator sees when they launch
 //! the TUI for the first time before typing anything.
+//!
+//! Snapshot normalization: substrings shaped like `v<digits>.<digits>.<digits>`
+//! are rewritten to `vX.Y.Z` before comparison so the welcome screen's runtime
+//! version display doesn't make the test fail on every release bump
+//! (Article VI — deterministic tests).
 
 use ratatui::backend::TestBackend;
 use ratatui::buffer::Buffer;
@@ -57,6 +62,55 @@ fn buffer_to_text(buf: &Buffer) -> String {
     out
 }
 
+fn normalize_volatile(s: &str) -> String {
+    // Replace any "v<digits>.<digits>.<digits>(optional pre-release)" with "vX.Y.Z"
+    // so the snapshot survives workspace version bumps.
+    let mut out = String::with_capacity(s.len());
+    let chars: Vec<char> = s.chars().collect();
+    let mut i = 0;
+    while i < chars.len() {
+        if chars[i] == 'v' && i + 1 < chars.len() && chars[i + 1].is_ascii_digit() {
+            // Try to consume a semver-ish suffix.
+            let start = i;
+            let mut j = i + 1;
+            let mut dots = 0;
+            while j < chars.len() {
+                let c = chars[j];
+                if c.is_ascii_digit() {
+                    j += 1;
+                } else if c == '.' && dots < 2 {
+                    dots += 1;
+                    j += 1;
+                } else {
+                    break;
+                }
+            }
+            // Optional "-<alnum.>" pre-release tail.
+            if j < chars.len() && chars[j] == '-' {
+                j += 1;
+                while j < chars.len() {
+                    let c = chars[j];
+                    if c.is_ascii_alphanumeric() || c == '.' {
+                        j += 1;
+                    } else {
+                        break;
+                    }
+                }
+            }
+            if dots == 2 && j > start + 1 {
+                out.push_str("vX.Y.Z");
+                i = j;
+                continue;
+            }
+            // Wasn't actually semver — fall through and emit the original char.
+            let _ = start;
+        }
+        out.push(chars[i]);
+        i += 1;
+    }
+    out
+}
+
 #[test]
 fn no_info_conveyed_by_color_alone() {
     let buf = render_welcome();
@@ -93,16 +147,20 @@ fn welcome_screen_matches_snapshot() {
         .join("accessibility")
         .join("welcome.txt");
 
+    let actual_normalized = normalize_volatile(&actual);
+
     if std::env::var("UPDATE_SNAPSHOTS").is_ok() {
+        // Save the NORMALIZED form so the file on disk is also stable.
         std::fs::create_dir_all(snapshot_path.parent().unwrap()).expect("mkdir snapshots");
-        std::fs::write(&snapshot_path, &actual).expect("write snapshot");
+        std::fs::write(&snapshot_path, &actual_normalized).expect("write snapshot");
         return;
     }
 
     let expected = std::fs::read_to_string(&snapshot_path)
         .unwrap_or_else(|e| panic!("read {}: {e}", snapshot_path.display()));
+    let expected_normalized = normalize_volatile(&expected);
     assert_eq!(
-        actual, expected,
+        actual_normalized, expected_normalized,
         "welcome screen drifted; review the diff and run with UPDATE_SNAPSHOTS=1 if intentional"
     );
 }
