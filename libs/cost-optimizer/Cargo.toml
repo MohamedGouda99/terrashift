@@ -25,9 +25,10 @@ chrono = { workspace = true }
 # Internal
 terrashift-engine = { workspace = true }
 terrashift-shared = { workspace = true }
+terrashift-agent-core = { workspace = true }
 async-trait = "0.1"
+uuid = { workspace = true }
 
 [dev-dependencies]
 tempfile = { workspace = true }
 wiremock = { workspace = true }
-uuid = { workspace = true }

@@ -3175,6 +3175,7 @@ dependencies = [
  "serde_json",
  "sha2",
  "tempfile",
+ "terrashift-agent-core",
  "terrashift-engine",
  "terrashift-shared",
  "thiserror 1.0.69",
