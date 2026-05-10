@@ -3086,6 +3086,7 @@ dependencies = [
  "terrashift-agent-core",
  "terrashift-ai",
  "terrashift-audit",
+ "terrashift-cost-optimizer",
  "terrashift-engine",
  "terrashift-knowledge",
  "terrashift-notify",
