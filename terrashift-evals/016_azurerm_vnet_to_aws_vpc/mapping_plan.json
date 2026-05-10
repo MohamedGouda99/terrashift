@@ -1,0 +1,17 @@
+{
+  "run_id": "00000000-0000-0000-0000-000000000016",
+  "source_provider": "azurerm",
+  "target_provider": "aws",
+  "resources": [
+    {
+      "source_addr": "azurerm_virtual_network.main",
+      "target_addr": "aws_vpc.main",
+      "target_type": "aws_vpc",
+      "target_name": "main",
+      "attributes": {
+        "cidr_block": { "string": "10.0.0.0/16" }
+      },
+      "dependencies": []
+    }
+  ]
+}

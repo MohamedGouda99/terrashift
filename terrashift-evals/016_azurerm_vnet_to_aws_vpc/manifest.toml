@@ -1,0 +1,9 @@
+name = "016_azurerm_vnet_to_aws_vpc"
+description = "Azure VNet → AWS VPC; closes the azurerm-source coverage gap (PR #25 matrix proved this direction works with real LLM; this golden makes it a CI gate)"
+source_provider = "azurerm"
+target_provider = "aws"
+token_cost_ceiling_micros = 0
+articles = [3, 6, 8]
+required_schemas = [
+  { provider = "aws", version = "5.30.0" },
+]

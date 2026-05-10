@@ -1,0 +1,19 @@
+{
+  "run_id": "00000000-0000-0000-0000-000000000018",
+  "source_provider": "google",
+  "target_provider": "azurerm",
+  "resources": [
+    {
+      "source_addr": "google_compute_network.main",
+      "target_addr": "azurerm_virtual_network.main",
+      "target_type": "azurerm_virtual_network",
+      "target_name": "main",
+      "attributes": {
+        "name": { "string": "main" },
+        "resource_group_name": { "string": "main-rg" },
+        "location": { "string": "East US" }
+      },
+      "dependencies": []
+    }
+  ]
+}
