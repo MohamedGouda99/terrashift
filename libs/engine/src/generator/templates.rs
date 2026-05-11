@@ -24,13 +24,46 @@ use crate::mapper::{AttributeValue, MappedResource};
 use hcl::expr::{Traversal, TraversalOperator};
 use hcl::{Block, Body, Expression, Identifier, Variable};
 use std::collections::{BTreeMap, HashMap};
+use std::sync::Arc;
+use terrashift_knowledge::ProviderSchema;
 
 /// One template — pure function over a single mapped resource.
 type TemplateFn = fn(&MappedResource) -> Result<Block, GeneratorError>;
 
 /// Lookup table keyed by `target_type` (e.g. `"aws_vpc"`).
+///
+/// Two-tier emission strategy (Article I — deterministic, Article XIII rule 8 —
+/// no hardcoding):
+///
+/// 1. **Hand-curated templates** (`by_type`) — pure-fn templates for resource
+///    types whose HCL emission needs custom shaping beyond flat-attribute
+///    pass-through (e.g., `aws_s3_bucket` uses `bucket` not `name` for the
+///    primary identifier; nested-block resources are stage 5+).
+///
+/// 2. **Schema-derived fallback** (`schema_cache`) — populated from the seed
+///    JSONs at construction. Every resource type present in any loaded
+///    `ProviderSchema` becomes emittable: required attributes are derived
+///    from `attribute_type.required == true`; optional attributes from
+///    `optional == true && !computed`. Hand-curated takes precedence —
+///    schema_cache entries are never inserted for keys already in by_type.
+///
+/// The fallback is the production-grade path: with 3 cloud providers'
+/// full schemas captured under `libs/knowledge/seed/`, the registry covers
+/// **every** resource type those providers expose without any source-level
+/// enumeration of resource type names (Article XIII rule 8 — no hardcoding).
 pub struct TemplateRegistry {
     by_type: HashMap<&'static str, TemplateFn>,
+    /// Schema-derived (required, optional) attribute lists, keyed by target
+    /// resource type. Owned `String`s because schema-derived types are
+    /// discovered at runtime, not compile time. BTreeMap for deterministic
+    /// iteration order under Article VI.
+    schema_cache: BTreeMap<String, SchemaTemplate>,
+}
+
+/// One entry in the schema-driven fallback table.
+struct SchemaTemplate {
+    required: Vec<String>,
+    optional: Vec<String>,
 }
 
 impl TemplateRegistry {
@@ -91,29 +124,110 @@ impl TemplateRegistry {
         );
         by_type.insert("azurerm_resource_group", template_azurerm_resource_group);
 
-        Self { by_type }
+        Self {
+            by_type,
+            schema_cache: BTreeMap::new(),
+        }
+    }
+
+    /// Production constructor — Stage 1 hand-curated templates PLUS a
+    /// schema-derived fallback for every resource in the provided schemas.
+    ///
+    /// Hand-curated templates win over schema-derived for the same target
+    /// type (so the special `aws_s3_bucket → bucket` shape stays correct).
+    /// All other types — thousands across the 3 cloud providers — become
+    /// emittable through the generic flat-attribute pass-through.
+    ///
+    /// Per Article XIII rule 8 (no hardcoding) and the project memory rule
+    /// "seed/ is schema truth", this is how new resource types are added:
+    /// drop a new schema into `libs/knowledge/seed/<provider>/<version>/`,
+    /// rebuild, and every resource becomes emittable without source-level
+    /// enumeration.
+    pub fn with_schemas(schemas: impl IntoIterator<Item = Arc<ProviderSchema>>) -> Self {
+        let mut me = Self::stage1();
+        let by_type_keys: std::collections::HashSet<&'static str> =
+            me.by_type.keys().copied().collect();
+
+        for schema in schemas {
+            for (target_type, resource_schema) in &schema.resources {
+                // Skip if a hand-curated template already covers this type —
+                // explicit overrides win over schema-derived defaults.
+                if by_type_keys.contains(target_type.as_str()) {
+                    continue;
+                }
+
+                // Filter attributes: required → required list; optional &&
+                // !computed → optional list; computed-only → skip (Terraform
+                // computes them post-apply, operator can't set them).
+                let required: Vec<String> = resource_schema
+                    .attributes
+                    .iter()
+                    .filter(|(_, a)| a.required)
+                    .map(|(name, _)| name.clone())
+                    .collect();
+                let optional: Vec<String> = resource_schema
+                    .attributes
+                    .iter()
+                    .filter(|(_, a)| a.optional && !a.computed)
+                    .map(|(name, _)| name.clone())
+                    .collect();
+
+                me.schema_cache
+                    .insert(target_type.clone(), SchemaTemplate { required, optional });
+            }
+        }
+
+        tracing::info!(
+            hand_curated = me.by_type.len(),
+            schema_derived = me.schema_cache.len(),
+            "TemplateRegistry initialized"
+        );
+        me
     }
 
     /// Look up the template fn for a `target_type`. None means template-miss.
+    /// Kept for backwards-compatibility with callers that only need the
+    /// hand-curated layer (e.g., tests asserting Stage 1 surface).
     pub fn template_for(&self, target_type: &str) -> Option<TemplateFn> {
         self.by_type.get(target_type).copied()
     }
 
-    /// Iterate the registered `target_type` keys. Used by the Mapper to
-    /// build the `VALID TARGET TYPES` prompt block and to validate the
-    /// LLM-produced `MappedResource.target_type` against the supported
-    /// set before emitting (RFC r07-mvp-closure / FR-2 + FR-4).
-    pub fn registered_types(&self) -> impl Iterator<Item = &'static str> + '_ {
-        self.by_type.keys().copied()
+    /// Emit one `MappedResource` to an HCL `Block` — the production entry
+    /// point. Dispatches in order:
+    ///   1. Hand-curated template if registered.
+    ///   2. Schema-derived flat emission if the type is in any loaded schema.
+    ///   3. `Err(TemplateMiss)` otherwise (Article IV — loud failure).
+    pub fn emit(&self, r: &MappedResource) -> Result<Block, GeneratorError> {
+        if let Some(template) = self.by_type.get(r.target_type.as_str()) {
+            return template(r);
+        }
+        if let Some(SchemaTemplate { required, optional }) = self.schema_cache.get(&r.target_type) {
+            let req_refs: Vec<&str> = required.iter().map(|s| s.as_str()).collect();
+            let opt_refs: Vec<&str> = optional.iter().map(|s| s.as_str()).collect();
+            return build_resource_block(r, &req_refs, &opt_refs);
+        }
+        Err(GeneratorError::TemplateMiss {
+            target_type: r.target_type.clone(),
+        })
     }
 
-    /// How many templates are registered. Used by tests.
+    /// Iterate every emittable `target_type` — hand-curated and schema-derived
+    /// — for diagnostic and Mapper-prompt use. Schema-derived types are owned
+    /// `String`s so the API returns `&str`.
+    pub fn registered_types(&self) -> impl Iterator<Item = &str> + '_ {
+        self.by_type
+            .keys()
+            .copied()
+            .chain(self.schema_cache.keys().map(|s| s.as_str()))
+    }
+
+    /// How many templates are registered, total (hand-curated + schema). Used by tests.
     pub fn len(&self) -> usize {
-        self.by_type.len()
+        self.by_type.len() + self.schema_cache.len()
     }
 
     pub fn is_empty(&self) -> bool {
-        self.by_type.is_empty()
+        self.by_type.is_empty() && self.schema_cache.is_empty()
     }
 }
 

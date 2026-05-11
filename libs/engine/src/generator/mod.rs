@@ -48,6 +48,8 @@ pub use templates::TemplateRegistry;
 
 use crate::mapper::MappingPlan;
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
+use terrashift_knowledge::ProviderSchema;
 
 /// Generator facade.
 ///
@@ -59,10 +61,25 @@ pub struct Generator {
 }
 
 impl Generator {
-    /// Build with the Stage 1 template set (10 AWS + Azure resource types).
+    /// Build with the Stage 1 hand-curated template set only. Use in tests
+    /// or when no schema cache is available. For production migration runs,
+    /// prefer [`Generator::with_schemas`] so every resource type in the
+    /// loaded schemas becomes emittable.
     pub fn new() -> Self {
         Self {
             registry: TemplateRegistry::stage1(),
+        }
+    }
+
+    /// Build with hand-curated templates PLUS schema-derived fallback for
+    /// every resource type in `schemas`. This is the production constructor
+    /// — at startup the migration pipeline enumerates loaded provider
+    /// schemas (typically aws + azurerm + google) and passes them here. The
+    /// resulting registry covers thousands of resource types without any
+    /// hand-curated source enumeration (Article XIII rule 8).
+    pub fn with_schemas(schemas: impl IntoIterator<Item = Arc<ProviderSchema>>) -> Self {
+        Self {
+            registry: TemplateRegistry::with_schemas(schemas),
         }
     }
 

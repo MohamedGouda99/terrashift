@@ -148,12 +148,19 @@ impl Mapper {
         // r07-mvp-closure / FR-1, FR-2: prompt context-injection.
         // Build the per-target-provider supported-target-type set and
         // (when cached) the per-target-type required-attributes hint.
-        let supported_types = supported_types_for(&self.target_provider);
+        // Order matters: fetch target_schema FIRST so supported_types can
+        // include schema-derived types alongside hand-curated ones. The
+        // Mapper's prompt then advertises every type the Generator can
+        // actually emit, not just the small hand-curated subset.
         let target_schema = lookup_target_schema(knowledge, &self.target_provider).await;
+        let supported_types = supported_types_for(&self.target_provider, target_schema.as_ref());
 
-        // Build the prompt + route through the reducer. Article XIII
-        // rule 1: the `reducer.reduce` call is non-optional on this
-        // path; the type system makes bypass impossible.
+        // Curated cross-cloud equivalences for this direction — primes the
+        // LLM with authoritative pairs (e.g., aws_eks_cluster → azurerm_kubernetes_cluster).
+        // Article XIII rule 8 — data lives in libs/knowledge/seed/mappings.toml.
+        let curated =
+            terrashift_knowledge::find_curated(&self.source_provider, &self.target_provider);
+
         let system_prompt = prompt::build_system_prompt(
             &self.target_provider,
             target_schema.as_ref(),
@@ -164,6 +171,7 @@ impl Mapper {
             &self.target_provider,
             estate,
             &knowledge_hits,
+            &curated,
         );
         let messages = vec![
             Message {
@@ -203,9 +211,10 @@ impl Mapper {
 
         let (response, _meta) = llm.complete(Tier::Eco, &combined_prompt).await?;
 
-        // Parse the response as JSON → MappingPlan (Article III gate is
-        // P-06; here we only enforce that it parses).
-        let plan: MappingPlan = serde_json::from_str(&response).map_err(|e| {
+        // LLMs often wrap JSON in ```json ... ``` fences despite explicit
+        // instructions otherwise. Strip them before parsing.
+        let cleaned = strip_markdown_fences(&response);
+        let plan: MappingPlan = serde_json::from_str(cleaned).map_err(|e| {
             let sample = truncate_utf8(&response, 500);
             MapperError::MalformedResponse {
                 reason: e.to_string(),
@@ -224,13 +233,18 @@ impl Mapper {
     }
 }
 
-/// Build the supported-target-type set for the given target provider.
-/// Filters `TemplateRegistry::stage1()` keys by `<target_provider>_` prefix.
-/// r07-mvp-closure / FR-2.
-fn supported_types_for(target_provider: &str) -> Vec<String> {
-    let registry = TemplateRegistry::stage1();
+/// Build the supported-target-type set for the Mapper prompt.
+/// Hand-curated only (~10-15 types per provider) — schema-derived emission
+/// is the Generator's job, not the Mapper's. Showing the LLM 900+ candidate
+/// types confused it severely (Llama 3.3 70B, observed 2026-05-11). RAG
+/// knowledge_hits in the user prompt expose schema-derived candidates per
+/// source type. r07-mvp-closure / FR-2.
+fn supported_types_for(
+    target_provider: &str,
+    _target_schema: Option<&terrashift_knowledge::ProviderSchema>,
+) -> Vec<String> {
     let prefix = format!("{target_provider}_");
-    registry
+    TemplateRegistry::stage1()
         .registered_types()
         .filter(|k| k.starts_with(&prefix))
         .map(|k| k.to_string())
@@ -258,6 +272,37 @@ async fn lookup_target_schema(
         .fetch_provider_schema(target_provider, &version)
         .await
         .ok()
+}
+
+/// Strip leading/trailing Markdown code fences (``` or ```json) plus
+/// surrounding whitespace. LLMs add them despite "JSON only" instructions.
+fn strip_markdown_fences(s: &str) -> &str {
+    let s = s.trim();
+    let s = s
+        .strip_prefix("```json")
+        .or_else(|| s.strip_prefix("```"))
+        .unwrap_or(s)
+        .trim_start();
+    s.strip_suffix("```").unwrap_or(s).trim()
+}
+
+/// Lenient UUID deserializer for `MappingPlan.run_id`.
+///
+/// The LLM is asked for a UUID but reliably emits invalid hex digits in
+/// the run_id slot (observed: `5c2a3d4e5f6g` — trailing `g`, against
+/// meta-llama/Llama-3.3-70B via HF auto-router, 2026-05-11). Run IDs are
+/// operational metadata — they don't *need* to come from the model. So
+/// we accept any string, parse if valid, and fall back to `Uuid::new_v4`
+/// when invalid. Article XIII rule 5 (LLM-unreliability tolerance).
+fn deserialize_lenient_run_id<'de, D>(d: D) -> Result<Uuid, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let s: String = serde::Deserialize::deserialize(d)?;
+    Ok(Uuid::parse_str(&s).unwrap_or_else(|_| {
+        tracing::debug!(emitted = %s, "LLM emitted invalid UUID for run_id; synthesizing");
+        Uuid::new_v4()
+    }))
 }
 
 /// Validate a parsed `MappingPlan` against the supported-target-type set.
@@ -303,9 +348,14 @@ fn truncate_utf8(s: &str, max_bytes: usize) -> String {
 /// Stage 1 shape; S4 (P-05) extends with: cache_key, version-pinned
 /// schemas, per-resource confidence scores, fallback annotations.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub struct MappingPlan {
     /// The migration run this plan belongs to. Used to scope backups
     /// (`.terrashift/runs/{run_id}/backups/`) and audit entries.
+    /// Deserialization is lenient: invalid UUIDs from LLM responses are
+    /// silently replaced with `Uuid::new_v4` (Article XIII rule 5 —
+    /// LLM-unreliability tolerance).
+    #[serde(deserialize_with = "deserialize_lenient_run_id")]
     pub run_id: Uuid,
 
     /// Source provider key, e.g., "aws", "google", "azurerm".
@@ -359,7 +409,20 @@ pub enum AttributeValue {
     String(String),
     Number(f64),
     Bool(bool),
+    /// `list` is the canonical variant name; `array` is accepted as a
+    /// deserialization alias because LLMs (verified against Llama 3.3
+    /// 70B via HF auto-router, 2026-05-11) reliably emit the English
+    /// word `array` for list-typed Terraform attributes. Without this
+    /// alias the Mapper JSON round-trip fails at deserialization —
+    /// *before* Validator + Recovery get a chance to repair — and the
+    /// migration aborts on a parse error. Article XIII rule 5
+    /// (LLM-unreliability tolerance).
+    #[serde(alias = "array")]
     List(Vec<AttributeValue>),
+    /// `map` is canonical; `object` accepted as a deserialization alias
+    /// for the same reason as `list`/`array` — LLMs default to "object"
+    /// for keyed-value JSON regardless of the target schema's language.
+    #[serde(alias = "object")]
     Map(BTreeMap<String, AttributeValue>),
     /// A raw HCL expression — emitted unquoted. Examples:
     /// `"aws_vpc.main.id"`, `"var.region"`, `"data.aws_ami.example.id"`.
@@ -461,7 +524,7 @@ mod tests {
 
     #[test]
     fn supported_types_for_azurerm_includes_template_registry_keys() {
-        let supported = supported_types_for("azurerm");
+        let supported = supported_types_for("azurerm", None);
         // Per templates.rs:50-78, azurerm has at least 5 templates registered.
         assert!(
             supported.len() >= 5,
@@ -485,7 +548,7 @@ mod tests {
 
     #[test]
     fn supported_types_for_aws_includes_template_registry_keys() {
-        let supported = supported_types_for("aws");
+        let supported = supported_types_for("aws", None);
         assert!(supported.iter().any(|t| t == "aws_vpc"));
         assert!(supported.iter().any(|t| t == "aws_s3_bucket"));
     }
@@ -495,7 +558,7 @@ mod tests {
         // No templates registered for `tencentcloud_*`. Returns empty —
         // Mapper graceful behaviour: prompt will warn, validation will
         // reject every output. This is the right Stage 1 posture.
-        let supported = supported_types_for("tencentcloud");
+        let supported = supported_types_for("tencentcloud", None);
         assert!(supported.is_empty());
     }
 

@@ -24,7 +24,7 @@
 
 use crate::scanner::EstateInventory;
 use std::fmt::Write as _;
-use terrashift_knowledge::{ProviderSchema, ResourceMatch};
+use terrashift_knowledge::{MappingExample, ProviderSchema, ResourceMatch};
 
 /// Static header — the rules + schema portion. Composed with two dynamic
 /// blocks (VALID TARGET TYPES + REQUIRED ATTRIBUTES) into the full system
@@ -151,6 +151,7 @@ pub fn build_user_prompt(
     target_provider: &str,
     inventory: &EstateInventory,
     knowledge_hits: &[(String, Vec<ResourceMatch>)],
+    curated: &[&MappingExample],
 ) -> String {
     let mut s = String::new();
     s.push_str(&format!(
@@ -167,6 +168,27 @@ pub fn build_user_prompt(
         s.push_str("(no resources)\n");
     }
     s.push('\n');
+
+    if !curated.is_empty() {
+        s.push_str("=== PROVEN EQUIVALENCES (authoritative — prefer these) ===\n");
+        for m in curated {
+            let _ = writeln!(
+                s,
+                "{} → {}  (confidence {:.2})",
+                m.source_resource, m.target_resource, m.confidence
+            );
+            if !m.attribute_alignments.is_empty() {
+                let pairs = m
+                    .attribute_alignments
+                    .iter()
+                    .map(|(src, tgt)| format!("{src}={tgt}"))
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                let _ = writeln!(s, "  attrs: {pairs}");
+            }
+        }
+        s.push('\n');
+    }
 
     s.push_str("=== KNOWLEDGE HITS (top-K target candidates per source type) ===\n");
     if knowledge_hits.is_empty() {

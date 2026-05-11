@@ -44,15 +44,23 @@ model = "huggingface/meta-llama/Llama-3.3-70B-Instruct"
   # ─── LLM provider: HuggingFace Inference Providers ────────────────
   #
   # The router endpoint is OpenAI-compatible — Terrashift's openai_compat
-  # provider works against it directly with no special-casing. Pick the
-  # backend provider via the URL path (`cerebras`, `together`, `nebius`,
-  # `sambanova`, `replicate`, `fal`). Cerebras is the fastest free tier.
+  # provider works against it directly with no special-casing.
   #
-  # Verify the model is hosted on your chosen backend at:
-  #   https://huggingface.co/<org>/<model>?inference_provider=cerebras
+  # Default: `/v1` is HuggingFace's **auto-router** — it picks whichever
+  # backend (Cerebras, Together, Nebius, SambaNova, Replicate, Fal,
+  # Novita, Hyperbolic) currently serves the requested model. Most
+  # resilient because backend availability changes without warning
+  # (verified 2026-05-11: Llama 3.3 70B Instruct was NOT on Cerebras,
+  # WAS on the auto-router).
+  #
+  # To pin a specific backend instead, swap to a backend-prefixed path:
+  #   https://router.huggingface.co/together/v1
+  #   https://router.huggingface.co/nebius/v1
+  # Verify the model is hosted there first at:
+  #   https://huggingface.co/<org>/<model>?inference_provider=<backend>
   [profiles.default.providers.huggingface]
   type         = "openai-compatible"
-  api_endpoint = "https://router.huggingface.co/cerebras/v1"
+  api_endpoint = "https://router.huggingface.co/v1"
   api_key_env  = "HF_TOKEN"
 
   # ─── Notifications: Slack Incoming Webhook ────────────────────────

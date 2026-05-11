@@ -1,0 +1,1275 @@
+# Terrashift curated cross-cloud mapping bundle.
+#
+# Data, not code. Article XIII rule 8 — resource type names are
+# enumerated here as KNOWLEDGE (the same way seed/<provider>/<version>/
+# schema.json captures each provider's resource catalog) and consumed by
+# the Mapper as a strong prior in its prompt under "PROVEN EQUIVALENCES".
+#
+# Coverage: ~30 canonical pairs per direction across the 6 cross-cloud
+# directions (aws ↔ azurerm ↔ google). Confidence values follow:
+#   1.00 — exact semantic equivalent, drop-in
+#   0.90 — strong equivalent, near-identical role
+#   0.80 — closest fit, may need post-migration adjustment
+#   0.70 — workload-specific match; reviewer should sanity-check
+# Anything below 0.70 is excluded — the LLM is better off proposing
+# from scratch than being primed with a weak prior.
+#
+# attribute_alignments lists [source_attr, target_attr] pairs that are
+# semantically equivalent. Used by the Mapper to hint attribute names
+# to the model when emitting target HCL.
+
+# ────────────────────────────────────────────────────────────────────
+# aws → azurerm
+# ────────────────────────────────────────────────────────────────────
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_vpc"
+target_provider = "azurerm"
+target_resource = "azurerm_virtual_network"
+attribute_alignments = [["cidr_block", "address_space"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_subnet"
+target_provider = "azurerm"
+target_resource = "azurerm_subnet"
+attribute_alignments = [["cidr_block", "address_prefixes"], ["vpc_id", "virtual_network_name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_security_group"
+target_provider = "azurerm"
+target_resource = "azurerm_network_security_group"
+attribute_alignments = [["name", "name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_instance"
+target_provider = "azurerm"
+target_resource = "azurerm_linux_virtual_machine"
+attribute_alignments = [["instance_type", "size"], ["ami", "source_image_reference"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_s3_bucket"
+target_provider = "azurerm"
+target_resource = "azurerm_storage_account"
+attribute_alignments = [["bucket", "name"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_iam_role"
+target_provider = "azurerm"
+target_resource = "azurerm_role_definition"
+attribute_alignments = [["name", "name"], ["assume_role_policy", "permissions"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_iam_role_policy_attachment"
+target_provider = "azurerm"
+target_resource = "azurerm_role_assignment"
+attribute_alignments = [["role", "principal_id"], ["policy_arn", "role_definition_id"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_iam_policy"
+target_provider = "azurerm"
+target_resource = "azurerm_role_definition"
+attribute_alignments = [["name", "name"], ["policy", "permissions"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_eks_cluster"
+target_provider = "azurerm"
+target_resource = "azurerm_kubernetes_cluster"
+attribute_alignments = [["name", "name"], ["role_arn", "identity"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_eks_node_group"
+target_provider = "azurerm"
+target_resource = "azurerm_kubernetes_cluster_node_pool"
+attribute_alignments = [["cluster_name", "kubernetes_cluster_id"], ["node_role_arn", "identity"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_ecr_repository"
+target_provider = "azurerm"
+target_resource = "azurerm_container_registry"
+attribute_alignments = [["name", "name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_eip"
+target_provider = "azurerm"
+target_resource = "azurerm_public_ip"
+attribute_alignments = [["domain", "allocation_method"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_route_table"
+target_provider = "azurerm"
+target_resource = "azurerm_route_table"
+attribute_alignments = [["vpc_id", "resource_group_name"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_internet_gateway"
+target_provider = "azurerm"
+target_resource = "azurerm_public_ip"
+attribute_alignments = []
+confidence = 0.7
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_nat_gateway"
+target_provider = "azurerm"
+target_resource = "azurerm_nat_gateway"
+attribute_alignments = [["subnet_id", "subnet_id"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_lambda_function"
+target_provider = "azurerm"
+target_resource = "azurerm_linux_function_app"
+attribute_alignments = [["function_name", "name"], ["runtime", "site_config"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_dynamodb_table"
+target_provider = "azurerm"
+target_resource = "azurerm_cosmosdb_account"
+attribute_alignments = [["name", "name"], ["hash_key", "partition_key_path"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_db_instance"
+target_provider = "azurerm"
+target_resource = "azurerm_mssql_database"
+attribute_alignments = [["identifier", "name"], ["engine", "collation"]]
+confidence = 0.8
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_sqs_queue"
+target_provider = "azurerm"
+target_resource = "azurerm_servicebus_queue"
+attribute_alignments = [["name", "name"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_sns_topic"
+target_provider = "azurerm"
+target_resource = "azurerm_servicebus_topic"
+attribute_alignments = [["name", "name"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_cloudwatch_log_group"
+target_provider = "azurerm"
+target_resource = "azurerm_log_analytics_workspace"
+attribute_alignments = [["name", "name"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_kms_key"
+target_provider = "azurerm"
+target_resource = "azurerm_key_vault_key"
+attribute_alignments = [["description", "name"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_secretsmanager_secret"
+target_provider = "azurerm"
+target_resource = "azurerm_key_vault_secret"
+attribute_alignments = [["name", "name"]]
+confidence = 0.95
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_lb"
+target_provider = "azurerm"
+target_resource = "azurerm_lb"
+attribute_alignments = [["name", "name"]]
+confidence = 0.95
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_route53_zone"
+target_provider = "azurerm"
+target_resource = "azurerm_dns_zone"
+attribute_alignments = [["name", "name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_acm_certificate"
+target_provider = "azurerm"
+target_resource = "azurerm_key_vault_certificate"
+attribute_alignments = [["domain_name", "name"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_cloudfront_distribution"
+target_provider = "azurerm"
+target_resource = "azurerm_cdn_endpoint"
+attribute_alignments = [["origin", "origin_host_header"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_apigatewayv2_api"
+target_provider = "azurerm"
+target_resource = "azurerm_api_management_api"
+attribute_alignments = [["name", "name"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_efs_file_system"
+target_provider = "azurerm"
+target_resource = "azurerm_storage_share"
+attribute_alignments = [["creation_token", "name"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_vpc_endpoint"
+target_provider = "azurerm"
+target_resource = "azurerm_private_endpoint"
+attribute_alignments = [["service_name", "private_service_connection"]]
+confidence = 0.85
+
+# ────────────────────────────────────────────────────────────────────
+# azurerm → aws (reverse of above where reasonable)
+# ────────────────────────────────────────────────────────────────────
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_virtual_network"
+target_provider = "aws"
+target_resource = "aws_vpc"
+attribute_alignments = [["address_space", "cidr_block"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_subnet"
+target_provider = "aws"
+target_resource = "aws_subnet"
+attribute_alignments = [["address_prefixes", "cidr_block"], ["virtual_network_name", "vpc_id"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_network_security_group"
+target_provider = "aws"
+target_resource = "aws_security_group"
+attribute_alignments = [["name", "name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_linux_virtual_machine"
+target_provider = "aws"
+target_resource = "aws_instance"
+attribute_alignments = [["size", "instance_type"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_storage_account"
+target_provider = "aws"
+target_resource = "aws_s3_bucket"
+attribute_alignments = [["name", "bucket"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_role_definition"
+target_provider = "aws"
+target_resource = "aws_iam_role"
+attribute_alignments = [["name", "name"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_role_assignment"
+target_provider = "aws"
+target_resource = "aws_iam_role_policy_attachment"
+attribute_alignments = [["principal_id", "role"], ["role_definition_id", "policy_arn"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_kubernetes_cluster"
+target_provider = "aws"
+target_resource = "aws_eks_cluster"
+attribute_alignments = [["name", "name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_kubernetes_cluster_node_pool"
+target_provider = "aws"
+target_resource = "aws_eks_node_group"
+attribute_alignments = [["kubernetes_cluster_id", "cluster_name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_container_registry"
+target_provider = "aws"
+target_resource = "aws_ecr_repository"
+attribute_alignments = [["name", "name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_public_ip"
+target_provider = "aws"
+target_resource = "aws_eip"
+attribute_alignments = [["allocation_method", "domain"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_dns_zone"
+target_provider = "aws"
+target_resource = "aws_route53_zone"
+attribute_alignments = [["name", "name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_key_vault_secret"
+target_provider = "aws"
+target_resource = "aws_secretsmanager_secret"
+attribute_alignments = [["name", "name"]]
+confidence = 0.95
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_function_app"
+target_provider = "aws"
+target_resource = "aws_lambda_function"
+attribute_alignments = [["name", "function_name"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_cosmosdb_account"
+target_provider = "aws"
+target_resource = "aws_dynamodb_table"
+attribute_alignments = [["name", "name"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_mssql_database"
+target_provider = "aws"
+target_resource = "aws_db_instance"
+attribute_alignments = [["name", "identifier"]]
+confidence = 0.8
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_servicebus_queue"
+target_provider = "aws"
+target_resource = "aws_sqs_queue"
+attribute_alignments = [["name", "name"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_servicebus_topic"
+target_provider = "aws"
+target_resource = "aws_sns_topic"
+attribute_alignments = [["name", "name"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_log_analytics_workspace"
+target_provider = "aws"
+target_resource = "aws_cloudwatch_log_group"
+attribute_alignments = [["name", "name"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_key_vault_key"
+target_provider = "aws"
+target_resource = "aws_kms_key"
+attribute_alignments = [["name", "description"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_lb"
+target_provider = "aws"
+target_resource = "aws_lb"
+attribute_alignments = [["name", "name"]]
+confidence = 0.95
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_route_table"
+target_provider = "aws"
+target_resource = "aws_route_table"
+attribute_alignments = [["resource_group_name", "vpc_id"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_nat_gateway"
+target_provider = "aws"
+target_resource = "aws_nat_gateway"
+attribute_alignments = [["subnet_id", "subnet_id"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_cdn_endpoint"
+target_provider = "aws"
+target_resource = "aws_cloudfront_distribution"
+attribute_alignments = []
+confidence = 0.85
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_api_management_api"
+target_provider = "aws"
+target_resource = "aws_apigatewayv2_api"
+attribute_alignments = [["name", "name"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_storage_share"
+target_provider = "aws"
+target_resource = "aws_efs_file_system"
+attribute_alignments = [["name", "creation_token"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_private_endpoint"
+target_provider = "aws"
+target_resource = "aws_vpc_endpoint"
+attribute_alignments = [["private_service_connection", "service_name"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_key_vault_certificate"
+target_provider = "aws"
+target_resource = "aws_acm_certificate"
+attribute_alignments = [["name", "domain_name"]]
+confidence = 0.9
+
+# ────────────────────────────────────────────────────────────────────
+# aws → google
+# ────────────────────────────────────────────────────────────────────
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_vpc"
+target_provider = "google"
+target_resource = "google_compute_network"
+attribute_alignments = [["cidr_block", "auto_create_subnetworks"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_subnet"
+target_provider = "google"
+target_resource = "google_compute_subnetwork"
+attribute_alignments = [["cidr_block", "ip_cidr_range"], ["vpc_id", "network"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_security_group"
+target_provider = "google"
+target_resource = "google_compute_firewall"
+attribute_alignments = [["name", "name"], ["vpc_id", "network"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_instance"
+target_provider = "google"
+target_resource = "google_compute_instance"
+attribute_alignments = [["instance_type", "machine_type"], ["availability_zone", "zone"]]
+confidence = 0.95
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_s3_bucket"
+target_provider = "google"
+target_resource = "google_storage_bucket"
+attribute_alignments = [["bucket", "name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_iam_role"
+target_provider = "google"
+target_resource = "google_service_account"
+attribute_alignments = [["name", "account_id"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_iam_policy"
+target_provider = "google"
+target_resource = "google_project_iam_custom_role"
+attribute_alignments = [["name", "role_id"], ["policy", "permissions"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_iam_role_policy_attachment"
+target_provider = "google"
+target_resource = "google_project_iam_binding"
+attribute_alignments = [["role", "members"], ["policy_arn", "role"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_eks_cluster"
+target_provider = "google"
+target_resource = "google_container_cluster"
+attribute_alignments = [["name", "name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_eks_node_group"
+target_provider = "google"
+target_resource = "google_container_node_pool"
+attribute_alignments = [["cluster_name", "cluster"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_ecr_repository"
+target_provider = "google"
+target_resource = "google_artifact_registry_repository"
+attribute_alignments = [["name", "repository_id"]]
+confidence = 0.95
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_eip"
+target_provider = "google"
+target_resource = "google_compute_address"
+attribute_alignments = []
+confidence = 1.0
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_lambda_function"
+target_provider = "google"
+target_resource = "google_cloudfunctions2_function"
+attribute_alignments = [["function_name", "name"], ["runtime", "build_config"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_dynamodb_table"
+target_provider = "google"
+target_resource = "google_bigtable_table"
+attribute_alignments = [["name", "name"]]
+confidence = 0.75
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_db_instance"
+target_provider = "google"
+target_resource = "google_sql_database_instance"
+attribute_alignments = [["identifier", "name"], ["engine", "database_version"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_sqs_queue"
+target_provider = "google"
+target_resource = "google_pubsub_topic"
+attribute_alignments = [["name", "name"]]
+confidence = 0.75
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_sns_topic"
+target_provider = "google"
+target_resource = "google_pubsub_topic"
+attribute_alignments = [["name", "name"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_cloudwatch_log_group"
+target_provider = "google"
+target_resource = "google_logging_project_sink"
+attribute_alignments = [["name", "name"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_kms_key"
+target_provider = "google"
+target_resource = "google_kms_crypto_key"
+attribute_alignments = [["description", "name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_secretsmanager_secret"
+target_provider = "google"
+target_resource = "google_secret_manager_secret"
+attribute_alignments = [["name", "secret_id"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_route53_zone"
+target_provider = "google"
+target_resource = "google_dns_managed_zone"
+attribute_alignments = [["name", "name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_lb"
+target_provider = "google"
+target_resource = "google_compute_forwarding_rule"
+attribute_alignments = [["name", "name"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_acm_certificate"
+target_provider = "google"
+target_resource = "google_compute_managed_ssl_certificate"
+attribute_alignments = [["domain_name", "managed"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_efs_file_system"
+target_provider = "google"
+target_resource = "google_filestore_instance"
+attribute_alignments = [["creation_token", "name"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_nat_gateway"
+target_provider = "google"
+target_resource = "google_compute_router_nat"
+attribute_alignments = []
+confidence = 0.9
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_internet_gateway"
+target_provider = "google"
+target_resource = "google_compute_router"
+attribute_alignments = []
+confidence = 0.7
+
+[[mappings]]
+source_provider = "aws"
+source_resource = "aws_route_table"
+target_provider = "google"
+target_resource = "google_compute_route"
+attribute_alignments = []
+confidence = 0.85
+
+# ────────────────────────────────────────────────────────────────────
+# google → aws
+# ────────────────────────────────────────────────────────────────────
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_compute_network"
+target_provider = "aws"
+target_resource = "aws_vpc"
+attribute_alignments = []
+confidence = 1.0
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_compute_subnetwork"
+target_provider = "aws"
+target_resource = "aws_subnet"
+attribute_alignments = [["ip_cidr_range", "cidr_block"], ["network", "vpc_id"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_compute_firewall"
+target_provider = "aws"
+target_resource = "aws_security_group"
+attribute_alignments = [["name", "name"], ["network", "vpc_id"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_compute_instance"
+target_provider = "aws"
+target_resource = "aws_instance"
+attribute_alignments = [["machine_type", "instance_type"], ["zone", "availability_zone"]]
+confidence = 0.95
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_storage_bucket"
+target_provider = "aws"
+target_resource = "aws_s3_bucket"
+attribute_alignments = [["name", "bucket"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_service_account"
+target_provider = "aws"
+target_resource = "aws_iam_role"
+attribute_alignments = [["account_id", "name"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_project_iam_custom_role"
+target_provider = "aws"
+target_resource = "aws_iam_policy"
+attribute_alignments = [["role_id", "name"], ["permissions", "policy"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_container_cluster"
+target_provider = "aws"
+target_resource = "aws_eks_cluster"
+attribute_alignments = [["name", "name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_container_node_pool"
+target_provider = "aws"
+target_resource = "aws_eks_node_group"
+attribute_alignments = [["cluster", "cluster_name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_artifact_registry_repository"
+target_provider = "aws"
+target_resource = "aws_ecr_repository"
+attribute_alignments = [["repository_id", "name"]]
+confidence = 0.95
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_compute_address"
+target_provider = "aws"
+target_resource = "aws_eip"
+attribute_alignments = []
+confidence = 1.0
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_cloudfunctions2_function"
+target_provider = "aws"
+target_resource = "aws_lambda_function"
+attribute_alignments = [["name", "function_name"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_sql_database_instance"
+target_provider = "aws"
+target_resource = "aws_db_instance"
+attribute_alignments = [["name", "identifier"], ["database_version", "engine"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_pubsub_topic"
+target_provider = "aws"
+target_resource = "aws_sns_topic"
+attribute_alignments = [["name", "name"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_logging_project_sink"
+target_provider = "aws"
+target_resource = "aws_cloudwatch_log_group"
+attribute_alignments = [["name", "name"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_kms_crypto_key"
+target_provider = "aws"
+target_resource = "aws_kms_key"
+attribute_alignments = [["name", "description"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_secret_manager_secret"
+target_provider = "aws"
+target_resource = "aws_secretsmanager_secret"
+attribute_alignments = [["secret_id", "name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_dns_managed_zone"
+target_provider = "aws"
+target_resource = "aws_route53_zone"
+attribute_alignments = [["name", "name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_compute_forwarding_rule"
+target_provider = "aws"
+target_resource = "aws_lb"
+attribute_alignments = [["name", "name"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_filestore_instance"
+target_provider = "aws"
+target_resource = "aws_efs_file_system"
+attribute_alignments = [["name", "creation_token"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_compute_router_nat"
+target_provider = "aws"
+target_resource = "aws_nat_gateway"
+attribute_alignments = []
+confidence = 0.9
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_compute_route"
+target_provider = "aws"
+target_resource = "aws_route_table"
+attribute_alignments = []
+confidence = 0.85
+
+# ────────────────────────────────────────────────────────────────────
+# azurerm → google
+# ────────────────────────────────────────────────────────────────────
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_virtual_network"
+target_provider = "google"
+target_resource = "google_compute_network"
+attribute_alignments = [["address_space", "auto_create_subnetworks"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_subnet"
+target_provider = "google"
+target_resource = "google_compute_subnetwork"
+attribute_alignments = [["address_prefixes", "ip_cidr_range"], ["virtual_network_name", "network"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_network_security_group"
+target_provider = "google"
+target_resource = "google_compute_firewall"
+attribute_alignments = [["name", "name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_linux_virtual_machine"
+target_provider = "google"
+target_resource = "google_compute_instance"
+attribute_alignments = [["size", "machine_type"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_storage_account"
+target_provider = "google"
+target_resource = "google_storage_bucket"
+attribute_alignments = [["name", "name"]]
+confidence = 0.95
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_role_definition"
+target_provider = "google"
+target_resource = "google_project_iam_custom_role"
+attribute_alignments = [["name", "role_id"], ["permissions", "permissions"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_kubernetes_cluster"
+target_provider = "google"
+target_resource = "google_container_cluster"
+attribute_alignments = [["name", "name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_kubernetes_cluster_node_pool"
+target_provider = "google"
+target_resource = "google_container_node_pool"
+attribute_alignments = [["kubernetes_cluster_id", "cluster"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_container_registry"
+target_provider = "google"
+target_resource = "google_artifact_registry_repository"
+attribute_alignments = [["name", "repository_id"]]
+confidence = 0.95
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_public_ip"
+target_provider = "google"
+target_resource = "google_compute_address"
+attribute_alignments = []
+confidence = 1.0
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_function_app"
+target_provider = "google"
+target_resource = "google_cloudfunctions2_function"
+attribute_alignments = [["name", "name"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_mssql_database"
+target_provider = "google"
+target_resource = "google_sql_database_instance"
+attribute_alignments = [["name", "name"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_servicebus_topic"
+target_provider = "google"
+target_resource = "google_pubsub_topic"
+attribute_alignments = [["name", "name"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_log_analytics_workspace"
+target_provider = "google"
+target_resource = "google_logging_project_sink"
+attribute_alignments = [["name", "name"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_key_vault_key"
+target_provider = "google"
+target_resource = "google_kms_crypto_key"
+attribute_alignments = [["name", "name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_key_vault_secret"
+target_provider = "google"
+target_resource = "google_secret_manager_secret"
+attribute_alignments = [["name", "secret_id"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_dns_zone"
+target_provider = "google"
+target_resource = "google_dns_managed_zone"
+attribute_alignments = [["name", "name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_lb"
+target_provider = "google"
+target_resource = "google_compute_forwarding_rule"
+attribute_alignments = [["name", "name"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_nat_gateway"
+target_provider = "google"
+target_resource = "google_compute_router_nat"
+attribute_alignments = []
+confidence = 0.9
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_storage_share"
+target_provider = "google"
+target_resource = "google_filestore_instance"
+attribute_alignments = [["name", "name"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_route_table"
+target_provider = "google"
+target_resource = "google_compute_route"
+attribute_alignments = []
+confidence = 0.85
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_cdn_endpoint"
+target_provider = "google"
+target_resource = "google_compute_backend_bucket"
+attribute_alignments = []
+confidence = 0.8
+
+[[mappings]]
+source_provider = "azurerm"
+source_resource = "azurerm_api_management_api"
+target_provider = "google"
+target_resource = "google_api_gateway_api"
+attribute_alignments = [["name", "api_id"]]
+confidence = 0.85
+
+# ────────────────────────────────────────────────────────────────────
+# google → azurerm
+# ────────────────────────────────────────────────────────────────────
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_compute_network"
+target_provider = "azurerm"
+target_resource = "azurerm_virtual_network"
+attribute_alignments = [["auto_create_subnetworks", "address_space"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_compute_subnetwork"
+target_provider = "azurerm"
+target_resource = "azurerm_subnet"
+attribute_alignments = [["ip_cidr_range", "address_prefixes"], ["network", "virtual_network_name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_compute_firewall"
+target_provider = "azurerm"
+target_resource = "azurerm_network_security_group"
+attribute_alignments = [["name", "name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_compute_instance"
+target_provider = "azurerm"
+target_resource = "azurerm_linux_virtual_machine"
+attribute_alignments = [["machine_type", "size"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_storage_bucket"
+target_provider = "azurerm"
+target_resource = "azurerm_storage_account"
+attribute_alignments = [["name", "name"]]
+confidence = 0.95
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_service_account"
+target_provider = "azurerm"
+target_resource = "azurerm_role_assignment"
+attribute_alignments = [["account_id", "principal_id"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_project_iam_custom_role"
+target_provider = "azurerm"
+target_resource = "azurerm_role_definition"
+attribute_alignments = [["role_id", "name"], ["permissions", "permissions"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_container_cluster"
+target_provider = "azurerm"
+target_resource = "azurerm_kubernetes_cluster"
+attribute_alignments = [["name", "name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_container_node_pool"
+target_provider = "azurerm"
+target_resource = "azurerm_kubernetes_cluster_node_pool"
+attribute_alignments = [["cluster", "kubernetes_cluster_id"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_artifact_registry_repository"
+target_provider = "azurerm"
+target_resource = "azurerm_container_registry"
+attribute_alignments = [["repository_id", "name"]]
+confidence = 0.95
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_compute_address"
+target_provider = "azurerm"
+target_resource = "azurerm_public_ip"
+attribute_alignments = []
+confidence = 1.0
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_cloudfunctions2_function"
+target_provider = "azurerm"
+target_resource = "azurerm_linux_function_app"
+attribute_alignments = [["name", "name"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_sql_database_instance"
+target_provider = "azurerm"
+target_resource = "azurerm_mssql_database"
+attribute_alignments = [["name", "name"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_pubsub_topic"
+target_provider = "azurerm"
+target_resource = "azurerm_servicebus_topic"
+attribute_alignments = [["name", "name"]]
+confidence = 0.9
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_logging_project_sink"
+target_provider = "azurerm"
+target_resource = "azurerm_log_analytics_workspace"
+attribute_alignments = [["name", "name"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_kms_crypto_key"
+target_provider = "azurerm"
+target_resource = "azurerm_key_vault_key"
+attribute_alignments = [["name", "name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_secret_manager_secret"
+target_provider = "azurerm"
+target_resource = "azurerm_key_vault_secret"
+attribute_alignments = [["secret_id", "name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_dns_managed_zone"
+target_provider = "azurerm"
+target_resource = "azurerm_dns_zone"
+attribute_alignments = [["name", "name"]]
+confidence = 1.0
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_compute_forwarding_rule"
+target_provider = "azurerm"
+target_resource = "azurerm_lb"
+attribute_alignments = [["name", "name"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_compute_router_nat"
+target_provider = "azurerm"
+target_resource = "azurerm_nat_gateway"
+attribute_alignments = []
+confidence = 0.9
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_filestore_instance"
+target_provider = "azurerm"
+target_resource = "azurerm_storage_share"
+attribute_alignments = [["name", "name"]]
+confidence = 0.85
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_compute_route"
+target_provider = "azurerm"
+target_resource = "azurerm_route_table"
+attribute_alignments = []
+confidence = 0.85
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_compute_backend_bucket"
+target_provider = "azurerm"
+target_resource = "azurerm_cdn_endpoint"
+attribute_alignments = []
+confidence = 0.8
+
+[[mappings]]
+source_provider = "google"
+source_resource = "google_api_gateway_api"
+target_provider = "azurerm"
+target_resource = "azurerm_api_management_api"
+attribute_alignments = [["api_id", "name"]]
+confidence = 0.85
