@@ -155,9 +155,12 @@ impl Mapper {
         let target_schema = lookup_target_schema(knowledge, &self.target_provider).await;
         let supported_types = supported_types_for(&self.target_provider, target_schema.as_ref());
 
-        // Build the prompt + route through the reducer. Article XIII
-        // rule 1: the `reducer.reduce` call is non-optional on this
-        // path; the type system makes bypass impossible.
+        // Curated cross-cloud equivalences for this direction — primes the
+        // LLM with authoritative pairs (e.g., aws_eks_cluster → azurerm_kubernetes_cluster).
+        // Article XIII rule 8 — data lives in libs/knowledge/seed/mappings.toml.
+        let curated =
+            terrashift_knowledge::find_curated(&self.source_provider, &self.target_provider);
+
         let system_prompt = prompt::build_system_prompt(
             &self.target_provider,
             target_schema.as_ref(),
@@ -168,6 +171,7 @@ impl Mapper {
             &self.target_provider,
             estate,
             &knowledge_hits,
+            &curated,
         );
         let messages = vec![
             Message {

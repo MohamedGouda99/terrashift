@@ -42,6 +42,7 @@ pub mod errors;
 pub mod knowledge_service;
 pub mod local_schema_store;
 pub mod manifest;
+pub mod mappings;
 pub mod registry_client;
 pub mod schema_fetcher_cli;
 pub mod schema_store;
@@ -58,6 +59,7 @@ pub use knowledge_service::{
 };
 pub use local_schema_store::LocalSchemaStore;
 pub use manifest::{RuntimeManifest, RuntimeManifestEntry, SCHEMA_VERSION};
+pub use mappings::{canonical_target, find_curated, CURATED_MAPPINGS};
 pub use registry_client::{
     ProviderMetadata, ProviderVersionEntry, ProviderVersions, RegistryError, SchemaFetcher,
     StubSchemaFetcher, TerraformRegistryClient,
