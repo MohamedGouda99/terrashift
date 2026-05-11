@@ -22,6 +22,11 @@ pub struct ProviderSchema {
     pub version: String,
     /// Provider-level metadata + per-resource schemas.
     pub resources: BTreeMap<String, ResourceSchema>,
+    /// Data-source schemas. Defaults to empty so that seed JSON captured
+    /// before the data_sources field was added still loads (Article VI —
+    /// version-pinned snapshots are stable; the deserializer must accept
+    /// older captures rather than silently dropping them).
+    #[serde(default)]
     pub data_sources: BTreeMap<String, ResourceSchema>,
     pub fetched_at: DateTime<Utc>,
 }

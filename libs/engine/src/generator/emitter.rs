@@ -49,15 +49,14 @@ pub fn emit(
 
     let mut emitted = Vec::with_capacity(groups.len());
     for (target_type, resources) in groups {
-        let template = registry
-            .template_for(&target_type)
-            .ok_or(GeneratorError::TemplateMiss {
-                target_type: target_type.clone(),
-            })?;
-
-        let blocks: Result<Vec<_>, _> = resources.iter().map(|r| template(r)).collect();
-        let body = templates::body_from_blocks(blocks?);
+        // Two-tier emit (registry.emit): hand-curated first, then
+        // schema-derived fallback. TemplateMiss only fires when neither
+        // covers the type (Article IV — loud failure).
+        let blocks: Result<Vec<_>, _> = resources.iter().map(|r| registry.emit(r)).collect();
+        let blocks = blocks?;
+        let body = templates::body_from_blocks(blocks);
         let serialized = hcl::to_string(&body).map_err(GeneratorError::Hcl)?;
+        let _ = target_type; // Used for file name below
 
         let target_path = output_dir.join(format!("{}.tf", target_type));
         let backup_path = if target_path.exists() {
@@ -88,13 +87,7 @@ pub fn render_one(
     resource: &MappedResource,
     registry: &TemplateRegistry,
 ) -> Result<String, GeneratorError> {
-    let template =
-        registry
-            .template_for(&resource.target_type)
-            .ok_or(GeneratorError::TemplateMiss {
-                target_type: resource.target_type.clone(),
-            })?;
-    let block = template(resource)?;
+    let block = registry.emit(resource)?;
     let body = templates::body_from_blocks(vec![block]);
     hcl::to_string(&body).map_err(GeneratorError::Hcl)
 }
@@ -110,13 +103,7 @@ pub fn render_many(
     let sorted = templates::sort_resources(resources);
     let mut blocks = Vec::with_capacity(sorted.len());
     for r in sorted {
-        let template =
-            registry
-                .template_for(&r.target_type)
-                .ok_or(GeneratorError::TemplateMiss {
-                    target_type: r.target_type.clone(),
-                })?;
-        blocks.push(template(r)?);
+        blocks.push(registry.emit(r)?);
     }
     let body = templates::body_from_blocks(blocks);
     hcl::to_string(&body).map_err(GeneratorError::Hcl)
