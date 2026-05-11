@@ -276,7 +276,37 @@ pub async fn run(args: Args, profile_path: Option<PathBuf>) -> Result<()> {
     let cwd_holder = TempDir::new().context("create temp cwd for backups")?;
 
     println!("📦 Emitting target HCL → {}", output_dir.display());
-    let generator = Generator::new();
+
+    // Schema-driven Generator (Article XIII rule 8 — no hardcoding).
+    // Snapshot every loaded provider's latest schema and pass them in;
+    // every resource type those schemas describe becomes emittable via
+    // the generic flat-attribute fallback. Hand-curated templates still
+    // take precedence for types needing custom HCL shaping.
+    let mut schemas: Vec<std::sync::Arc<terrashift_knowledge::ProviderSchema>> = Vec::new();
+    if let Ok(providers) = knowledge.schema_store.list_providers().await {
+        for provider in providers {
+            if let Ok(versions) = knowledge.schema_store.list_versions(&provider).await {
+                if let Some(version) = versions.into_iter().next() {
+                    if let Ok(schema) = knowledge
+                        .schema_store
+                        .fetch_provider_schema(&provider, &version)
+                        .await
+                    {
+                        schemas.push(std::sync::Arc::new(schema));
+                    }
+                }
+            }
+        }
+    }
+    let generator = if schemas.is_empty() {
+        println!(
+            "⚠ No provider schemas cached — falling back to hand-curated template set only. \
+             Run `terrashift schemas sync --provider azurerm --version 4.71.0` to expand coverage."
+        );
+        Generator::new()
+    } else {
+        Generator::with_schemas(schemas)
+    };
 
     // Best-effort per-resource emission: skip resources with schema
     // gaps (missing required attrs / missing template) but keep going.
