@@ -46,10 +46,10 @@ futures = "0.3"
 # Serialization
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-toml = "0.8"
+toml = "1.1"
 
 # Error handling (per Article IV — failures must be loud)
-thiserror = "1"
+thiserror = "2"
 anyhow = "1"
 
 # Observability (per Article X)
@@ -62,7 +62,7 @@ reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-feature
 reqwest-eventsource = "0.6"
 
 # TUI
-ratatui = "0.29"
+ratatui = "0.30"
 crossterm = "0.29"
 
 # CLI
@@ -77,7 +77,7 @@ stakai = "0.3"
 rmcp = { version = "0.11", features = ["client", "server"] }
 
 # HCL parsing
-hcl-rs = "0.18"
+hcl-rs = "0.19"
 
 # Filesystem walking (Scanner P-04)
 walkdir = "2"
@@ -102,7 +102,7 @@ semver = "1"
 sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "sqlite", "macros", "chrono", "uuid"] }
 
 # JSON Schema generation
-schemars = "0.8"
+schemars = "1.2"
 
 # Security primitives (per Article V)
 zeroize = { version = "1", features = ["zeroize_derive"] }
@@ -113,10 +113,10 @@ chrono = { version = "0.4", features = ["serde"] }
 
 # Cryptography (audit log signing per Article V)
 ed25519-dalek = "2"
-sha2 = "0.10"
+sha2 = "0.11"
 
 # Diff generation (Eval framework golden-file comparison; P-12)
-similar = "2"
+similar = "3"
 
 # tree-sitter parsing (shell-tool-approvals; P-09a per stakpak_arch.md §17)
 # Pinned to match Stakpak's refs/stakpak/libs/shell-tool-approvals/Cargo.toml
